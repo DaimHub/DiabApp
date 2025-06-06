@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "592690965998",
+    "project_id": "diabapp-ab3e5",
+    "storage_bucket": "diabapp-ab3e5.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:592690965998:android:88c5c186f581c3478332ff",
+        "android_client_info": {
+          "package_name": "com.example.diabapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "592690965998-48ltac9de2p8ctnipe86aha530ofefpi.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.diabapp",
+            "certificate_hash": "694b3566f8eca4ee0df37c459bcbb00552b9eb4a"
+          }
+        },
+        {
+          "client_id": "592690965998-r53kts7fr0ac61q2afktj8tbag8dfnej.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBxOw7O5l7aA4m-_0ApJHFSarmDLaYC0xY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "592690965998-c142pljbr1pmhftjl53f3ut7ij52uii5.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "592690965998-afueu157u950u9m69h4pfj75l6mh0p83.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.diabapp"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,66 @@
+# Flutter/Dart/Pub related
+.dart_tool/
+.packages
+.pub-cache/
+.pub/
+build/
+flutter_*.png
+
+# Ongoing Flutter Gen files
+**/*.g.dart
+**/*.freezed.dart
+**/*.gen.dart
+
+# Android
+android/.gradle/
+android/captures/
+android/.idea/
+*.iml
+*.hprof
+*.lock
+
+# iOS
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+ios/.generated/
+ios/Runner.xcworkspace/
+ios/Runner.xcodeproj/project.xcworkspace/
+ios/Runner.xcodeproj/xcuserdata/
+
+# Xcode
+*.xcuserstate
+*.xcworkspace
+*.xcuserdata
+
+# Web
+web/.dart_tool/
+web/build/
+
+# Windows
+windows/.dart_tool/
+windows/build/
+windows/Runner/GeneratedPluginRegistrant.*
+
+# macOS
+macos/.dart_tool/
+macos/build/
+macos/Flutter/GeneratedPluginRegistrant.*
+
+# Linux
+linux/.dart_tool/
+linux/build/
+linux/GeneratedPluginRegistrant.*
+
+# IDEs
+.idea/
+.vscode/
+*.sublime-workspace
+*.sublime-project
+
+# Logs
+*.log
+
+# Environment
+.env
