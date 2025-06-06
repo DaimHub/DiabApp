@@ -47,14 +47,6 @@ class _RegisterDetailsScreenState extends State<RegisterDetailsScreen> {
     });
 
     try {
-      // Debug: Print the additional profile information
-      print('Completing user profile setup:');
-      print('First Name: ${widget.firstName}');
-      print('Last Name: ${widget.lastName}');
-      print('Email: ${widget.email}');
-      print('Diabetes Type: $_selectedDiabetesType');
-      print('Health Component: $_selectedHealthComponent');
-
       // Save user profile data to Firestore
       final userData = {
         'firstName': widget.firstName,
@@ -79,8 +71,6 @@ class _RegisterDetailsScreenState extends State<RegisterDetailsScreen> {
         throw Exception('Failed to save user profile data');
       }
 
-      print('User profile data saved successfully to Firestore');
-
       // Show success message
       _showToast(
         'Welcome to your diabetes journey!',
@@ -103,7 +93,6 @@ class _RegisterDetailsScreenState extends State<RegisterDetailsScreen> {
         'An error occurred while setting up your profile. Please try again.',
         ToastificationType.error,
       );
-      print('Profile setup error: $e');
     } finally {
       setState(() {
         _isLoading = false;

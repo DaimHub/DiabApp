@@ -30,7 +30,6 @@ class FirestoreService {
       }
       return null;
     } catch (e) {
-      print('Erreur lors de la récupération des données utilisateur: $e');
       return null;
     }
   }
@@ -44,7 +43,6 @@ class FirestoreService {
       await userDoc.set(data, SetOptions(merge: true));
       return true;
     } catch (e) {
-      print('Erreur lors de la sauvegarde des données utilisateur: $e');
       return false;
     }
   }
@@ -58,7 +56,6 @@ class FirestoreService {
       await userDoc.update({field: value});
       return true;
     } catch (e) {
-      print('Erreur lors de la mise à jour du champ $field: $e');
       return false;
     }
   }
@@ -160,10 +157,9 @@ class FirestoreService {
       }
 
       final docRef = await eventsRef.add(eventData);
-      print('Event added successfully with ID: ${docRef.id}');
+
       return docRef.id;
     } catch (e) {
-      print('Error adding event: $e');
       return null;
     }
   }
@@ -217,7 +213,6 @@ class FirestoreService {
         return data;
       }).toList();
     } catch (e) {
-      print('Error getting events: $e');
       return [];
     }
   }
@@ -242,10 +237,9 @@ class FirestoreService {
       if (eventsRef == null) return false;
 
       await eventsRef.doc(eventId).update(updates);
-      print('Event updated successfully: $eventId');
+
       return true;
     } catch (e) {
-      print('Error updating event $eventId: $e');
       return false;
     }
   }
@@ -257,10 +251,9 @@ class FirestoreService {
       if (eventsRef == null) return false;
 
       await eventsRef.doc(eventId).delete();
-      print('Event deleted successfully: $eventId');
+
       return true;
     } catch (e) {
-      print('Error deleting event $eventId: $e');
       return false;
     }
   }
@@ -291,7 +284,6 @@ class FirestoreService {
       }
       return null;
     } catch (e) {
-      print('Error getting latest glucose measurement: $e');
       return null;
     }
   }
@@ -327,7 +319,6 @@ class FirestoreService {
 
       return count > 0 ? total / count : null;
     } catch (e) {
-      print('Error getting weekly glucose average: $e');
       return null;
     }
   }
@@ -363,7 +354,6 @@ class FirestoreService {
 
       return count > 0 ? total / count : null;
     } catch (e) {
-      print('Error getting previous week glucose average: $e');
       return null;
     }
   }
@@ -431,7 +421,6 @@ class FirestoreService {
 
       return dailyAverages;
     } catch (e) {
-      print('Error getting daily glucose averages: $e');
       return [];
     }
   }

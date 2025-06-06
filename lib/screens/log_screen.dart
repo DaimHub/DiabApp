@@ -318,9 +318,7 @@ class _LogBottomSheetState extends State<LogBottomSheet> {
                   // If glucose data was saved, refresh the glucose cache
                   if (_selectedSegment == 0) {
                     // Glucose
-                    print(
-                      '🩸 Glucose data saved successfully, refreshing cache...',
-                    );
+
                     try {
                       await GlucoseDataProvider.invalidateAndRefreshGlobally(
                         context,
@@ -328,24 +326,16 @@ class _LogBottomSheetState extends State<LogBottomSheet> {
                       await GlucoseTrendDataProvider.invalidateAndRefreshGlobally(
                         context,
                       );
-                      print('🩸 Cache refreshed successfully');
-                    } catch (e) {
-                      print('🩸 Failed to refresh cache: $e');
-                    }
+                    } catch (e) {}
                   }
 
                   // Refresh log history cache for any type of data
-                  print(
-                    '📚 Data saved successfully, refreshing log history cache...',
-                  );
+
                   try {
                     await LogHistoryDataProvider.invalidateAndRefreshGlobally(
                       context,
                     );
-                    print('📚 Log history cache refreshed successfully');
-                  } catch (e) {
-                    print('📚 Failed to refresh log history cache: $e');
-                  }
+                  } catch (e) {}
 
                   // Clear form fields
                   _clearAllFields();

@@ -55,12 +55,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
         '${_firstNameController.text.trim()} ${_lastNameController.text.trim()}',
       );
 
-      // Debug: Print user information to console
-      print('User account created successfully:');
-      print('UID: ${credential.user?.uid}');
-      print('Email: ${credential.user?.email}');
-      print('Display Name: ${credential.user?.displayName}');
-
       // Show success message
       _showToast('Account created successfully!', ToastificationType.success);
 
@@ -118,10 +112,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
       if (userCredential != null) {
         // Successfully signed in
-        print('Google Sign-In successful:');
-        print('UID: ${userCredential.user?.uid}');
-        print('Email: ${userCredential.user?.email}');
-        print('Display Name: ${userCredential.user?.displayName}');
 
         // Extract first and last name from Google display name
         final displayName = userCredential.user?.displayName ?? '';
@@ -152,15 +142,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
       }
     } catch (e) {
       // Add detailed error logging
-      print('Google Sign-In Error: $e');
-      print('Error type: ${e.runtimeType}');
 
       String errorMessage = 'Failed to sign up with Google';
 
       if (e is FirebaseAuthException) {
-        print('Firebase Auth Error Code: ${e.code}');
-        print('Firebase Auth Error Message: ${e.message}');
-
         switch (e.code) {
           case 'account-exists-with-different-credential':
             errorMessage =
@@ -179,7 +164,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
             errorMessage = e.message ?? errorMessage;
         }
       } else {
-        print('Non-Firebase error: $e');
         errorMessage = 'An unexpected error occurred: $e';
       }
 

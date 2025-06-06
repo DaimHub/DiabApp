@@ -1032,28 +1032,19 @@ class EventDetailsBottomSheet extends StatelessWidget {
 
           // If glucose data was updated, refresh the glucose and trend caches
           if (entry.title == 'Glucose') {
-            print('🩸 Glucose data updated successfully, refreshing caches...');
             try {
               await GlucoseDataProvider.invalidateAndRefreshGlobally(context);
               await GlucoseTrendDataProvider.invalidateAndRefreshGlobally(
                 context,
               );
-              print('🩸 Caches refreshed successfully after update');
-            } catch (e) {
-              print('🩸 Failed to refresh caches after update: $e');
-            }
+            } catch (e) {}
           }
 
           // Refresh log history cache for any type of data
-          print(
-            '📚 Data updated successfully, refreshing log history cache...',
-          );
+
           try {
             await LogHistoryDataProvider.invalidateAndRefreshGlobally(context);
-            print('📚 Log history cache refreshed successfully after update');
-          } catch (e) {
-            print('📚 Failed to refresh log history cache after update: $e');
-          }
+          } catch (e) {}
 
           toastification.show(
             context: context,
@@ -1089,9 +1080,7 @@ class EventDetailsBottomSheet extends StatelessWidget {
           );
         }
       }
-    } catch (e) {
-      print('Error updating event: $e');
-    }
+    } catch (e) {}
   }
 
   void _showDeleteConfirmation(BuildContext context, LogEntry entry) {
@@ -1141,9 +1130,6 @@ class EventDetailsBottomSheet extends StatelessWidget {
 
                 // If glucose data was deleted, refresh the glucose and trend caches
                 if (entry.title == 'Glucose') {
-                  print(
-                    '🩸 Glucose data deleted successfully, refreshing caches...',
-                  );
                   try {
                     await GlucoseDataProvider.invalidateAndRefreshGlobally(
                       parentContext,
@@ -1151,28 +1137,16 @@ class EventDetailsBottomSheet extends StatelessWidget {
                     await GlucoseTrendDataProvider.invalidateAndRefreshGlobally(
                       parentContext,
                     );
-                    print('🩸 Caches refreshed successfully after deletion');
-                  } catch (e) {
-                    print('🩸 Failed to refresh caches after deletion: $e');
-                  }
+                  } catch (e) {}
                 }
 
                 // Refresh log history cache for any type of data
-                print(
-                  '📚 Data deleted successfully, refreshing log history cache...',
-                );
+
                 try {
                   await LogHistoryDataProvider.invalidateAndRefreshGlobally(
                     parentContext,
                   );
-                  print(
-                    '📚 Log history cache refreshed successfully after deletion',
-                  );
-                } catch (e) {
-                  print(
-                    '📚 Failed to refresh log history cache after deletion: $e',
-                  );
-                }
+                } catch (e) {}
 
                 toastification.show(
                   context: parentContext,

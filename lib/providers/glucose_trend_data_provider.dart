@@ -65,22 +65,13 @@ class GlucoseTrendDataProvider with ChangeNotifier {
   Future<Map<String, dynamic>> getGlucoseTrendData({
     bool forceRefresh = false,
   }) async {
-    print(
-      '📈 GlucoseTrendDataProvider: getGlucoseTrendData called (forceRefresh: $forceRefresh)',
-    );
-    print('📈 hasData: $hasData, isCacheValid: $isCacheValid');
-
     // If we have cached data and not forcing refresh, return it immediately
     if (!forceRefresh && hasData && isCacheValid) {
-      print('📈 Returning valid cached trend data');
       return _buildTrendDataMap();
     }
 
     // If we have cached data but it might be stale, return it first then fetch fresh data
     if (!forceRefresh && hasData) {
-      print(
-        '📈 Returning stale cached trend data and fetching fresh data in background',
-      );
       // Return cached data immediately
       final cachedData = _buildTrendDataMap();
 
@@ -90,9 +81,6 @@ class GlucoseTrendDataProvider with ChangeNotifier {
       return cachedData;
     }
 
-    print(
-      '📈 No cached data or force refresh - fetching fresh trend data with loading',
-    );
     // No cached data or force refresh - fetch fresh data and show loading
     return await _fetchFreshData(showLoading: true);
   }
@@ -143,14 +131,13 @@ class GlucoseTrendDataProvider with ChangeNotifier {
         _isLoading = false;
       }
       notifyListeners();
-      print('📈 Error fetching glucose trend data: $e');
+
       return _buildTrendDataMap();
     }
   }
 
   /// Fetch fresh data in background (without loading state)
   Future<void> _fetchFreshDataInBackground() async {
-    print('📈 Background trend data fetch started');
     try {
       final results = await Future.wait([
         FirestoreService.getWeeklyGlucoseAverage(),
@@ -164,36 +151,20 @@ class GlucoseTrendDataProvider with ChangeNotifier {
         results[2] as List,
       );
 
-      print('📈 Background trend fetch completed, checking for changes...');
-      print('📈 Weekly avg: $_weeklyAverage vs $newWeeklyAverage');
-      print(
-        '📈 Previous week avg: $_previousWeekAverage vs $newPreviousWeekAverage',
-      );
-      print(
-        '📈 Daily averages: ${_dailyAverages.length} vs ${newDailyAverages.length}',
-      );
-
       // Check if data has changed
       if (_hasDataChanged(
         newWeeklyAverage,
         newPreviousWeekAverage,
         newDailyAverages,
       )) {
-        print(
-          '📈 Trend data has changed! Updating cache and notifying listeners',
-        );
         _weeklyAverage = newWeeklyAverage;
         _previousWeekAverage = newPreviousWeekAverage;
         _dailyAverages = newDailyAverages;
         _lastFetchTime = DateTime.now();
         _error = null;
         notifyListeners();
-        print('📈 Glucose trend data updated in background');
-      } else {
-        print('📈 No trend data changes detected');
-      }
+      } else {}
     } catch (e) {
-      print('📈 Background trend fetch failed: $e');
       // Don't update error state for background fetches
     }
   }
@@ -207,20 +178,17 @@ class GlucoseTrendDataProvider with ChangeNotifier {
     // Compare weekly averages
     if (_weeklyAverage != newWeeklyAverage ||
         _previousWeekAverage != newPreviousWeekAverage) {
-      print('📈 Weekly averages changed');
       return true;
     }
 
     // Compare daily averages length
     if (_dailyAverages.length != newDailyAverages.length) {
-      print('📈 Daily averages length changed');
       return true;
     }
 
     // Compare daily averages content
     for (int i = 0; i < _dailyAverages.length; i++) {
       if (_dailyAverages[i]['average'] != newDailyAverages[i]['average']) {
-        print('📈 Daily average at index $i changed');
         return true;
       }
     }
@@ -273,7 +241,6 @@ class GlucoseTrendDataProvider with ChangeNotifier {
 
   /// Static method to refresh data globally (useful when glucose data is logged)
   static Future<void> refreshDataGlobally(BuildContext context) async {
-    print('📈 Global trend refresh called - forcing immediate cache refresh');
     final provider = Provider.of<GlucoseTrendDataProvider>(
       context,
       listen: false,
@@ -285,7 +252,6 @@ class GlucoseTrendDataProvider with ChangeNotifier {
 
   /// Static method to invalidate and refresh data globally (immediate effect)
   static Future<void> invalidateAndRefreshGlobally(BuildContext context) async {
-    print('📈 Global trend invalidate and refresh called');
     final provider = Provider.of<GlucoseTrendDataProvider>(
       context,
       listen: false,

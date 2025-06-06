@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import '../theme/theme_manager.dart';
 import '../services/google_sign_in_service.dart';
 import '../services/firestore_service.dart';
@@ -50,7 +49,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     try {
       final userData = await FirestoreService.getUserData();
       if (userData != null && mounted) {
-        print('Données Firestore chargées: $userData'); // Debug
         setState(() {
           // Notifications
           _notificationsEnabled = userData['notificationsEnabled'] ?? false;
@@ -69,14 +67,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
           _userDiabetesType = userData['diabetesType'] ?? 'Type 1';
           _firstName = userData['firstName'] ?? '';
           _lastName = userData['lastName'] ?? '';
-
-          print('Type de diabète chargé: $_userDiabetesType'); // Debug
         });
-      } else {
-        print('Aucune donnée Firestore trouvée'); // Debug
-      }
+      } else {}
     } catch (e) {
-      print('Erreur lors du chargement des données: $e');
     } finally {
       setState(() {
         _isLoading = false;
@@ -1456,7 +1449,7 @@ class _LogoutDialogState extends State<_LogoutDialog> {
 
     try {
       // Clear all cached data from providers to prevent data leakage
-      print('🧹 Clearing all cached data before logout...');
+
       final glucoseProvider = Provider.of<GlucoseDataProvider>(
         context,
         listen: false,
@@ -1483,7 +1476,6 @@ class _LogoutDialogState extends State<_LogoutDialog> {
       // Also clear legacy cache services (if still in use)
       OverviewCacheService().clearCache();
       EventsCacheService().clearCache();
-      print('🧹 All cached data cleared successfully');
 
       // Use GoogleSignInService to handle logout from both Google and Firebase
       await GoogleSignInService.signOut();

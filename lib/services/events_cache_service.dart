@@ -106,7 +106,6 @@ class EventsCacheService {
         _notifyDataChanged?.call(newEvents);
       }
     } catch (e) {
-      print('Background fetch failed: $e');
     } finally {
       _isFetching = false;
     }

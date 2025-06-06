@@ -32,22 +32,13 @@ class MedicationDataProvider with ChangeNotifier {
   Future<List<Map<String, dynamic>>> getTodaysMedicationData({
     bool forceRefresh = false,
   }) async {
-    print(
-      '💊 MedicationDataProvider: getTodaysMedicationData called (forceRefresh: $forceRefresh)',
-    );
-    print('💊 hasData: $hasData, isCacheValid: $isCacheValid');
-
     // If we have cached data and not forcing refresh, return it immediately
     if (!forceRefresh && hasData && isCacheValid) {
-      print('💊 Returning valid cached medication data');
       return _todaysMedications;
     }
 
     // If we have cached data but it might be stale, return it first then fetch fresh data
     if (!forceRefresh && hasData) {
-      print(
-        '💊 Returning stale cached medication data and fetching fresh data in background',
-      );
       // Return cached data immediately
       final cachedData = _todaysMedications;
 
@@ -57,9 +48,6 @@ class MedicationDataProvider with ChangeNotifier {
       return cachedData;
     }
 
-    print(
-      '💊 No cached data or force refresh - fetching fresh medication data with loading',
-    );
     // No cached data or force refresh - fetch fresh data and show loading
     return await _fetchFreshData(showLoading: true);
   }
@@ -95,37 +83,25 @@ class MedicationDataProvider with ChangeNotifier {
         _isLoading = false;
       }
       notifyListeners();
-      print('💊 Error fetching medication data: $e');
+
       return [];
     }
   }
 
   /// Fetch fresh data in background (without loading state)
   Future<void> _fetchFreshDataInBackground() async {
-    print('💊 Background medication fetch started');
     try {
       final userData = await FirestoreService.getUserData();
 
-      print(
-        '💊 Background medication fetch completed, checking for changes...',
-      );
-
       // Check if data has changed
       if (_hasDataChanged(userData)) {
-        print(
-          '💊 Medication data has changed! Updating cache and notifying listeners',
-        );
         _userData = userData;
         _todaysMedications = _getTodaysMedications(userData);
         _lastFetchTime = DateTime.now();
         _error = null;
         notifyListeners();
-        print('💊 Medication data updated in background');
-      } else {
-        print('💊 No medication data changes detected');
-      }
+      } else {}
     } catch (e) {
-      print('💊 Background medication fetch failed: $e');
       // Don't update error state for background fetches
     }
   }
@@ -133,11 +109,9 @@ class MedicationDataProvider with ChangeNotifier {
   /// Check if the new data is different from cached data
   bool _hasDataChanged(Map<String, dynamic>? newData) {
     if (_userData == null && newData == null) {
-      print('💊 Both old and new medication data are null - no change');
       return false;
     }
     if (_userData == null || newData == null) {
-      print('💊 One is null, other is not - medication data changed');
       return true;
     }
 
@@ -147,11 +121,6 @@ class MedicationDataProvider with ChangeNotifier {
     // Simple comparison of medications list
     final hasChanged = oldMedications != newMedications;
 
-    print('💊 Medication data comparison:');
-    print('💊   Old medications count: ${oldMedications?.length ?? 0}');
-    print('💊   New medications count: ${newMedications?.length ?? 0}');
-    print('💊   Overall changed: $hasChanged');
-
     return hasChanged;
   }
 
@@ -160,23 +129,19 @@ class MedicationDataProvider with ChangeNotifier {
     Map<String, dynamic>? userData,
   ) {
     if (userData == null || userData['medications'] == null) {
-      print('💊 No user data or medications found');
       return [];
     }
 
     final medications = List<Map<String, dynamic>>.from(
       userData['medications'],
     );
-    print('💊 Total medications in database: ${medications.length}');
 
     // First filter: only enabled medications
     final enabledMedications = medications
         .where((med) => med['enabled'] == true)
         .toList();
-    print('💊 Enabled medications: ${enabledMedications.length}');
 
     if (enabledMedications.isEmpty) {
-      print('💊 No enabled medications found');
       return [];
     }
 
@@ -197,8 +162,6 @@ class MedicationDataProvider with ChangeNotifier {
         weekdays[now.weekday -
             1]; // DateTime.weekday returns 1-7 (Monday-Sunday)
 
-    print('💊 Today is: $todayDayName');
-
     List<Map<String, dynamic>> todaysMedications = [];
 
     for (final medication in enabledMedications) {
@@ -216,15 +179,9 @@ class MedicationDataProvider with ChangeNotifier {
       if (days == null || days.isEmpty) {
         // Old format - assume daily
         isScheduledToday = true;
-        print(
-          '💊 Medication "$medicationName": Old format, assuming daily - INCLUDED',
-        );
       } else {
         // New format - check if today is included
         isScheduledToday = days.contains(todayDayName);
-        print(
-          '💊 Medication "$medicationName": Scheduled days: $days, Today: $todayDayName, Included: $isScheduledToday',
-        );
       }
 
       // Only add medications scheduled for today and that are enabled
@@ -245,14 +202,8 @@ class MedicationDataProvider with ChangeNotifier {
           'reminderDateTime': todayReminder,
           'isPastDue': todayReminder.isBefore(now),
         });
-
-        print(
-          '💊 Added medication "$medicationName" at ${medicationTime.hour}:${medicationTime.minute}',
-        );
       }
     }
-
-    print('💊 Final medications for today: ${todaysMedications.length}');
 
     // Sort by time
     todaysMedications.sort(
@@ -296,9 +247,6 @@ class MedicationDataProvider with ChangeNotifier {
 
   /// Static method to refresh data globally (useful when medications are updated)
   static Future<void> refreshDataGlobally(BuildContext context) async {
-    print(
-      '💊 Global medication refresh called - forcing immediate cache refresh',
-    );
     final provider = Provider.of<MedicationDataProvider>(
       context,
       listen: false,
@@ -310,7 +258,6 @@ class MedicationDataProvider with ChangeNotifier {
 
   /// Static method to invalidate and refresh data globally (immediate effect)
   static Future<void> invalidateAndRefreshGlobally(BuildContext context) async {
-    print('💊 Global medication invalidate and refresh called');
     final provider = Provider.of<MedicationDataProvider>(
       context,
       listen: false,

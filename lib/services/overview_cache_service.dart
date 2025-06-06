@@ -137,7 +137,6 @@ class OverviewCacheService {
         _notifyGlucoseDataChanged?.call(newGlucoseData);
       }
     } catch (e) {
-      print('Background glucose fetch failed: $e');
     } finally {
       _isFetchingGlucose = false;
     }
@@ -156,7 +155,6 @@ class OverviewCacheService {
         _notifyUserDataChanged?.call(newUserData);
       }
     } catch (e) {
-      print('Background user data fetch failed: $e');
     } finally {
       _isFetchingUserData = false;
     }

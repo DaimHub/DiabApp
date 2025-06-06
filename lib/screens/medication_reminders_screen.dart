@@ -37,7 +37,6 @@ class _MedicationRemindersScreenState extends State<MedicationRemindersScreen> {
         });
       }
     } catch (e) {
-      print('Error loading medications: $e');
     } finally {
       setState(() {
         _isLoading = false;
@@ -50,13 +49,10 @@ class _MedicationRemindersScreenState extends State<MedicationRemindersScreen> {
       await FirestoreService.saveUserData({'medications': _medications});
 
       // Refresh medication cache
-      print('💊 Medications saved successfully, refreshing cache...');
+
       try {
         await MedicationDataProvider.invalidateAndRefreshGlobally(context);
-        print('💊 Medication cache refreshed successfully');
-      } catch (e) {
-        print('💊 Failed to refresh medication cache: $e');
-      }
+      } catch (e) {}
 
       _showToast(
         'Medications updated successfully!',
@@ -64,7 +60,6 @@ class _MedicationRemindersScreenState extends State<MedicationRemindersScreen> {
       );
     } catch (e) {
       _showToast('Failed to save medications', ToastificationType.error);
-      print('Error saving medications: $e');
     }
   }
 
@@ -81,16 +76,11 @@ class _MedicationRemindersScreenState extends State<MedicationRemindersScreen> {
       );
 
       // Refresh medication cache silently
-      print('💊 Medications saved silently, refreshing cache...');
+
       try {
         await MedicationDataProvider.invalidateAndRefreshGlobally(context);
-        print('💊 Medication cache refreshed silently');
-      } catch (e) {
-        print('💊 Failed to refresh medication cache silently: $e');
-      }
-    } catch (e) {
-      print('Error saving medications: $e');
-    }
+      } catch (e) {}
+    } catch (e) {}
   }
 
   void _showAddMedicationDialog() {

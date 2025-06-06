@@ -54,7 +54,6 @@ class _OverviewScreenContentState extends State<OverviewScreenContent> {
         trendProvider.getGlucoseTrendData(),
       ]);
     } catch (e) {
-      print('Error loading overview data: $e');
     } finally {
       setState(() {
         _isLoading = false;

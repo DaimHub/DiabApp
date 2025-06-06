@@ -40,7 +40,6 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
     try {
       final userData = await FirestoreService.getUserData();
       if (userData != null && mounted) {
-        print('Données chargées depuis Firestore: $userData'); // Debug
         setState(() {
           // Charger les données personnelles
           _firstNameController.text = userData['firstName'] ?? '';
@@ -53,11 +52,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
           _glucoseMaxController.text =
               userData['targetGlucoseMax']?.toString() ?? '180';
         });
-        print('Type de diabète chargé: $_selectedDiabetesType'); // Debug
       } else {
-        print(
-          'Aucune donnée Firestore, utilisation des valeurs par défaut',
-        ); // Debug
         setState(() {
           // Fallback vers les données Firebase Auth si pas de données Firestore
           final user = FirebaseAuth.instance.currentUser;
@@ -77,7 +72,6 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
         });
       }
     } catch (e) {
-      print('Erreur lors du chargement des données: $e');
       setState(() {
         // Valeurs par défaut en cas d'erreur
         _glucoseMinController.text = '80';

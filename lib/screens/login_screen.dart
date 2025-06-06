@@ -96,10 +96,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
       if (userCredential != null) {
         // Successfully signed in
-        print('Google Sign-In successful:');
-        print('UID: ${userCredential.user?.uid}');
-        print('Email: ${userCredential.user?.email}');
-        print('Display Name: ${userCredential.user?.displayName}');
 
         toastification.show(
           context: context,
@@ -147,15 +143,10 @@ class _LoginScreenState extends State<LoginScreen> {
       }
     } catch (e) {
       // Add detailed error logging
-      print('Google Sign-In Error: $e');
-      print('Error type: ${e.runtimeType}');
 
       String errorMessage = 'Failed to sign in with Google';
 
       if (e is FirebaseAuthException) {
-        print('Firebase Auth Error Code: ${e.code}');
-        print('Firebase Auth Error Message: ${e.message}');
-
         switch (e.code) {
           case 'account-exists-with-different-credential':
             errorMessage =
@@ -174,7 +165,6 @@ class _LoginScreenState extends State<LoginScreen> {
             errorMessage = e.message ?? errorMessage;
         }
       } else {
-        print('Non-Firebase error: $e');
         errorMessage = 'An unexpected error occurred: $e';
       }
 

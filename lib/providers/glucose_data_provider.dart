@@ -30,22 +30,13 @@ class GlucoseDataProvider with ChangeNotifier {
   Future<Map<String, dynamic>?> getLatestGlucoseData({
     bool forceRefresh = false,
   }) async {
-    print(
-      '🩸 GlucoseDataProvider: getLatestGlucoseData called (forceRefresh: $forceRefresh)',
-    );
-    print('🩸 hasData: $hasData, isCacheValid: $isCacheValid');
-
     // If we have cached data and not forcing refresh, return it immediately
     if (!forceRefresh && hasData && isCacheValid) {
-      print('🩸 Returning valid cached data');
       return _latestGlucose;
     }
 
     // If we have cached data but it might be stale, return it first then fetch fresh data
     if (!forceRefresh && hasData) {
-      print(
-        '🩸 Returning stale cached data and fetching fresh data in background',
-      );
       // Return cached data immediately
       final cachedData = _latestGlucose;
 
@@ -55,9 +46,6 @@ class GlucoseDataProvider with ChangeNotifier {
       return cachedData;
     }
 
-    print(
-      '🩸 No cached data or force refresh - fetching fresh data with loading',
-    );
     // No cached data or force refresh - fetch fresh data and show loading
     return await _fetchFreshData(showLoading: true);
   }
@@ -93,39 +81,25 @@ class GlucoseDataProvider with ChangeNotifier {
         _isLoading = false;
       }
       notifyListeners();
-      print('Error fetching latest glucose data: $e');
+
       return null;
     }
   }
 
   /// Fetch fresh data in background (without loading state)
   Future<void> _fetchFreshDataInBackground() async {
-    print('🩸 Background fetch started');
     try {
       final latestGlucose =
           await FirestoreService.getLatestGlucoseMeasurement();
 
-      print('🩸 Background fetch completed, checking for changes...');
-      print(
-        '🩸 New data: ${latestGlucose?['id']} - ${latestGlucose?['measure']} - ${latestGlucose?['date']}',
-      );
-      print(
-        '🩸 Cached data: ${_latestGlucose?['id']} - ${_latestGlucose?['measure']} - ${_latestGlucose?['date']}',
-      );
-
       // Check if data has changed
       if (_hasDataChanged(latestGlucose)) {
-        print('🩸 Data has changed! Updating cache and notifying listeners');
         _latestGlucose = latestGlucose;
         _lastFetchTime = DateTime.now();
         _error = null;
         notifyListeners();
-        print('🩸 Glucose data updated in background');
-      } else {
-        print('🩸 No data changes detected');
-      }
+      } else {}
     } catch (e) {
-      print('🩸 Background glucose fetch failed: $e');
       // Don't update error state for background fetches
     }
   }
@@ -133,11 +107,9 @@ class GlucoseDataProvider with ChangeNotifier {
   /// Check if the new data is different from cached data
   bool _hasDataChanged(Map<String, dynamic>? newData) {
     if (_latestGlucose == null && newData == null) {
-      print('🩸 Both old and new data are null - no change');
       return false;
     }
     if (_latestGlucose == null || newData == null) {
-      print('🩸 One is null, other is not - data changed');
       return true;
     }
 
@@ -150,14 +122,6 @@ class GlucoseDataProvider with ChangeNotifier {
 
     final hasChanged =
         oldId != newId || oldMeasure != newMeasure || oldDate != newDate;
-
-    print('🩸 Data comparison:');
-    print('🩸   ID: $oldId vs $newId (changed: ${oldId != newId})');
-    print(
-      '🩸   Measure: $oldMeasure vs $newMeasure (changed: ${oldMeasure != newMeasure})',
-    );
-    print('🩸   Date: $oldDate vs $newDate (changed: ${oldDate != newDate})');
-    print('🩸   Overall changed: $hasChanged');
 
     return hasChanged;
   }
@@ -227,7 +191,6 @@ class GlucoseDataProvider with ChangeNotifier {
 
   /// Static method to refresh data globally (useful when new glucose data is logged)
   static Future<void> refreshDataGlobally(BuildContext context) async {
-    print('🩸 Global refresh called - forcing immediate cache refresh');
     final provider = Provider.of<GlucoseDataProvider>(context, listen: false);
 
     // Force refresh to ensure we get the latest data immediately
@@ -236,7 +199,6 @@ class GlucoseDataProvider with ChangeNotifier {
 
   /// Static method to invalidate and refresh data globally (immediate effect)
   static Future<void> invalidateAndRefreshGlobally(BuildContext context) async {
-    print('🩸 Global invalidate and refresh called');
     final provider = Provider.of<GlucoseDataProvider>(context, listen: false);
 
     // First invalidate the cache

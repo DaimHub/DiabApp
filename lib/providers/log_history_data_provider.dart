@@ -34,22 +34,13 @@ class LogHistoryDataProvider with ChangeNotifier {
   Future<Map<String, dynamic>> getLogHistoryData({
     bool forceRefresh = false,
   }) async {
-    print(
-      '📚 LogHistoryDataProvider: getLogHistoryData called (forceRefresh: $forceRefresh)',
-    );
-    print('📚 hasData: $hasData, isCacheValid: $isCacheValid');
-
     // If we have cached data and not forcing refresh, return it immediately
     if (!forceRefresh && hasData && isCacheValid) {
-      print('📚 Returning valid cached log history data');
       return _buildLogHistoryDataMap();
     }
 
     // If we have cached data but it might be stale, return it first then fetch fresh data
     if (!forceRefresh && hasData) {
-      print(
-        '📚 Returning stale cached log history data and fetching fresh data in background',
-      );
       // Return cached data immediately
       final cachedData = _buildLogHistoryDataMap();
 
@@ -59,9 +50,6 @@ class LogHistoryDataProvider with ChangeNotifier {
       return cachedData;
     }
 
-    print(
-      '📚 No cached data or force refresh - fetching fresh log history data with loading',
-    );
     // No cached data or force refresh - fetch fresh data and show loading
     return await _fetchFreshData(showLoading: true);
   }
@@ -113,14 +101,13 @@ class LogHistoryDataProvider with ChangeNotifier {
         _isLoading = false;
       }
       notifyListeners();
-      print('📚 Error fetching log history data: $e');
+
       return _buildLogHistoryDataMap();
     }
   }
 
   /// Fetch fresh data in background (without loading state)
   Future<void> _fetchFreshDataInBackground() async {
-    print('📚 Background log history fetch started');
     try {
       // Load events from the past 30 days
       final endDate = DateTime.now();
@@ -137,27 +124,15 @@ class LogHistoryDataProvider with ChangeNotifier {
       final newEvents = processedData['events'];
       final newAllEvents = processedData['allEvents'];
 
-      print(
-        '📚 Background log history fetch completed, checking for changes...',
-      );
-      print('📚 Events count: ${_allEvents.length} vs ${newAllEvents.length}');
-
       // Check if data has changed
       if (_hasDataChanged(newEvents, newAllEvents)) {
-        print(
-          '📚 Log history data has changed! Updating cache and notifying listeners',
-        );
         _events = newEvents;
         _allEvents = newAllEvents;
         _lastFetchTime = DateTime.now();
         _error = null;
         notifyListeners();
-        print('📚 Log history data updated in background');
-      } else {
-        print('📚 No log history data changes detected');
-      }
+      } else {}
     } catch (e) {
-      print('📚 Background log history fetch failed: $e');
       // Don't update error state for background fetches
     }
   }
@@ -293,9 +268,6 @@ class LogHistoryDataProvider with ChangeNotifier {
   ) {
     // Compare total count first (quick check)
     if (_allEvents.length != newAllEvents.length) {
-      print(
-        '📚 Event count changed: ${_allEvents.length} vs ${newAllEvents.length}',
-      );
       return true;
     }
 
@@ -304,14 +276,12 @@ class LogHistoryDataProvider with ChangeNotifier {
     final newIds = newAllEvents.map((e) => e.id).toSet();
 
     if (oldIds.length != newIds.length) {
-      print('📚 Event IDs count changed');
       return true;
     }
 
     // Check if any IDs are different
     for (final id in newIds) {
       if (!oldIds.contains(id)) {
-        print('📚 New event ID found: $id');
         return true;
       }
     }
@@ -368,9 +338,6 @@ class LogHistoryDataProvider with ChangeNotifier {
 
   /// Static method to refresh data globally (useful when events are added/updated/deleted)
   static Future<void> refreshDataGlobally(BuildContext context) async {
-    print(
-      '📚 Global log history refresh called - forcing immediate cache refresh',
-    );
     final provider = Provider.of<LogHistoryDataProvider>(
       context,
       listen: false,
@@ -382,7 +349,6 @@ class LogHistoryDataProvider with ChangeNotifier {
 
   /// Static method to invalidate and refresh data globally (immediate effect)
   static Future<void> invalidateAndRefreshGlobally(BuildContext context) async {
-    print('📚 Global log history invalidate and refresh called');
     final provider = Provider.of<LogHistoryDataProvider>(
       context,
       listen: false,
