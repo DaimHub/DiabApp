@@ -3,6 +3,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:toastification/toastification.dart';
+import 'package:figma_squircle/figma_squircle.dart';
 import '../services/firestore_service.dart';
 
 class ProfileEditScreen extends StatefulWidget {
@@ -214,215 +215,192 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: AppBar(
-        backgroundColor: theme.appBarTheme.backgroundColor,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back,
-            color: theme.appBarTheme.foregroundColor,
-            size: 24,
-          ),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Text(
-          'Edit Profile',
-          style: TextStyle(
-            color: theme.appBarTheme.foregroundColor,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        centerTitle: true,
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 20),
-
-              // Profile Picture Section
-              Center(
-                child: Container(
-                  height: 100,
-                  width: 100,
-                  decoration: BoxDecoration(
-                    color: theme.brightness == Brightness.dark
-                        ? const Color(0xFF3A3A3A)
-                        : const Color(0xFFF0F1F7),
-                    borderRadius: BorderRadius.circular(50),
-                  ),
-                  child: Center(
-                    child: FaIcon(
-                      FontAwesomeIcons.user,
-                      color: theme.colorScheme.primary,
-                      size: 40,
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Custom App Bar
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              decoration: BoxDecoration(color: theme.scaffoldBackgroundColor),
+              child: Row(
+                children: [
+                  // Back Button
+                  Container(
+                    decoration: ShapeDecoration(
+                      color: theme.brightness == Brightness.dark
+                          ? const Color(0xFF2A2A2A)
+                          : const Color(0xFFF0F1F7),
+                      shape: SmoothRectangleBorder(
+                        borderRadius: SmoothBorderRadius(
+                          cornerRadius: 12,
+                          cornerSmoothing: 0.6,
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 30),
-
-              // Personal Information Section
-              Text(
-                'Personal Information',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: theme.textTheme.headlineMedium?.color,
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              _buildInputField(
-                controller: _firstNameController,
-                label: 'First Name',
-                icon: Icons.person,
-              ),
-              const SizedBox(height: 16),
-
-              _buildInputField(
-                controller: _lastNameController,
-                label: 'Last Name',
-                icon: Icons.person_outline,
-              ),
-              const SizedBox(height: 30),
-
-              // Health Information Section
-              Text(
-                'Health Information',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: theme.textTheme.headlineMedium?.color,
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              _buildDiabetesTypeSelector(),
-              const SizedBox(height: 16),
-
-              _buildInputField(
-                controller: _glucoseMinController,
-                label: 'Target Glucose Min (mg/dL)',
-                icon: FontAwesomeIcons.droplet,
-                keyboardType: TextInputType.number,
-              ),
-              const SizedBox(height: 16),
-
-              _buildInputField(
-                controller: _glucoseMaxController,
-                label: 'Target Glucose Max (mg/dL)',
-                icon: FontAwesomeIcons.droplet,
-                keyboardType: TextInputType.number,
-              ),
-              const SizedBox(height: 40),
-
-              // Save Button
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _isLoading ? null : _saveProfile,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: theme.colorScheme.primary,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                  ),
-                  child: _isLoading
-                      ? const CircularProgressIndicator(color: Colors.white)
-                      : const Text(
-                          'Save Changes',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: () => Navigator.pop(context),
+                        customBorder: SmoothRectangleBorder(
+                          borderRadius: SmoothBorderRadius(
+                            cornerRadius: 12,
+                            cornerSmoothing: 0.6,
                           ),
                         ),
-                ),
-              ),
-              const SizedBox(height: 40),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildInputField({
-    required TextEditingController controller,
-    required String label,
-    required IconData icon,
-    TextInputType keyboardType = TextInputType.text,
-  }) {
-    final theme = Theme.of(context);
-    return Material(
-      color: theme.cardColor,
-      borderRadius: BorderRadius.circular(12),
-      elevation: 0,
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: theme.brightness == Brightness.dark
-                ? const Color(0xFF3A3A3A)
-                : Colors.grey[200]!,
-          ),
-        ),
-        child: Row(
-          children: [
-            Container(
-              height: 40,
-              width: 40,
-              decoration: BoxDecoration(
-                color: theme.brightness == Brightness.dark
-                    ? const Color(0xFF3A3A3A)
-                    : const Color(0xFFF0F1F7),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Center(
-                child: icon == FontAwesomeIcons.droplet
-                    ? FaIcon(icon, color: theme.colorScheme.primary, size: 18)
-                    : Icon(icon, color: theme.colorScheme.primary, size: 20),
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    label,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: theme.textTheme.bodyMedium?.color,
+                        child: Container(
+                          padding: const EdgeInsets.all(12),
+                          child: const Icon(Icons.arrow_back, size: 20),
+                        ),
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  Container(
-                    constraints: const BoxConstraints(minHeight: 40),
-                    child: TextField(
-                      controller: controller,
-                      keyboardType: keyboardType,
+                  const SizedBox(width: 16),
+                  // Title
+                  Expanded(
+                    child: Text(
+                      'Edit Profile',
+                      textAlign: TextAlign.center,
                       style: TextStyle(
-                        color: theme.textTheme.bodyLarge?.color,
-                        fontSize: 16,
+                        color: theme.textTheme.headlineMedium?.color,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
                       ),
-                      decoration: const InputDecoration(
-                        border: InputBorder.none,
-                        contentPadding: EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 8,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  // Save Button
+                  Container(
+                    decoration: ShapeDecoration(
+                      color: theme.colorScheme.primary,
+                      shape: SmoothRectangleBorder(
+                        borderRadius: SmoothBorderRadius(
+                          cornerRadius: 12,
+                          cornerSmoothing: 0.6,
                         ),
-                        isDense: false,
+                      ),
+                    ),
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: _isLoading ? null : _saveProfile,
+                        customBorder: SmoothRectangleBorder(
+                          borderRadius: SmoothBorderRadius(
+                            cornerRadius: 12,
+                            cornerSmoothing: 0.6,
+                          ),
+                        ),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
+                          child: _isLoading
+                              ? const SizedBox(
+                                  width: 16,
+                                  height: 16,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : const Text(
+                                  'Save',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                        ),
                       ),
                     ),
                   ),
                 ],
+              ),
+            ),
+
+            // Content
+            Expanded(
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Personal Information Section
+                      Text(
+                        'Personal Information',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: theme.textTheme.headlineMedium?.color,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+
+                      _buildTextField(
+                        controller: _firstNameController,
+                        label: 'First Name',
+                        icon: FontAwesomeIcons.user,
+                      ),
+                      const SizedBox(height: 16),
+
+                      _buildTextField(
+                        controller: _lastNameController,
+                        label: 'Last Name',
+                        icon: FontAwesomeIcons.user,
+                      ),
+                      const SizedBox(height: 16),
+
+                      _buildDiabetesTypeSelector(),
+
+                      const SizedBox(height: 40),
+
+                      // Glucose Goals Section
+                      Text(
+                        'Glucose Goals',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: theme.textTheme.headlineMedium?.color,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Set your target glucose range in mg/dL',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: theme.textTheme.bodyMedium?.color,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _buildTextField(
+                              controller: _glucoseMinController,
+                              label: 'Minimum',
+                              icon: Icons.trending_down,
+                              keyboardType: TextInputType.number,
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: _buildTextField(
+                              controller: _glucoseMaxController,
+                              label: 'Maximum',
+                              icon: Icons.trending_up,
+                              keyboardType: TextInputType.number,
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 30),
+                    ],
+                  ),
+                ),
               ),
             ),
           ],
@@ -431,75 +409,174 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
     );
   }
 
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+    TextInputType? keyboardType,
+  }) {
+    final theme = Theme.of(context);
+
+    return Focus(
+      child: Builder(
+        builder: (context) {
+          final isFocused = Focus.of(context).hasFocus;
+
+          return Container(
+            decoration: ShapeDecoration(
+              color: theme.brightness == Brightness.dark
+                  ? const Color(0xFF2A2A2A)
+                  : const Color(0xFFF0F1F7),
+              shape: SmoothRectangleBorder(
+                borderRadius: SmoothBorderRadius(
+                  cornerRadius: 16,
+                  cornerSmoothing: 0.6,
+                ),
+                side: BorderSide(
+                  color: isFocused
+                      ? theme.colorScheme.primary.withOpacity(0.8)
+                      : theme.brightness == Brightness.dark
+                      ? const Color(0xFF3A3A3A)
+                      : Colors.grey[200]!,
+                  width: isFocused ? 2 : 1,
+                ),
+              ),
+              shadows: isFocused
+                  ? [
+                      BoxShadow(
+                        color: theme.colorScheme.primary.withOpacity(0.1),
+                        blurRadius: 12,
+                        offset: const Offset(0, 2),
+                      ),
+                    ]
+                  : [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.02),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+            ),
+            child: ClipSmoothRect(
+              radius: SmoothBorderRadius(
+                cornerRadius: 16,
+                cornerSmoothing: 0.6,
+              ),
+              child: TextFormField(
+                controller: controller,
+                keyboardType: keyboardType,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: theme.textTheme.bodyLarge?.color,
+                ),
+                decoration: InputDecoration(
+                  labelText: label,
+                  labelStyle: TextStyle(
+                    color: const Color(0xFF5C5FC1).withOpacity(0.7),
+                    fontSize: 16,
+                  ),
+                  prefixIcon: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Icon(
+                      icon,
+                      color: theme.colorScheme.primary,
+                      size: 20,
+                    ),
+                  ),
+                  border: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                  enabledBorder: InputBorder.none,
+                  errorBorder: InputBorder.none,
+                  focusedErrorBorder: InputBorder.none,
+                  contentPadding: const EdgeInsets.all(20),
+                  filled: false,
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
   Widget _buildDiabetesTypeSelector() {
     final theme = Theme.of(context);
-    return Material(
-      color: theme.cardColor,
-      borderRadius: BorderRadius.circular(12),
-      elevation: 0,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: _showDiabetesTypeDialog,
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: theme.brightness == Brightness.dark
-                  ? const Color(0xFF3A3A3A)
-                  : Colors.grey[200]!,
+
+    return Container(
+      decoration: ShapeDecoration(
+        color: theme.brightness == Brightness.dark
+            ? const Color(0xFF2A2A2A)
+            : const Color(0xFFF0F1F7),
+        shape: SmoothRectangleBorder(
+          borderRadius: SmoothBorderRadius(
+            cornerRadius: 16,
+            cornerSmoothing: 0.6,
+          ),
+          side: BorderSide(
+            color: theme.brightness == Brightness.dark
+                ? const Color(0xFF3A3A3A)
+                : Colors.grey[200]!,
+            width: 1,
+          ),
+        ),
+        shadows: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => _showDiabetesTypeDialog(),
+          customBorder: SmoothRectangleBorder(
+            borderRadius: SmoothBorderRadius(
+              cornerRadius: 16,
+              cornerSmoothing: 0.6,
             ),
           ),
-          child: Row(
-            children: [
-              Container(
-                height: 40,
-                width: 40,
-                decoration: BoxDecoration(
-                  color: theme.brightness == Brightness.dark
-                      ? const Color(0xFF3A3A3A)
-                      : const Color(0xFFF0F1F7),
-                  borderRadius: BorderRadius.circular(10),
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            child: Row(
+              children: [
+                Icon(
+                  FontAwesomeIcons.heartbeat,
+                  color: theme.colorScheme.primary,
+                  size: 20,
                 ),
-                child: Center(
-                  child: FaIcon(
-                    FontAwesomeIcons.pills,
-                    color: theme.colorScheme.primary,
-                    size: 18,
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Diabetes Type',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: const Color(0xFF5C5FC1).withOpacity(0.7),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        _selectedDiabetesType,
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          color: theme.textTheme.bodyLarge?.color,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Diabetes Type',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: theme.textTheme.bodyMedium?.color,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      _selectedDiabetesType,
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: theme.textTheme.bodyLarge?.color,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
+                Icon(
+                  Icons.arrow_forward_ios,
+                  color: theme.textTheme.bodyMedium?.color?.withOpacity(0.5),
+                  size: 16,
                 ),
-              ),
-              const SizedBox(width: 16),
-              Icon(
-                Icons.arrow_forward_ios,
-                color: theme.textTheme.bodyMedium?.color?.withOpacity(0.5),
-                size: 14,
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -510,12 +587,26 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
     showDialog(
       context: context,
       builder: (context) => Dialog(
-        backgroundColor: Theme.of(context).dialogBackgroundColor,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+        backgroundColor: Colors.transparent,
         child: Container(
           width: double.infinity,
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(24),
+          decoration: ShapeDecoration(
+            color: Theme.of(context).dialogBackgroundColor,
+            shape: SmoothRectangleBorder(
+              borderRadius: SmoothBorderRadius(
+                cornerRadius: 20,
+                cornerSmoothing: 0.6,
+              ),
+            ),
+            shadows: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.15),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
+              ),
+            ],
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -531,21 +622,31 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                     ),
                   ),
                   const Spacer(),
-                  Material(
-                    color: Theme.of(context).brightness == Brightness.dark
-                        ? const Color(0xFF2A2A2A)
-                        : const Color(0xFFF0F1F7),
-                    borderRadius: BorderRadius.circular(8),
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(8),
-                      onTap: () => Navigator.pop(context),
-                      child: Container(
-                        padding: const EdgeInsets.all(8),
-                        child: Icon(
-                          Icons.close,
-                          color: Theme.of(context).iconTheme.color,
-                          size: 20,
+                  Container(
+                    width: 36,
+                    height: 36,
+                    decoration: ShapeDecoration(
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? const Color(0xFF2A2A2A)
+                          : const Color(0xFFF0F1F7),
+                      shape: SmoothRectangleBorder(
+                        borderRadius: SmoothBorderRadius(
+                          cornerRadius: 10,
+                          cornerSmoothing: 0.6,
                         ),
+                      ),
+                    ),
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: () => Navigator.pop(context),
+                        customBorder: SmoothRectangleBorder(
+                          borderRadius: SmoothBorderRadius(
+                            cornerRadius: 10,
+                            cornerSmoothing: 0.6,
+                          ),
+                        ),
+                        child: const Center(child: Icon(Icons.close, size: 18)),
                       ),
                     ),
                   ),
@@ -553,30 +654,14 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
               ),
               const SizedBox(height: 24),
 
-              // Diabetes type options
-              _buildDiabetesTypeOption(
-                'Type 1',
-                'Insulin-dependent diabetes',
-                FontAwesomeIcons.syringe,
-              ),
+              // Type options
+              _buildTypeOption('Type 1'),
               const SizedBox(height: 12),
-              _buildDiabetesTypeOption(
-                'Type 2',
-                'Non-insulin-dependent diabetes',
-                FontAwesomeIcons.appleWhole,
-              ),
+              _buildTypeOption('Type 2'),
               const SizedBox(height: 12),
-              _buildDiabetesTypeOption(
-                'Gestational',
-                'Diabetes during pregnancy',
-                FontAwesomeIcons.baby,
-              ),
+              _buildTypeOption('Gestational'),
               const SizedBox(height: 12),
-              _buildDiabetesTypeOption(
-                'Other',
-                'Other type of diabetes',
-                FontAwesomeIcons.stethoscope,
-              ),
+              _buildTypeOption('Pre-diabetes'),
             ],
           ),
         ),
@@ -584,103 +669,77 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
     );
   }
 
-  Widget _buildDiabetesTypeOption(
-    String type,
-    String description,
-    IconData icon,
-  ) {
+  Widget _buildTypeOption(String type) {
     final theme = Theme.of(context);
     final isSelected = _selectedDiabetesType == type;
 
-    return Material(
-      color: theme.cardColor,
-      borderRadius: BorderRadius.circular(12),
-      elevation: 0,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: () {
-          setState(() {
-            _selectedDiabetesType = type;
-          });
-          Navigator.pop(context);
-        },
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: isSelected
-                  ? theme.colorScheme.primary
-                  : theme.brightness == Brightness.dark
-                  ? const Color(0xFF3A3A3A)
-                  : Colors.grey[200]!,
-              width: isSelected ? 2 : 1,
+    return Container(
+      decoration: ShapeDecoration(
+        color: isSelected
+            ? theme.colorScheme.primary.withOpacity(0.1)
+            : theme.brightness == Brightness.dark
+            ? const Color(0xFF2A2A2A)
+            : const Color(0xFFF0F1F7),
+        shape: SmoothRectangleBorder(
+          borderRadius: SmoothBorderRadius(
+            cornerRadius: 14,
+            cornerSmoothing: 0.6,
+          ),
+          side: BorderSide(
+            color: isSelected
+                ? theme.colorScheme.primary
+                : theme.brightness == Brightness.dark
+                ? const Color(0xFF3A3A3A)
+                : Colors.grey[200]!,
+            width: isSelected ? 2 : 1,
+          ),
+        ),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            setState(() {
+              _selectedDiabetesType = type;
+            });
+            Navigator.pop(context);
+          },
+          customBorder: SmoothRectangleBorder(
+            borderRadius: SmoothBorderRadius(
+              cornerRadius: 14,
+              cornerSmoothing: 0.6,
             ),
           ),
-          child: Row(
-            children: [
-              Container(
-                height: 40,
-                width: 40,
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? theme.colorScheme.primary.withOpacity(0.1)
-                      : theme.brightness == Brightness.dark
-                      ? const Color(0xFF3A3A3A)
-                      : const Color(0xFFF0F1F7),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Center(
-                  child: FaIcon(
-                    icon,
-                    color: isSelected
-                        ? theme.colorScheme.primary
-                        : theme.iconTheme.color,
-                    size: 18,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      type,
-                      style: TextStyle(
-                        color: isSelected
-                            ? theme.colorScheme.primary
-                            : theme.textTheme.bodyLarge?.color,
-                        fontWeight: isSelected
-                            ? FontWeight.w600
-                            : FontWeight.normal,
-                        fontSize: 16,
-                      ),
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    type,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: isSelected
+                          ? theme.colorScheme.primary
+                          : theme.textTheme.bodyLarge?.color,
                     ),
-                    const SizedBox(height: 2),
-                    Text(
-                      description,
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: theme.textTheme.bodyMedium?.color,
-                      ),
+                  ),
+                ),
+                if (isSelected)
+                  Container(
+                    height: 20,
+                    width: 20,
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.primary,
+                      shape: BoxShape.circle,
                     ),
-                  ],
-                ),
-              ),
-              if (isSelected)
-                Container(
-                  height: 20,
-                  width: 20,
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.primary,
-                    shape: BoxShape.circle,
+                    child: const Center(
+                      child: Icon(Icons.check, color: Colors.white, size: 14),
+                    ),
                   ),
-                  child: const Center(
-                    child: Icon(Icons.check, color: Colors.white, size: 14),
-                  ),
-                ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

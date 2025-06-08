@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:toastification/toastification.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
+import 'package:figma_squircle/figma_squircle.dart';
 import 'overview_screen.dart';
 import 'log_screen.dart';
 import 'log_history_screen.dart';
@@ -34,27 +35,49 @@ class _DashboardScreenState extends State<DashboardScreen> {
         return [
           Padding(
             padding: const EdgeInsets.only(right: 16),
-            child: Material(
-              color: theme.brightness == Brightness.dark
-                  ? const Color(0xFF2A2A2A)
-                  : const Color(0xFFF0F1F7),
-              borderRadius: BorderRadius.circular(8),
-              child: InkWell(
-                borderRadius: BorderRadius.circular(8),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const SettingsScreen(),
+            child: Container(
+              decoration: ShapeDecoration(
+                color: theme.brightness == Brightness.dark
+                    ? const Color(0xFF2A2A2A)
+                    : const Color(0xFFF0F1F7),
+                shape: SmoothRectangleBorder(
+                  borderRadius: SmoothBorderRadius(
+                    cornerRadius: 12,
+                    cornerSmoothing: 0.6,
+                  ),
+                ),
+                shadows: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const SettingsScreen(),
+                      ),
+                    );
+                  },
+                  customBorder: SmoothRectangleBorder(
+                    borderRadius: SmoothBorderRadius(
+                      cornerRadius: 12,
+                      cornerSmoothing: 0.6,
                     ),
-                  );
-                },
-                child: Container(
-                  padding: const EdgeInsets.all(8),
-                  child: Icon(
-                    Icons.settings,
-                    color: Theme.of(context).colorScheme.primary,
-                    size: 20,
+                  ),
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    child: Icon(
+                      Icons.settings,
+                      color: theme.colorScheme.primary,
+                      size: 20,
+                    ),
                   ),
                 ),
               ),
@@ -65,41 +88,63 @@ class _DashboardScreenState extends State<DashboardScreen> {
         return [
           Padding(
             padding: const EdgeInsets.only(right: 16),
-            child: Material(
-              color: theme.brightness == Brightness.dark
-                  ? const Color(0xFF2A2A2A)
-                  : const Color(0xFFF0F1F7),
-              borderRadius: BorderRadius.circular(8),
-              child: InkWell(
-                borderRadius: BorderRadius.circular(8),
-                onTap: () {
-                  setState(() {
-                    _isCalendarView = !_isCalendarView;
-                  });
-                },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 8,
+            child: Container(
+              decoration: ShapeDecoration(
+                color: theme.brightness == Brightness.dark
+                    ? const Color(0xFF2A2A2A)
+                    : const Color(0xFFF0F1F7),
+                shape: SmoothRectangleBorder(
+                  borderRadius: SmoothBorderRadius(
+                    cornerRadius: 12,
+                    cornerSmoothing: 0.6,
                   ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        _isCalendarView ? Icons.list : Icons.calendar_today,
-                        color: Theme.of(context).colorScheme.primary,
-                        size: 16,
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        _isCalendarView ? 'List' : 'Calendar',
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.primary,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
+                ),
+                shadows: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () {
+                    setState(() {
+                      _isCalendarView = !_isCalendarView;
+                    });
+                  },
+                  customBorder: SmoothRectangleBorder(
+                    borderRadius: SmoothBorderRadius(
+                      cornerRadius: 12,
+                      cornerSmoothing: 0.6,
+                    ),
+                  ),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          _isCalendarView ? Icons.list : Icons.calendar_today,
+                          color: theme.colorScheme.primary,
+                          size: 16,
                         ),
-                      ),
-                    ],
+                        const SizedBox(width: 8),
+                        Text(
+                          _isCalendarView ? 'List' : 'Calendar',
+                          style: TextStyle(
+                            color: theme.colorScheme.primary,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -110,27 +155,49 @@ class _DashboardScreenState extends State<DashboardScreen> {
         return [
           Padding(
             padding: const EdgeInsets.only(right: 16),
-            child: Material(
-              color: theme.brightness == Brightness.dark
-                  ? const Color(0xFF2A2A2A)
-                  : const Color(0xFFF0F1F7),
-              borderRadius: BorderRadius.circular(8),
-              child: InkWell(
-                borderRadius: BorderRadius.circular(8),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const SettingsScreen(),
+            child: Container(
+              decoration: ShapeDecoration(
+                color: theme.brightness == Brightness.dark
+                    ? const Color(0xFF2A2A2A)
+                    : const Color(0xFFF0F1F7),
+                shape: SmoothRectangleBorder(
+                  borderRadius: SmoothBorderRadius(
+                    cornerRadius: 12,
+                    cornerSmoothing: 0.6,
+                  ),
+                ),
+                shadows: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const SettingsScreen(),
+                      ),
+                    );
+                  },
+                  customBorder: SmoothRectangleBorder(
+                    borderRadius: SmoothBorderRadius(
+                      cornerRadius: 12,
+                      cornerSmoothing: 0.6,
                     ),
-                  );
-                },
-                child: Container(
-                  padding: const EdgeInsets.all(8),
-                  child: Icon(
-                    Icons.settings,
-                    color: Theme.of(context).colorScheme.primary,
-                    size: 20,
+                  ),
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    child: Icon(
+                      Icons.settings,
+                      color: theme.colorScheme.primary,
+                      size: 20,
+                    ),
                   ),
                 ),
               ),
@@ -141,27 +208,49 @@ class _DashboardScreenState extends State<DashboardScreen> {
         return [
           Padding(
             padding: const EdgeInsets.only(right: 16),
-            child: Material(
-              color: theme.brightness == Brightness.dark
-                  ? const Color(0xFF2A2A2A)
-                  : const Color(0xFFF0F1F7),
-              borderRadius: BorderRadius.circular(8),
-              child: InkWell(
-                borderRadius: BorderRadius.circular(8),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const SettingsScreen(),
+            child: Container(
+              decoration: ShapeDecoration(
+                color: theme.brightness == Brightness.dark
+                    ? const Color(0xFF2A2A2A)
+                    : const Color(0xFFF0F1F7),
+                shape: SmoothRectangleBorder(
+                  borderRadius: SmoothBorderRadius(
+                    cornerRadius: 12,
+                    cornerSmoothing: 0.6,
+                  ),
+                ),
+                shadows: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const SettingsScreen(),
+                      ),
+                    );
+                  },
+                  customBorder: SmoothRectangleBorder(
+                    borderRadius: SmoothBorderRadius(
+                      cornerRadius: 12,
+                      cornerSmoothing: 0.6,
                     ),
-                  );
-                },
-                child: Container(
-                  padding: const EdgeInsets.all(8),
-                  child: Icon(
-                    Icons.settings,
-                    color: Theme.of(context).colorScheme.primary,
-                    size: 20,
+                  ),
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    child: Icon(
+                      Icons.settings,
+                      color: theme.colorScheme.primary,
+                      size: 20,
+                    ),
                   ),
                 ),
               ),
@@ -178,8 +267,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Theme.of(context).colorScheme.background,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      shape: const SmoothRectangleBorder(
+        borderRadius: SmoothBorderRadius.only(
+          topLeft: SmoothRadius(cornerRadius: 20, cornerSmoothing: 0.6),
+          topRight: SmoothRadius(cornerRadius: 20, cornerSmoothing: 0.6),
+        ),
       ),
       builder: (context) => DraggableScrollableSheet(
         initialChildSize: 0.7,
@@ -249,9 +341,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ),
       body: currentScreens[_selectedIndex],
       floatingActionButton: Container(
-        height: 56,
-        width: 56,
-        decoration: BoxDecoration(
+        height: 60,
+        width: 60,
+        decoration: ShapeDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
@@ -260,8 +352,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
               theme.colorScheme.primary.withOpacity(0.8),
             ],
           ),
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
+          shape: SmoothRectangleBorder(
+            borderRadius: SmoothBorderRadius(
+              cornerRadius: 18,
+              cornerSmoothing: 0.6,
+            ),
+          ),
+          shadows: [
             BoxShadow(
               color: theme.colorScheme.primary.withOpacity(0.3),
               blurRadius: 12,
@@ -272,10 +369,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
         child: Material(
           color: Colors.transparent,
           child: InkWell(
-            borderRadius: BorderRadius.circular(16),
             onTap: _showLogBottomSheet,
+            customBorder: SmoothRectangleBorder(
+              borderRadius: SmoothBorderRadius(
+                cornerRadius: 18,
+                cornerSmoothing: 0.6,
+              ),
+            ),
             child: const Center(
-              child: Icon(Icons.add, color: Colors.white, size: 28),
+              child: Icon(Icons.add, color: Colors.white, size: 30),
             ),
           ),
         ),
@@ -302,7 +404,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               duration: const Duration(milliseconds: 300),
               tabBackgroundColor: theme.colorScheme.primary,
-              tabBorderRadius: 12,
+              tabBorderRadius: 16,
               color: theme.brightness == Brightness.dark
                   ? Colors.grey[400]
                   : Colors.grey[600],

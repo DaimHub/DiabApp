@@ -3,6 +3,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:provider/provider.dart';
+import 'package:figma_squircle/figma_squircle.dart';
 import '../services/firestore_service.dart';
 import '../providers/glucose_data_provider.dart';
 import '../providers/medication_data_provider.dart';
@@ -125,78 +126,120 @@ class _OverviewScreenContentState extends State<OverviewScreenContent> {
                     builder: (context, glucoseProvider, child) {
                       return Container(
                         margin: const EdgeInsets.only(top: 20),
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.transparent,
-                          borderRadius: BorderRadius.circular(16),
+                        padding: const EdgeInsets.all(20),
+                        decoration: ShapeDecoration(
+                          color: theme.brightness == Brightness.dark
+                              ? const Color(0xFF2A2A2A)
+                              : const Color(0xFFF0F1F7),
+                          shape: SmoothRectangleBorder(
+                            borderRadius: SmoothBorderRadius(
+                              cornerRadius: 16,
+                              cornerSmoothing: 0.6,
+                            ),
+                            side: BorderSide(
+                              color: theme.brightness == Brightness.dark
+                                  ? const Color(0xFF3A3A3A)
+                                  : Colors.grey[200]!,
+                              width: 1,
+                            ),
+                          ),
+                          shadows: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.03),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
                         ),
                         child: Row(
                           children: [
                             Container(
                               height: 60,
                               width: 60,
-                              decoration: BoxDecoration(
+                              decoration: ShapeDecoration(
                                 color: theme.brightness == Brightness.dark
-                                    ? const Color(0xFF2A2A2A)
-                                    : const Color(0xFFF0F1F7),
-                                borderRadius: BorderRadius.circular(12),
+                                    ? const Color(0xFF3A3A3A)
+                                    : Colors.white,
+                                shape: SmoothRectangleBorder(
+                                  borderRadius: SmoothBorderRadius(
+                                    cornerRadius: 16,
+                                    cornerSmoothing: 0.6,
+                                  ),
+                                ),
+                                shadows: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.05),
+                                    blurRadius: 6,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
                               ),
                               child: Center(
                                 child: FaIcon(
                                   FontAwesomeIcons.droplet,
                                   color: theme.colorScheme.primary,
-                                  size: 30,
+                                  size: 28,
                                 ),
                               ),
                             ),
                             const SizedBox(width: 16),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Blood Glucose',
-                                  style: theme.textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.bold,
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Blood Glucose',
+                                    style: theme.textTheme.titleMedium
+                                        ?.copyWith(fontWeight: FontWeight.bold),
                                   ),
-                                ),
-                                glucoseProvider.isLoading &&
-                                        !glucoseProvider.hasData
-                                    ? Container(
-                                        width: 80,
-                                        height: 20,
-                                        margin: const EdgeInsets.only(top: 4),
-                                        decoration: BoxDecoration(
-                                          color:
-                                              theme.brightness ==
-                                                  Brightness.dark
-                                              ? const Color(0xFF3A3A3A)
-                                              : const Color(0xFFF0F1F7),
-                                          borderRadius: BorderRadius.circular(
-                                            4,
-                                          ),
-                                        ),
-                                      )
-                                    : Text(
-                                        glucoseProvider.getGlucoseValueString(),
-                                        style: theme.textTheme.titleMedium
-                                            ?.copyWith(
-                                              color: theme.colorScheme.primary,
-                                              fontWeight: FontWeight.w500,
+                                  const SizedBox(height: 4),
+                                  glucoseProvider.isLoading &&
+                                          !glucoseProvider.hasData
+                                      ? Container(
+                                          width: 80,
+                                          height: 20,
+                                          decoration: ShapeDecoration(
+                                            color:
+                                                theme.brightness ==
+                                                    Brightness.dark
+                                                ? const Color(0xFF3A3A3A)
+                                                : const Color(0xFFF0F1F7),
+                                            shape: SmoothRectangleBorder(
+                                              borderRadius: SmoothBorderRadius(
+                                                cornerRadius: 6,
+                                                cornerSmoothing: 0.6,
+                                              ),
                                             ),
-                                      ),
-                              ],
+                                          ),
+                                        )
+                                      : Text(
+                                          glucoseProvider
+                                              .getGlucoseValueString(),
+                                          style: theme.textTheme.titleMedium
+                                              ?.copyWith(
+                                                color:
+                                                    theme.colorScheme.primary,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                        ),
+                                ],
+                              ),
                             ),
-                            const Spacer(),
                             glucoseProvider.isLoading &&
                                     !glucoseProvider.hasData
                                 ? Container(
                                     width: 120,
                                     height: 16,
-                                    decoration: BoxDecoration(
+                                    decoration: ShapeDecoration(
                                       color: theme.brightness == Brightness.dark
                                           ? const Color(0xFF3A3A3A)
                                           : const Color(0xFFF0F1F7),
-                                      borderRadius: BorderRadius.circular(4),
+                                      shape: SmoothRectangleBorder(
+                                        borderRadius: SmoothBorderRadius(
+                                          cornerRadius: 6,
+                                          cornerSmoothing: 0.6,
+                                        ),
+                                      ),
                                     ),
                                   )
                                 : Text(
@@ -320,8 +363,8 @@ class _OverviewScreenContentState extends State<OverviewScreenContent> {
                               final isPastDue = medication['isPastDue'] as bool;
                               return Container(
                                 margin: const EdgeInsets.only(bottom: 12),
-                                padding: const EdgeInsets.all(16),
-                                decoration: BoxDecoration(
+                                padding: const EdgeInsets.all(20),
+                                decoration: ShapeDecoration(
                                   color: isPastDue
                                       ? (theme.brightness == Brightness.dark
                                             ? const Color(
@@ -330,24 +373,39 @@ class _OverviewScreenContentState extends State<OverviewScreenContent> {
                                             : const Color(
                                                 0xFFF0F1F7,
                                               ).withOpacity(0.7))
-                                      : Colors.transparent,
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: isPastDue
-                                      ? Border.all(
-                                          color:
-                                              theme.brightness ==
-                                                  Brightness.dark
-                                              ? const Color(0xFF3A3A3A)
-                                              : Colors.grey[300]!,
-                                        )
-                                      : null,
+                                      : (theme.brightness == Brightness.dark
+                                            ? const Color(0xFF2A2A2A)
+                                            : const Color(0xFFF0F1F7)),
+                                  shape: SmoothRectangleBorder(
+                                    borderRadius: SmoothBorderRadius(
+                                      cornerRadius: 16,
+                                      cornerSmoothing: 0.6,
+                                    ),
+                                    side: BorderSide(
+                                      color: isPastDue
+                                          ? (theme.brightness == Brightness.dark
+                                                ? const Color(0xFF3A3A3A)
+                                                : Colors.grey[300]!)
+                                          : (theme.brightness == Brightness.dark
+                                                ? const Color(0xFF3A3A3A)
+                                                : Colors.grey[200]!),
+                                      width: 1,
+                                    ),
+                                  ),
+                                  shadows: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.03),
+                                      blurRadius: 8,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
                                 ),
                                 child: Row(
                                   children: [
                                     Container(
                                       height: 50,
                                       width: 50,
-                                      decoration: BoxDecoration(
+                                      decoration: ShapeDecoration(
                                         color: isPastDue
                                             ? (theme.brightness ==
                                                       Brightness.dark
@@ -355,9 +413,23 @@ class _OverviewScreenContentState extends State<OverviewScreenContent> {
                                                   : Colors.grey[200])
                                             : (theme.brightness ==
                                                       Brightness.dark
-                                                  ? const Color(0xFF2A2A2A)
-                                                  : const Color(0xFFF0F1F7)),
-                                        borderRadius: BorderRadius.circular(10),
+                                                  ? const Color(0xFF3A3A3A)
+                                                  : Colors.white),
+                                        shape: SmoothRectangleBorder(
+                                          borderRadius: SmoothBorderRadius(
+                                            cornerRadius: 14,
+                                            cornerSmoothing: 0.6,
+                                          ),
+                                        ),
+                                        shadows: [
+                                          BoxShadow(
+                                            color: Colors.black.withOpacity(
+                                              0.05,
+                                            ),
+                                            blurRadius: 6,
+                                            offset: const Offset(0, 2),
+                                          ),
+                                        ],
                                       ),
                                       child: Center(
                                         child: FaIcon(
@@ -393,7 +465,7 @@ class _OverviewScreenContentState extends State<OverviewScreenContent> {
                                                             ?.color,
                                                 ),
                                           ),
-                                          const SizedBox(height: 2),
+                                          const SizedBox(height: 4),
                                           Text(
                                             (medication['time'] as TimeOfDay)
                                                 .format(context),
@@ -424,16 +496,19 @@ class _OverviewScreenContentState extends State<OverviewScreenContent> {
                                           horizontal: 8,
                                           vertical: 4,
                                         ),
-                                        decoration: BoxDecoration(
+                                        decoration: ShapeDecoration(
                                           color: Colors.orange.withOpacity(0.1),
-                                          borderRadius: BorderRadius.circular(
-                                            12,
-                                          ),
-                                          border: Border.all(
-                                            color: Colors.orange.withOpacity(
-                                              0.3,
+                                          shape: SmoothRectangleBorder(
+                                            borderRadius: SmoothBorderRadius(
+                                              cornerRadius: 8,
+                                              cornerSmoothing: 0.6,
                                             ),
-                                            width: 1,
+                                            side: BorderSide(
+                                              color: Colors.orange.withOpacity(
+                                                0.3,
+                                              ),
+                                              width: 1,
+                                            ),
                                           ),
                                         ),
                                         child: Text(
@@ -446,10 +521,23 @@ class _OverviewScreenContentState extends State<OverviewScreenContent> {
                                         ),
                                       )
                                     else
-                                      Icon(
-                                        Icons.schedule,
-                                        color: theme.colorScheme.primary,
-                                        size: 20,
+                                      Container(
+                                        padding: const EdgeInsets.all(6),
+                                        decoration: ShapeDecoration(
+                                          color: theme.colorScheme.primary
+                                              .withOpacity(0.1),
+                                          shape: SmoothRectangleBorder(
+                                            borderRadius: SmoothBorderRadius(
+                                              cornerRadius: 8,
+                                              cornerSmoothing: 0.6,
+                                            ),
+                                          ),
+                                        ),
+                                        child: Icon(
+                                          Icons.schedule,
+                                          color: theme.colorScheme.primary,
+                                          size: 18,
+                                        ),
                                       ),
                                   ],
                                 ),
@@ -460,26 +548,53 @@ class _OverviewScreenContentState extends State<OverviewScreenContent> {
                       } else {
                         // No medication reminders set up
                         return Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
+                          padding: const EdgeInsets.all(20),
+                          decoration: ShapeDecoration(
                             color: theme.brightness == Brightness.dark
                                 ? const Color(0xFF2A2A2A)
                                 : const Color(0xFFF0F1F7),
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(
-                              color: theme.brightness == Brightness.dark
-                                  ? const Color(0xFF3A3A3A)
-                                  : Colors.grey[200]!,
+                            shape: SmoothRectangleBorder(
+                              borderRadius: SmoothBorderRadius(
+                                cornerRadius: 16,
+                                cornerSmoothing: 0.6,
+                              ),
+                              side: BorderSide(
+                                color: theme.brightness == Brightness.dark
+                                    ? const Color(0xFF3A3A3A)
+                                    : Colors.grey[200]!,
+                                width: 1,
+                              ),
                             ),
+                            shadows: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.03),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
                           ),
                           child: Row(
                             children: [
                               Container(
                                 height: 60,
                                 width: 60,
-                                decoration: BoxDecoration(
-                                  color: theme.cardColor,
-                                  borderRadius: BorderRadius.circular(12),
+                                decoration: ShapeDecoration(
+                                  color: theme.brightness == Brightness.dark
+                                      ? const Color(0xFF3A3A3A)
+                                      : Colors.white,
+                                  shape: SmoothRectangleBorder(
+                                    borderRadius: SmoothBorderRadius(
+                                      cornerRadius: 16,
+                                      cornerSmoothing: 0.6,
+                                    ),
+                                  ),
+                                  shadows: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.05),
+                                      blurRadius: 6,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
                                 ),
                                 child: Center(
                                   child: FaIcon(
@@ -502,25 +617,13 @@ class _OverviewScreenContentState extends State<OverviewScreenContent> {
                                             fontWeight: FontWeight.bold,
                                           ),
                                     ),
+                                    const SizedBox(height: 4),
                                     Text(
-                                      'Set up reminders in Settings',
-                                      style: theme.textTheme.bodyMedium
-                                          ?.copyWith(
-                                            color: theme
-                                                .textTheme
-                                                .bodyMedium
-                                                ?.color
-                                                ?.withOpacity(0.7),
-                                          ),
+                                      'Set up medication reminders in settings',
+                                      style: theme.textTheme.bodyMedium,
                                     ),
                                   ],
                                 ),
-                              ),
-                              Icon(
-                                Icons.arrow_forward_ios,
-                                color: theme.textTheme.bodyMedium?.color
-                                    ?.withOpacity(0.5),
-                                size: 16,
                               ),
                             ],
                           ),
