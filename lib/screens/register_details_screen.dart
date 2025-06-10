@@ -3,6 +3,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:toastification/toastification.dart';
+import 'package:figma_squircle/figma_squircle.dart';
 import '../services/firestore_service.dart';
 
 class RegisterDetailsScreen extends StatefulWidget {
@@ -26,10 +27,10 @@ class RegisterDetailsScreen extends StatefulWidget {
 class _RegisterDetailsScreenState extends State<RegisterDetailsScreen> {
   bool _isLoading = false;
   String? _selectedDiabetesType;
-  List<String> _diabetesTypes = ['Type 1', 'Type 2', 'Gestational', 'Other'];
+  List<String> diabetesTypes = ['Type 1', 'Type 2', 'Gestational', 'Other'];
 
   String? _selectedHealthComponent;
-  List<String> _healthComponents = [
+  List<String> healthComponents = [
     'Blood Glucose',
     'Weight',
     'Activity',
@@ -156,8 +157,8 @@ class _RegisterDetailsScreenState extends State<RegisterDetailsScreen> {
       autoCloseDuration: const Duration(seconds: 3),
       showProgressBar: false,
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 50),
-      borderRadius: BorderRadius.circular(10),
-      backgroundColor: theme.cardColor,
+      borderRadius: SmoothBorderRadius(cornerRadius: 12, cornerSmoothing: 0.6),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       foregroundColor: theme.colorScheme.primary,
       borderSide: BorderSide(
         color: theme.brightness == Brightness.dark
@@ -191,15 +192,41 @@ class _RegisterDetailsScreenState extends State<RegisterDetailsScreen> {
                 Row(
                   children: [
                     const Spacer(),
-                    IconButton(
-                      icon: const FaIcon(FontAwesomeIcons.xmark, size: 24),
-                      onPressed: () {
-                        Navigator.pushNamedAndRemoveUntil(
-                          context,
-                          '/dashboard',
-                          (route) => false,
-                        );
-                      },
+                    Container(
+                      width: 44,
+                      height: 44,
+                      decoration: ShapeDecoration(
+                        color: theme.brightness == Brightness.dark
+                            ? const Color(0xFF2A2A2A)
+                            : const Color(0xFFF0F1F7),
+                        shape: SmoothRectangleBorder(
+                          borderRadius: SmoothBorderRadius(
+                            cornerRadius: 14,
+                            cornerSmoothing: 0.6,
+                          ),
+                        ),
+                      ),
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: () {
+                            Navigator.pushNamedAndRemoveUntil(
+                              context,
+                              '/dashboard',
+                              (route) => false,
+                            );
+                          },
+                          customBorder: SmoothRectangleBorder(
+                            borderRadius: SmoothBorderRadius(
+                              cornerRadius: 14,
+                              cornerSmoothing: 0.6,
+                            ),
+                          ),
+                          child: const Center(
+                            child: FaIcon(FontAwesomeIcons.xmark, size: 20),
+                          ),
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -255,25 +282,51 @@ class _RegisterDetailsScreenState extends State<RegisterDetailsScreen> {
                 _buildHealthFocusSelector(theme),
 
                 const SizedBox(height: 50),
-                ElevatedButton(
-                  onPressed: _isLoading ? null : _completeRegistration,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF5D74FB),
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+                Container(
+                  width: double.infinity,
+                  height: 56,
+                  decoration: ShapeDecoration(
+                    color: theme.colorScheme.primary,
+                    shape: SmoothRectangleBorder(
+                      borderRadius: SmoothBorderRadius(
+                        cornerRadius: 16,
+                        cornerSmoothing: 0.6,
+                      ),
+                    ),
+                    shadows: [
+                      BoxShadow(
+                        color: theme.colorScheme.primary.withOpacity(0.3),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: _isLoading ? null : _completeRegistration,
+                      customBorder: SmoothRectangleBorder(
+                        borderRadius: SmoothBorderRadius(
+                          cornerRadius: 16,
+                          cornerSmoothing: 0.6,
+                        ),
+                      ),
+                      child: Center(
+                        child: _isLoading
+                            ? const CircularProgressIndicator(
+                                color: Colors.white,
+                              )
+                            : const Text(
+                                'Let\'s Get Started!',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white,
+                                ),
+                              ),
+                      ),
                     ),
                   ),
-                  child: _isLoading
-                      ? const CircularProgressIndicator(color: Colors.white)
-                      : const Text(
-                          'Let\'s Get Started!',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
                 ),
                 const SizedBox(height: 30),
               ],
@@ -285,75 +338,107 @@ class _RegisterDetailsScreenState extends State<RegisterDetailsScreen> {
   }
 
   Widget _buildDiabetesTypeSelector(ThemeData theme) {
-    return Material(
-      color: theme.cardColor,
-      borderRadius: BorderRadius.circular(12),
-      elevation: 0,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: _showDiabetesTypeDialog,
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: theme.brightness == Brightness.dark
-                  ? const Color(0xFF3A3A3A)
-                  : Colors.grey[200]!,
+    return Container(
+      decoration: ShapeDecoration(
+        color: theme.brightness == Brightness.dark
+            ? const Color(0xFF2A2A2A)
+            : const Color(0xFFF0F1F7),
+        shape: SmoothRectangleBorder(
+          borderRadius: SmoothBorderRadius(
+            cornerRadius: 16,
+            cornerSmoothing: 0.6,
+          ),
+          side: BorderSide(
+            color: theme.brightness == Brightness.dark
+                ? const Color(0xFF3A3A3A)
+                : Colors.grey[200]!,
+            width: 1,
+          ),
+        ),
+        shadows: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: _showDiabetesTypeDialog,
+          customBorder: SmoothRectangleBorder(
+            borderRadius: SmoothBorderRadius(
+              cornerRadius: 16,
+              cornerSmoothing: 0.6,
             ),
           ),
-          child: Row(
-            children: [
-              Container(
-                height: 40,
-                width: 40,
-                decoration: BoxDecoration(
-                  color: theme.brightness == Brightness.dark
-                      ? const Color(0xFF3A3A3A)
-                      : const Color(0xFFF0F1F7),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Center(
-                  child: FaIcon(
-                    _getIconForDiabetesType(_selectedDiabetesType),
-                    color: theme.colorScheme.primary,
-                    size: 18,
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            child: Row(
+              children: [
+                Container(
+                  height: 50,
+                  width: 50,
+                  decoration: ShapeDecoration(
+                    color: theme.brightness == Brightness.dark
+                        ? const Color(0xFF3A3A3A)
+                        : Colors.white,
+                    shape: SmoothRectangleBorder(
+                      borderRadius: SmoothBorderRadius(
+                        cornerRadius: 14,
+                        cornerSmoothing: 0.6,
+                      ),
+                    ),
+                    shadows: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 6,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Center(
+                    child: FaIcon(
+                      _getIconForDiabetesType(_selectedDiabetesType),
+                      color: theme.colorScheme.primary,
+                      size: 20,
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Diabetes Type',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: theme.textTheme.bodyMedium?.color,
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Diabetes Type',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: theme.colorScheme.primary.withOpacity(0.7),
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      _selectedDiabetesType ?? 'Select your type',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: _selectedDiabetesType != null
-                            ? theme.textTheme.bodyLarge?.color
-                            : theme.textTheme.bodyMedium?.color,
-                        fontWeight: FontWeight.w500,
+                      const SizedBox(height: 4),
+                      Text(
+                        _selectedDiabetesType ?? 'Select your type',
+                        style: TextStyle(
+                          fontSize: 18,
+                          color: _selectedDiabetesType != null
+                              ? theme.textTheme.bodyLarge?.color
+                              : theme.textTheme.bodyMedium?.color,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              const SizedBox(width: 16),
-              Icon(
-                Icons.arrow_forward_ios,
-                color: theme.textTheme.bodyMedium?.color?.withOpacity(0.5),
-                size: 14,
-              ),
-            ],
+                Icon(
+                  Icons.arrow_forward_ios,
+                  color: theme.textTheme.bodyMedium?.color?.withOpacity(0.5),
+                  size: 16,
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -378,254 +463,320 @@ class _RegisterDetailsScreenState extends State<RegisterDetailsScreen> {
   void _showDiabetesTypeDialog() {
     showDialog(
       context: context,
-      builder: (context) => Dialog(
-        backgroundColor: Theme.of(context).dialogBackgroundColor,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Header with close button
-              Row(
-                children: [
-                  Text(
-                    'Diabetes Type',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).textTheme.headlineMedium?.color,
-                    ),
-                  ),
-                  const Spacer(),
-                  Material(
-                    color: Theme.of(context).brightness == Brightness.dark
-                        ? const Color(0xFF2A2A2A)
-                        : const Color(0xFFF0F1F7),
-                    borderRadius: BorderRadius.circular(8),
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(8),
-                      onTap: () => Navigator.pop(context),
-                      child: Container(
-                        padding: const EdgeInsets.all(8),
-                        child: Icon(
-                          Icons.close,
-                          color: Theme.of(context).iconTheme.color,
-                          size: 20,
+      builder: (context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(24),
+            decoration: ShapeDecoration(
+              color: Theme.of(context).scaffoldBackgroundColor,
+              shape: SmoothRectangleBorder(
+                borderRadius: SmoothBorderRadius(
+                  cornerRadius: 20,
+                  cornerSmoothing: 0.6,
+                ),
+              ),
+              shadows: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.15),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10),
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Header with close button
+                Row(
+                  children: [
+                    const Spacer(),
+                    Container(
+                      width: 36,
+                      height: 36,
+                      decoration: ShapeDecoration(
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? const Color(0xFF2A2A2A)
+                            : const Color(0xFFF0F1F7),
+                        shape: SmoothRectangleBorder(
+                          borderRadius: SmoothBorderRadius(
+                            cornerRadius: 10,
+                            cornerSmoothing: 0.6,
+                          ),
                         ),
                       ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-
-              // Diabetes type options
-              _buildDiabetesTypeOption(
-                'Type 1',
-                'Insulin-dependent diabetes',
-                FontAwesomeIcons.syringe,
-              ),
-              const SizedBox(height: 12),
-              _buildDiabetesTypeOption(
-                'Type 2',
-                'Non-insulin-dependent diabetes',
-                FontAwesomeIcons.appleWhole,
-              ),
-              const SizedBox(height: 12),
-              _buildDiabetesTypeOption(
-                'Gestational',
-                'Diabetes during pregnancy',
-                FontAwesomeIcons.baby,
-              ),
-              const SizedBox(height: 12),
-              _buildDiabetesTypeOption(
-                'Other',
-                'Other type of diabetes',
-                FontAwesomeIcons.stethoscope,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDiabetesTypeOption(
-    String type,
-    String description,
-    IconData icon,
-  ) {
-    final theme = Theme.of(context);
-    final isSelected = _selectedDiabetesType == type;
-
-    return Material(
-      color: theme.cardColor,
-      borderRadius: BorderRadius.circular(12),
-      elevation: 0,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: () {
-          setState(() {
-            _selectedDiabetesType = type;
-          });
-          Navigator.pop(context);
-        },
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: isSelected
-                  ? theme.colorScheme.primary
-                  : theme.brightness == Brightness.dark
-                  ? const Color(0xFF3A3A3A)
-                  : Colors.grey[200]!,
-              width: isSelected ? 2 : 1,
-            ),
-          ),
-          child: Row(
-            children: [
-              Container(
-                height: 40,
-                width: 40,
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? theme.colorScheme.primary.withOpacity(0.1)
-                      : theme.brightness == Brightness.dark
-                      ? const Color(0xFF3A3A3A)
-                      : const Color(0xFFF0F1F7),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Center(
-                  child: FaIcon(
-                    icon,
-                    color: isSelected
-                        ? theme.colorScheme.primary
-                        : theme.iconTheme.color,
-                    size: 18,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      type,
-                      style: TextStyle(
-                        color: isSelected
-                            ? theme.colorScheme.primary
-                            : theme.textTheme.bodyLarge?.color,
-                        fontWeight: isSelected
-                            ? FontWeight.w600
-                            : FontWeight.normal,
-                        fontSize: 16,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      description,
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: theme.textTheme.bodyMedium?.color,
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: () => Navigator.pop(context),
+                          customBorder: SmoothRectangleBorder(
+                            borderRadius: SmoothBorderRadius(
+                              cornerRadius: 10,
+                              cornerSmoothing: 0.6,
+                            ),
+                          ),
+                          child: const Center(
+                            child: Icon(Icons.close, size: 18),
+                          ),
+                        ),
                       ),
                     ),
                   ],
                 ),
-              ),
-              if (isSelected)
+                const SizedBox(height: 20),
+
+                // Large diabetes type icon
                 Container(
-                  height: 20,
-                  width: 20,
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.primary,
-                    shape: BoxShape.circle,
+                  height: 80,
+                  width: 80,
+                  decoration: ShapeDecoration(
+                    color: Theme.of(context).colorScheme.primary,
+                    shape: SmoothRectangleBorder(
+                      borderRadius: SmoothBorderRadius(
+                        cornerRadius: 24,
+                        cornerSmoothing: 0.6,
+                      ),
+                    ),
+                    shadows: [
+                      BoxShadow(
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.primary.withOpacity(0.3),
+                        blurRadius: 20,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
                   ),
                   child: const Center(
-                    child: Icon(Icons.check, color: Colors.white, size: 14),
+                    child: Icon(
+                      Icons.medical_information,
+                      color: Colors.white,
+                      size: 36,
+                    ),
                   ),
                 ),
-            ],
+                const SizedBox(height: 24),
+
+                // Title
+                Text(
+                  'Select Diabetes Type',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).textTheme.headlineMedium?.color,
+                  ),
+                ),
+                const SizedBox(height: 8),
+
+                // Description
+                Text(
+                  'Choose the type that best describes your diabetes diagnosis',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Theme.of(context).textTheme.bodyMedium?.color,
+                    height: 1.4,
+                  ),
+                ),
+                const SizedBox(height: 32),
+
+                ...diabetesTypes.map(
+                  (type) => Column(
+                    children: [
+                      Container(
+                        width: double.infinity,
+                        decoration: ShapeDecoration(
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? const Color(0xFF2A2A2A)
+                              : const Color(0xFFF0F1F7),
+                          shape: SmoothRectangleBorder(
+                            borderRadius: SmoothBorderRadius(
+                              cornerRadius: 14,
+                              cornerSmoothing: 0.6,
+                            ),
+                          ),
+                        ),
+                        child: Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            onTap: () {
+                              setState(() {
+                                _selectedDiabetesType = type;
+                              });
+                              Navigator.pop(context);
+                            },
+                            customBorder: SmoothRectangleBorder(
+                              borderRadius: SmoothBorderRadius(
+                                cornerRadius: 14,
+                                cornerSmoothing: 0.6,
+                              ),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    height: 44,
+                                    width: 44,
+                                    decoration: ShapeDecoration(
+                                      color:
+                                          Theme.of(context).brightness ==
+                                              Brightness.dark
+                                          ? const Color(0xFF3A3A3A)
+                                          : Colors.white,
+                                      shape: SmoothRectangleBorder(
+                                        borderRadius: SmoothBorderRadius(
+                                          cornerRadius: 12,
+                                          cornerSmoothing: 0.6,
+                                        ),
+                                      ),
+                                    ),
+                                    child: Center(
+                                      child: FaIcon(
+                                        _getIconForDiabetesType(type),
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.primary,
+                                        size: 18,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 16),
+                                  Expanded(
+                                    child: Text(
+                                      type,
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500,
+                                        color: Theme.of(
+                                          context,
+                                        ).textTheme.bodyLarge?.color,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
   Widget _buildHealthFocusSelector(ThemeData theme) {
-    return Material(
-      color: theme.cardColor,
-      borderRadius: BorderRadius.circular(12),
-      elevation: 0,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: _showHealthFocusDialog,
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: theme.brightness == Brightness.dark
-                  ? const Color(0xFF3A3A3A)
-                  : Colors.grey[200]!,
+    return Container(
+      decoration: ShapeDecoration(
+        color: theme.brightness == Brightness.dark
+            ? const Color(0xFF2A2A2A)
+            : const Color(0xFFF0F1F7),
+        shape: SmoothRectangleBorder(
+          borderRadius: SmoothBorderRadius(
+            cornerRadius: 16,
+            cornerSmoothing: 0.6,
+          ),
+          side: BorderSide(
+            color: theme.brightness == Brightness.dark
+                ? const Color(0xFF3A3A3A)
+                : Colors.grey[200]!,
+            width: 1,
+          ),
+        ),
+        shadows: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: _showHealthFocusDialog,
+          customBorder: SmoothRectangleBorder(
+            borderRadius: SmoothBorderRadius(
+              cornerRadius: 16,
+              cornerSmoothing: 0.6,
             ),
           ),
-          child: Row(
-            children: [
-              Container(
-                height: 40,
-                width: 40,
-                decoration: BoxDecoration(
-                  color: theme.brightness == Brightness.dark
-                      ? const Color(0xFF3A3A3A)
-                      : const Color(0xFFF0F1F7),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Center(
-                  child: FaIcon(
-                    _getIconForHealthFocus(_selectedHealthComponent),
-                    color: theme.colorScheme.primary,
-                    size: 18,
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            child: Row(
+              children: [
+                Container(
+                  height: 50,
+                  width: 50,
+                  decoration: ShapeDecoration(
+                    color: theme.brightness == Brightness.dark
+                        ? const Color(0xFF3A3A3A)
+                        : Colors.white,
+                    shape: SmoothRectangleBorder(
+                      borderRadius: SmoothBorderRadius(
+                        cornerRadius: 14,
+                        cornerSmoothing: 0.6,
+                      ),
+                    ),
+                    shadows: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 6,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Center(
+                    child: FaIcon(
+                      _getIconForHealthFocus(_selectedHealthComponent),
+                      color: theme.colorScheme.primary,
+                      size: 20,
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Health Focus',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: theme.textTheme.bodyMedium?.color,
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Health Focus',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: theme.colorScheme.primary.withOpacity(0.7),
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      _selectedHealthComponent ?? 'Pick your focus (optional)',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: _selectedHealthComponent != null
-                            ? theme.textTheme.bodyLarge?.color
-                            : theme.textTheme.bodyMedium?.color,
-                        fontWeight: FontWeight.w500,
+                      const SizedBox(height: 4),
+                      Text(
+                        _selectedHealthComponent ??
+                            'Pick your focus (optional)',
+                        style: TextStyle(
+                          fontSize: 18,
+                          color: _selectedHealthComponent != null
+                              ? theme.textTheme.bodyLarge?.color
+                              : theme.textTheme.bodyMedium?.color,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              const SizedBox(width: 16),
-              Icon(
-                Icons.arrow_forward_ios,
-                color: theme.textTheme.bodyMedium?.color?.withOpacity(0.5),
-                size: 14,
-              ),
-            ],
+                Icon(
+                  Icons.arrow_forward_ios,
+                  color: theme.textTheme.bodyMedium?.color?.withOpacity(0.5),
+                  size: 16,
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -650,284 +801,218 @@ class _RegisterDetailsScreenState extends State<RegisterDetailsScreen> {
   void _showHealthFocusDialog() {
     showDialog(
       context: context,
-      builder: (context) => Dialog(
-        backgroundColor: Theme.of(context).dialogBackgroundColor,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Header with close button
-              Row(
-                children: [
-                  Text(
-                    'Health Focus',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).textTheme.headlineMedium?.color,
-                    ),
-                  ),
-                  const Spacer(),
-                  Material(
-                    color: Theme.of(context).brightness == Brightness.dark
-                        ? const Color(0xFF2A2A2A)
-                        : const Color(0xFFF0F1F7),
-                    borderRadius: BorderRadius.circular(8),
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(8),
-                      onTap: () => Navigator.pop(context),
-                      child: Container(
-                        padding: const EdgeInsets.all(8),
-                        child: Icon(
-                          Icons.close,
-                          color: Theme.of(context).iconTheme.color,
-                          size: 20,
+      builder: (context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(24),
+            decoration: ShapeDecoration(
+              color: Theme.of(context).scaffoldBackgroundColor,
+              shape: SmoothRectangleBorder(
+                borderRadius: SmoothBorderRadius(
+                  cornerRadius: 20,
+                  cornerSmoothing: 0.6,
+                ),
+              ),
+              shadows: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.15),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10),
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Header with close button
+                Row(
+                  children: [
+                    const Spacer(),
+                    Container(
+                      width: 36,
+                      height: 36,
+                      decoration: ShapeDecoration(
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? const Color(0xFF2A2A2A)
+                            : const Color(0xFFF0F1F7),
+                        shape: SmoothRectangleBorder(
+                          borderRadius: SmoothBorderRadius(
+                            cornerRadius: 10,
+                            cornerSmoothing: 0.6,
+                          ),
+                        ),
+                      ),
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: () => Navigator.pop(context),
+                          customBorder: SmoothRectangleBorder(
+                            borderRadius: SmoothBorderRadius(
+                              cornerRadius: 10,
+                              cornerSmoothing: 0.6,
+                            ),
+                          ),
+                          child: const Center(
+                            child: Icon(Icons.close, size: 18),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-
-              // Health focus options
-              _buildHealthFocusOption(
-                'Blood Glucose',
-                'Monitor and track your blood sugar levels',
-                FontAwesomeIcons.droplet,
-              ),
-              const SizedBox(height: 12),
-              _buildHealthFocusOption(
-                'Weight',
-                'Track your weight and body measurements',
-                FontAwesomeIcons.scaleBalanced,
-              ),
-              const SizedBox(height: 12),
-              _buildHealthFocusOption(
-                'Activity',
-                'Monitor physical activity and exercise',
-                FontAwesomeIcons.personRunning,
-              ),
-              const SizedBox(height: 12),
-              _buildHealthFocusOption(
-                'Medication',
-                'Track medications and treatment plans',
-                FontAwesomeIcons.pills,
-              ),
-              const SizedBox(height: 16),
-
-              // Clear selection option
-              _buildClearSelectionOption(),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildHealthFocusOption(
-    String focus,
-    String description,
-    IconData icon,
-  ) {
-    final theme = Theme.of(context);
-    final isSelected = _selectedHealthComponent == focus;
-
-    return Material(
-      color: theme.cardColor,
-      borderRadius: BorderRadius.circular(12),
-      elevation: 0,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: () {
-          setState(() {
-            _selectedHealthComponent = focus;
-          });
-          Navigator.pop(context);
-        },
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: isSelected
-                  ? theme.colorScheme.primary
-                  : theme.brightness == Brightness.dark
-                  ? const Color(0xFF3A3A3A)
-                  : Colors.grey[200]!,
-              width: isSelected ? 2 : 1,
-            ),
-          ),
-          child: Row(
-            children: [
-              Container(
-                height: 40,
-                width: 40,
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? theme.colorScheme.primary.withOpacity(0.1)
-                      : theme.brightness == Brightness.dark
-                      ? const Color(0xFF3A3A3A)
-                      : const Color(0xFFF0F1F7),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Center(
-                  child: FaIcon(
-                    icon,
-                    color: isSelected
-                        ? theme.colorScheme.primary
-                        : theme.iconTheme.color,
-                    size: 18,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      focus,
-                      style: TextStyle(
-                        color: isSelected
-                            ? theme.colorScheme.primary
-                            : theme.textTheme.bodyLarge?.color,
-                        fontWeight: isSelected
-                            ? FontWeight.w600
-                            : FontWeight.normal,
-                        fontSize: 16,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      description,
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: theme.textTheme.bodyMedium?.color,
-                      ),
-                    ),
                   ],
                 ),
-              ),
-              if (isSelected)
+                const SizedBox(height: 20),
+
+                // Large health focus icon
                 Container(
-                  height: 20,
-                  width: 20,
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.primary,
-                    shape: BoxShape.circle,
+                  height: 80,
+                  width: 80,
+                  decoration: ShapeDecoration(
+                    color: Theme.of(context).colorScheme.primary,
+                    shape: SmoothRectangleBorder(
+                      borderRadius: SmoothBorderRadius(
+                        cornerRadius: 24,
+                        cornerSmoothing: 0.6,
+                      ),
+                    ),
+                    shadows: [
+                      BoxShadow(
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.primary.withOpacity(0.3),
+                        blurRadius: 20,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
                   ),
                   child: const Center(
-                    child: Icon(Icons.check, color: Colors.white, size: 14),
+                    child: Icon(
+                      Icons.health_and_safety,
+                      color: Colors.white,
+                      size: 36,
+                    ),
                   ),
                 ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+                const SizedBox(height: 24),
 
-  Widget _buildClearSelectionOption() {
-    final theme = Theme.of(context);
-    final isCleared = _selectedHealthComponent == null;
+                // Title
+                Text(
+                  'Choose Health Focus',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).textTheme.headlineMedium?.color,
+                  ),
+                ),
+                const SizedBox(height: 8),
 
-    return Material(
-      color: theme.cardColor,
-      borderRadius: BorderRadius.circular(12),
-      elevation: 0,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: () {
-          setState(() {
-            _selectedHealthComponent = null;
-          });
-          Navigator.pop(context);
-        },
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: isCleared
-                  ? theme.colorScheme.primary
-                  : theme.brightness == Brightness.dark
-                  ? const Color(0xFF3A3A3A)
-                  : Colors.grey[200]!,
-              width: isCleared ? 2 : 1,
+                // Description
+                Text(
+                  'Select the area you\'d like to focus on most (optional)',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Theme.of(context).textTheme.bodyMedium?.color,
+                    height: 1.4,
+                  ),
+                ),
+                const SizedBox(height: 32),
+
+                ...healthComponents
+                    .map(
+                      (component) => Column(
+                        children: [
+                          Container(
+                            width: double.infinity,
+                            decoration: ShapeDecoration(
+                              color:
+                                  Theme.of(context).brightness ==
+                                      Brightness.dark
+                                  ? const Color(0xFF2A2A2A)
+                                  : const Color(0xFFF0F1F7),
+                              shape: SmoothRectangleBorder(
+                                borderRadius: SmoothBorderRadius(
+                                  cornerRadius: 14,
+                                  cornerSmoothing: 0.6,
+                                ),
+                              ),
+                            ),
+                            child: Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                onTap: () {
+                                  setState(() {
+                                    _selectedHealthComponent = component;
+                                  });
+                                  Navigator.pop(context);
+                                },
+                                customBorder: SmoothRectangleBorder(
+                                  borderRadius: SmoothBorderRadius(
+                                    cornerRadius: 14,
+                                    cornerSmoothing: 0.6,
+                                  ),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(16),
+                                  child: Row(
+                                    children: [
+                                      Container(
+                                        height: 44,
+                                        width: 44,
+                                        decoration: ShapeDecoration(
+                                          color:
+                                              Theme.of(context).brightness ==
+                                                  Brightness.dark
+                                              ? const Color(0xFF3A3A3A)
+                                              : Colors.white,
+                                          shape: SmoothRectangleBorder(
+                                            borderRadius: SmoothBorderRadius(
+                                              cornerRadius: 12,
+                                              cornerSmoothing: 0.6,
+                                            ),
+                                          ),
+                                        ),
+                                        child: Center(
+                                          child: FaIcon(
+                                            _getIconForHealthFocus(component),
+                                            color: Theme.of(
+                                              context,
+                                            ).colorScheme.primary,
+                                            size: 18,
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 16),
+                                      Expanded(
+                                        child: Text(
+                                          component,
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w500,
+                                            color: Theme.of(
+                                              context,
+                                            ).textTheme.bodyLarge?.color,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                        ],
+                      ),
+                    )
+                    .toList(),
+              ],
             ),
           ),
-          child: Row(
-            children: [
-              Container(
-                height: 40,
-                width: 40,
-                decoration: BoxDecoration(
-                  color: isCleared
-                      ? theme.colorScheme.primary.withOpacity(0.1)
-                      : theme.brightness == Brightness.dark
-                      ? const Color(0xFF3A3A3A)
-                      : const Color(0xFFF0F1F7),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Center(
-                  child: Icon(
-                    Icons.clear,
-                    color: isCleared
-                        ? theme.colorScheme.primary
-                        : theme.iconTheme.color,
-                    size: 20,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Skip for now',
-                      style: TextStyle(
-                        color: isCleared
-                            ? theme.colorScheme.primary
-                            : theme.textTheme.bodyLarge?.color,
-                        fontWeight: isCleared
-                            ? FontWeight.w600
-                            : FontWeight.normal,
-                        fontSize: 16,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      'You can set your focus later in settings',
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: theme.textTheme.bodyMedium?.color,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              if (isCleared)
-                Container(
-                  height: 20,
-                  width: 20,
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.primary,
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Center(
-                    child: Icon(Icons.check, color: Colors.white, size: 14),
-                  ),
-                ),
-            ],
-          ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

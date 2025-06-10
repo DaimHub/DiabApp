@@ -189,7 +189,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
       autoCloseDuration: const Duration(seconds: 3),
       showProgressBar: false,
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 50),
-      borderRadius: BorderRadius.circular(10),
+      borderRadius: SmoothBorderRadius(cornerRadius: 12, cornerSmoothing: 0.6),
       backgroundColor: theme.cardColor,
       foregroundColor: theme.colorScheme.primary,
       borderSide: BorderSide(
@@ -472,7 +472,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                 decoration: InputDecoration(
                   labelText: label,
                   labelStyle: TextStyle(
-                    color: const Color(0xFF5C5FC1).withOpacity(0.7),
+                    color: theme.colorScheme.primary.withOpacity(0.7),
                     fontSize: 16,
                   ),
                   prefixIcon: Padding(
@@ -490,6 +490,10 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                   focusedErrorBorder: InputBorder.none,
                   contentPadding: const EdgeInsets.all(20),
                   filled: false,
+                  hintStyle: TextStyle(
+                    color: theme.colorScheme.primary.withOpacity(0.7),
+                    fontSize: 16,
+                  ),
                 ),
               ),
             ),
@@ -555,7 +559,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                         'Diabetes Type',
                         style: TextStyle(
                           fontSize: 16,
-                          color: const Color(0xFF5C5FC1).withOpacity(0.7),
+                          color: theme.colorScheme.primary.withOpacity(0.7),
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -592,7 +596,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
           width: double.infinity,
           padding: const EdgeInsets.all(24),
           decoration: ShapeDecoration(
-            color: Theme.of(context).dialogBackgroundColor,
+            color: Theme.of(context).scaffoldBackgroundColor,
             shape: SmoothRectangleBorder(
               borderRadius: SmoothBorderRadius(
                 cornerRadius: 20,
@@ -613,14 +617,6 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
               // Header with close button
               Row(
                 children: [
-                  Text(
-                    'Diabetes Type',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).textTheme.headlineMedium?.color,
-                    ),
-                  ),
                   const Spacer(),
                   Container(
                     width: 36,
@@ -652,7 +648,63 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                   ),
                 ],
               ),
+              const SizedBox(height: 20),
+
+              // Large diabetes type icon
+              Container(
+                height: 80,
+                width: 80,
+                decoration: ShapeDecoration(
+                  color: Theme.of(context).colorScheme.primary,
+                  shape: SmoothRectangleBorder(
+                    borderRadius: SmoothBorderRadius(
+                      cornerRadius: 24,
+                      cornerSmoothing: 0.6,
+                    ),
+                  ),
+                  shadows: [
+                    BoxShadow(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.primary.withOpacity(0.3),
+                      blurRadius: 20,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
+                ),
+                child: const Center(
+                  child: Icon(
+                    Icons.medical_information,
+                    color: Colors.white,
+                    size: 36,
+                  ),
+                ),
+              ),
               const SizedBox(height: 24),
+
+              // Title
+              Text(
+                'Diabetes Type',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).textTheme.headlineMedium?.color,
+                ),
+              ),
+              const SizedBox(height: 8),
+
+              // Description
+              Text(
+                'Update your diabetes type information',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Theme.of(context).textTheme.bodyMedium?.color,
+                  height: 1.4,
+                ),
+              ),
+              const SizedBox(height: 32),
 
               // Type options
               _buildTypeOption('Type 1'),

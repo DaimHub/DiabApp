@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:toastification/toastification.dart';
+import 'package:figma_squircle/figma_squircle.dart';
 import '../services/firestore_service.dart';
 import '../providers/glucose_data_provider.dart';
 import '../providers/glucose_trend_data_provider.dart';
@@ -87,9 +88,14 @@ class _LogBottomSheetState extends State<LogBottomSheet> {
 
     return Container(
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: theme.bottomSheetTheme.backgroundColor ?? theme.cardColor,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+      decoration: ShapeDecoration(
+        color: theme.scaffoldBackgroundColor,
+        shape: const SmoothRectangleBorder(
+          borderRadius: SmoothBorderRadius.only(
+            topLeft: SmoothRadius(cornerRadius: 20, cornerSmoothing: 0.6),
+            topRight: SmoothRadius(cornerRadius: 20, cornerSmoothing: 0.6),
+          ),
+        ),
       ),
       child: ListView(
         controller: widget.scrollController,
@@ -106,20 +112,44 @@ class _LogBottomSheetState extends State<LogBottomSheet> {
                   color: theme.textTheme.headlineSmall?.color,
                 ),
               ),
-              Material(
-                color: theme.brightness == Brightness.dark
-                    ? const Color(0xFF2A2A2A)
-                    : const Color(0xFFF0F1F7),
-                borderRadius: BorderRadius.circular(8),
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(8),
-                  onTap: () => Navigator.pop(context),
-                  child: Container(
-                    padding: const EdgeInsets.all(8),
-                    child: Icon(
-                      Icons.close,
-                      color: theme.iconTheme.color,
-                      size: 20,
+              Container(
+                decoration: ShapeDecoration(
+                  color: theme.brightness == Brightness.dark
+                      ? const Color(0xFF2A2A2A)
+                      : const Color(0xFFF0F1F7),
+                  shape: SmoothRectangleBorder(
+                    borderRadius: SmoothBorderRadius(
+                      cornerRadius: 10,
+                      cornerSmoothing: 0.6,
+                    ),
+                  ),
+                  shadows: [
+                    BoxShadow(
+                      color: theme.brightness == Brightness.dark
+                          ? Colors.black.withOpacity(0.2)
+                          : Colors.black.withOpacity(0.05),
+                      blurRadius: 4,
+                      offset: const Offset(0, 1),
+                    ),
+                  ],
+                ),
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    customBorder: SmoothRectangleBorder(
+                      borderRadius: SmoothBorderRadius(
+                        cornerRadius: 10,
+                        cornerSmoothing: 0.6,
+                      ),
+                    ),
+                    onTap: () => Navigator.pop(context),
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      child: Icon(
+                        Icons.close,
+                        color: theme.iconTheme.color,
+                        size: 20,
+                      ),
                     ),
                   ),
                 ),
@@ -129,73 +159,61 @@ class _LogBottomSheetState extends State<LogBottomSheet> {
           const SizedBox(height: 20),
 
           // Segmented Control
-          CupertinoSlidingSegmentedControl<int>(
-            backgroundColor: theme.brightness == Brightness.dark
-                ? const Color(0xFF2A2A2A)
-                : const Color(0xFFF0F1F7),
-            thumbColor: theme.colorScheme.primary,
-            children: {
-              0: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                child: Text(
-                  'Glucose',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    color: _selectedSegment == 0
-                        ? Colors.white
-                        : theme.textTheme.bodyLarge?.color,
-                  ),
-                ),
-              ),
-              1: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                child: Text(
-                  'Meal',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    color: _selectedSegment == 1
-                        ? Colors.white
-                        : theme.textTheme.bodyLarge?.color,
-                  ),
-                ),
-              ),
-              2: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                child: Text(
-                  'Activity',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    color: _selectedSegment == 2
-                        ? Colors.white
-                        : theme.textTheme.bodyLarge?.color,
-                  ),
-                ),
-              ),
-              3: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                child: Text(
-                  'Medication',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    color: _selectedSegment == 3
-                        ? Colors.white
-                        : theme.textTheme.bodyLarge?.color,
-                  ),
-                ),
-              ),
+          SegmentedButton<int>(
+            segments: const [
+              ButtonSegment<int>(value: 0, label: Text('Glucose')),
+              ButtonSegment<int>(value: 1, label: Text('Meal')),
+              ButtonSegment<int>(value: 2, label: Text('Activity')),
+              ButtonSegment<int>(value: 3, label: Text('Medication')),
+            ],
+            selected: {_selectedSegment},
+            onSelectionChanged: (Set<int> newSelection) {
+              setState(() {
+                _selectedSegment = newSelection.first;
+              });
             },
-            onValueChanged: (int? value) {
-              if (value != null) {
-                setState(() {
-                  _selectedSegment = value;
-                });
-              }
-            },
-            groupValue: _selectedSegment,
+            style: ButtonStyle(
+              backgroundColor: WidgetStateProperty.resolveWith<Color?>((
+                Set<WidgetState> states,
+              ) {
+                if (states.contains(WidgetState.selected)) {
+                  return theme.colorScheme.primary;
+                }
+                return theme.brightness == Brightness.dark
+                    ? const Color(0xFF2A2A2A)
+                    : const Color(0xFFF0F1F7);
+              }),
+              foregroundColor: WidgetStateProperty.resolveWith<Color?>((
+                Set<WidgetState> states,
+              ) {
+                if (states.contains(WidgetState.selected)) {
+                  return Colors.white;
+                }
+                return theme.textTheme.bodyLarge?.color;
+              }),
+              side: WidgetStateProperty.resolveWith<BorderSide?>((
+                Set<WidgetState> states,
+              ) {
+                return BorderSide(
+                  color: theme.brightness == Brightness.dark
+                      ? const Color(0xFF3A3A3A)
+                      : Colors.grey[200]!,
+                  width: 1,
+                );
+              }),
+              shape: WidgetStateProperty.all(
+                SmoothRectangleBorder(
+                  borderRadius: SmoothBorderRadius(
+                    cornerRadius: 16,
+                    cornerSmoothing: 0.6,
+                  ),
+                ),
+              ),
+              textStyle: WidgetStateProperty.all(
+                const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+              ),
+            ),
+            showSelectedIcon: false,
           ),
           const SizedBox(height: 30),
 
@@ -209,158 +227,182 @@ class _LogBottomSheetState extends State<LogBottomSheet> {
           const SizedBox(height: 40),
 
           // Save Button
-          SizedBox(
+          Container(
             width: double.infinity,
             height: 50,
-            child: ElevatedButton(
-              onPressed: () async {
-                // Create event data based on selected segment
-                Map<String, dynamic>? eventData;
-                String entryType;
+            decoration: ShapeDecoration(
+              color: theme.colorScheme.primary,
+              shape: SmoothRectangleBorder(
+                borderRadius: SmoothBorderRadius(
+                  cornerRadius: 16,
+                  cornerSmoothing: 0.6,
+                ),
+              ),
+              shadows: [
+                BoxShadow(
+                  color: theme.colorScheme.primary.withOpacity(0.3),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                customBorder: SmoothRectangleBorder(
+                  borderRadius: SmoothBorderRadius(
+                    cornerRadius: 16,
+                    cornerSmoothing: 0.6,
+                  ),
+                ),
+                onTap: () async {
+                  // Create event data based on selected segment
+                  Map<String, dynamic>? eventData;
+                  String entryType;
 
-                switch (_selectedSegment) {
-                  case 0: // Glucose
-                    if (_glucoseController.text.trim().isEmpty) {
-                      _showErrorToast('Please enter glucose value');
-                      return;
-                    }
-
-                    final glucose = double.tryParse(_glucoseController.text);
-                    if (glucose == null) {
-                      _showErrorToast('Please enter a valid glucose value');
-                      return;
-                    }
-
-                    eventData = {'type': 'glucose', 'measure': glucose};
-                    entryType = 'Glucose';
-                    break;
-
-                  case 1: // Meal
-                    if (_carbsController.text.trim().isEmpty &&
-                        _foodController.text.trim().isEmpty) {
-                      _showErrorToast('Please enter meal information');
-                      return;
-                    }
-
-                    eventData = {'type': 'meal'};
-
-                    if (_carbsController.text.trim().isNotEmpty) {
-                      final carbs = double.tryParse(_carbsController.text);
-                      if (carbs == null) {
-                        _showErrorToast('Please enter a valid carbs value');
+                  switch (_selectedSegment) {
+                    case 0: // Glucose
+                      if (_glucoseController.text.trim().isEmpty) {
+                        _showErrorToast('Please enter glucose value');
                         return;
                       }
-                      eventData['carbs'] = carbs;
-                    }
 
-                    if (_foodController.text.trim().isNotEmpty) {
-                      eventData['name'] = _foodController.text.trim();
-                    }
-                    entryType = 'Meal';
-                    break;
-
-                  case 2: // Activity
-                    if (_activityController.text.trim().isEmpty) {
-                      _showErrorToast('Please enter activity name');
-                      return;
-                    }
-
-                    eventData = {
-                      'type': 'activity',
-                      'name': _activityController.text.trim(),
-                    };
-
-                    if (_durationController.text.trim().isNotEmpty) {
-                      final duration = int.tryParse(_durationController.text);
-                      if (duration == null) {
-                        _showErrorToast('Please enter a valid duration');
+                      final glucose = double.tryParse(_glucoseController.text);
+                      if (glucose == null) {
+                        _showErrorToast('Please enter a valid glucose value');
                         return;
                       }
-                      eventData['duration'] = duration;
-                    }
-                    entryType = 'Activity';
-                    break;
 
-                  case 3: // Medication
-                    if (_medicationController.text.trim().isEmpty) {
-                      _showErrorToast('Please enter medication name');
-                      return;
-                    }
+                      eventData = {'type': 'glucose', 'measure': glucose};
+                      entryType = 'Glucose';
+                      break;
 
-                    eventData = {
-                      'type': 'medication',
-                      'name': _medicationController.text.trim(),
-                    };
-
-                    if (_doseController.text.trim().isNotEmpty) {
-                      final dose = double.tryParse(_doseController.text);
-                      if (dose == null) {
-                        _showErrorToast('Please enter a valid dose');
+                    case 1: // Meal
+                      if (_carbsController.text.trim().isEmpty &&
+                          _foodController.text.trim().isEmpty) {
+                        _showErrorToast('Please enter meal information');
                         return;
                       }
-                      eventData['dose'] = dose;
+
+                      eventData = {'type': 'meal'};
+
+                      if (_carbsController.text.trim().isNotEmpty) {
+                        final carbs = double.tryParse(_carbsController.text);
+                        if (carbs == null) {
+                          _showErrorToast('Please enter a valid carbs value');
+                          return;
+                        }
+                        eventData['carbs'] = carbs;
+                      }
+
+                      if (_foodController.text.trim().isNotEmpty) {
+                        eventData['name'] = _foodController.text.trim();
+                      }
+                      entryType = 'Meal';
+                      break;
+
+                    case 2: // Activity
+                      if (_activityController.text.trim().isEmpty) {
+                        _showErrorToast('Please enter activity name');
+                        return;
+                      }
+
+                      eventData = {
+                        'type': 'activity',
+                        'name': _activityController.text.trim(),
+                      };
+
+                      if (_durationController.text.trim().isNotEmpty) {
+                        final duration = int.tryParse(_durationController.text);
+                        if (duration == null) {
+                          _showErrorToast('Please enter a valid duration');
+                          return;
+                        }
+                        eventData['duration'] = duration;
+                      }
+                      entryType = 'Activity';
+                      break;
+
+                    case 3: // Medication
+                      if (_medicationController.text.trim().isEmpty) {
+                        _showErrorToast('Please enter medication name');
+                        return;
+                      }
+
+                      eventData = {
+                        'type': 'medication',
+                        'name': _medicationController.text.trim(),
+                      };
+
+                      if (_doseController.text.trim().isNotEmpty) {
+                        final dose = double.tryParse(_doseController.text);
+                        if (dose == null) {
+                          _showErrorToast('Please enter a valid dose');
+                          return;
+                        }
+                        eventData['dose'] = dose;
+                      }
+                      entryType = 'Medication';
+                      break;
+
+                    default:
+                      _showErrorToast('Please select an entry type');
+                      return;
+                  }
+
+                  // Add the selected date/time to the event data
+                  eventData['date'] = Timestamp.fromDate(_selectedDateTime);
+
+                  // Save to Firestore
+                  final eventId = await FirestoreService.addEvent(eventData);
+
+                  if (eventId != null) {
+                    // If glucose data was saved, refresh the glucose cache
+                    if (_selectedSegment == 0) {
+                      // Glucose
+
+                      try {
+                        await GlucoseDataProvider.invalidateAndRefreshGlobally(
+                          context,
+                        );
+                        await GlucoseTrendDataProvider.invalidateAndRefreshGlobally(
+                          context,
+                        );
+                      } catch (e) {}
                     }
-                    entryType = 'Medication';
-                    break;
 
-                  default:
-                    _showErrorToast('Please select an entry type');
-                    return;
-                }
-
-                // Add the selected date/time to the event data
-                eventData['date'] = Timestamp.fromDate(_selectedDateTime);
-
-                // Save to Firestore
-                final eventId = await FirestoreService.addEvent(eventData);
-
-                if (eventId != null) {
-                  // If glucose data was saved, refresh the glucose cache
-                  if (_selectedSegment == 0) {
-                    // Glucose
+                    // Refresh log history cache for any type of data
 
                     try {
-                      await GlucoseDataProvider.invalidateAndRefreshGlobally(
-                        context,
-                      );
-                      await GlucoseTrendDataProvider.invalidateAndRefreshGlobally(
+                      await LogHistoryDataProvider.invalidateAndRefreshGlobally(
                         context,
                       );
                     } catch (e) {}
-                  }
 
-                  // Refresh log history cache for any type of data
+                    // Clear form fields
+                    _clearAllFields();
 
-                  try {
-                    await LogHistoryDataProvider.invalidateAndRefreshGlobally(
-                      context,
+                    // Show success toast
+                    _showSuccessToast(entryType);
+
+                    // Close the bottom sheet
+                    Navigator.pop(context);
+                  } else {
+                    _showErrorToast(
+                      'Failed to save $entryType entry. Please try again.',
                     );
-                  } catch (e) {}
-
-                  // Clear form fields
-                  _clearAllFields();
-
-                  // Show success toast
-                  _showSuccessToast(entryType);
-
-                  // Close the bottom sheet
-                  Navigator.pop(context);
-                } else {
-                  _showErrorToast(
-                    'Failed to save $entryType entry. Please try again.',
-                  );
-                }
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: theme.colorScheme.primary,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+                  }
+                },
+                child: const Center(
+                  child: Text(
+                    'Save',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
                 ),
-              ),
-              child: const Text(
-                'Save',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
               ),
             ),
           ),
@@ -398,20 +440,57 @@ class _LogBottomSheetState extends State<LogBottomSheet> {
           ),
         ),
         const SizedBox(height: 16),
-        TextField(
-          controller: _glucoseController,
-          keyboardType: TextInputType.number,
-          decoration: InputDecoration(
-            hintText: 'mg/dL',
-            filled: true,
-            fillColor: theme.brightness == Brightness.dark
+        Container(
+          decoration: ShapeDecoration(
+            color: theme.brightness == Brightness.dark
                 ? const Color(0xFF2A2A2A)
                 : const Color(0xFFF0F1F7),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
-              borderSide: BorderSide.none,
+            shape: SmoothRectangleBorder(
+              borderRadius: SmoothBorderRadius(
+                cornerRadius: 16,
+                cornerSmoothing: 0.6,
+              ),
+              side: BorderSide(
+                color: theme.brightness == Brightness.dark
+                    ? const Color(0xFF3A3A3A)
+                    : Colors.grey[200]!,
+                width: 1,
+              ),
             ),
-            contentPadding: const EdgeInsets.all(16),
+            shadows: [
+              BoxShadow(
+                color: theme.brightness == Brightness.dark
+                    ? Colors.black.withOpacity(0.2)
+                    : Colors.black.withOpacity(0.05),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: ClipSmoothRect(
+            radius: SmoothBorderRadius(cornerRadius: 16, cornerSmoothing: 0.6),
+            child: TextField(
+              controller: _glucoseController,
+              keyboardType: TextInputType.number,
+              style: TextStyle(
+                fontSize: 16,
+                color: theme.textTheme.bodyLarge?.color,
+              ),
+              decoration: InputDecoration(
+                hintText: 'mg/dL',
+                hintStyle: TextStyle(
+                  color: theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
+                  fontSize: 16,
+                ),
+                filled: false,
+                border: InputBorder.none,
+                focusedBorder: InputBorder.none,
+                enabledBorder: InputBorder.none,
+                errorBorder: InputBorder.none,
+                focusedErrorBorder: InputBorder.none,
+                contentPadding: const EdgeInsets.all(16),
+              ),
+            ),
           ),
         ),
       ],
@@ -432,36 +511,110 @@ class _LogBottomSheetState extends State<LogBottomSheet> {
           ),
         ),
         const SizedBox(height: 16),
-        TextField(
-          controller: _carbsController,
-          keyboardType: TextInputType.number,
-          decoration: InputDecoration(
-            hintText: 'Carbs (g)',
-            filled: true,
-            fillColor: theme.brightness == Brightness.dark
+        Container(
+          decoration: ShapeDecoration(
+            color: theme.brightness == Brightness.dark
                 ? const Color(0xFF2A2A2A)
                 : const Color(0xFFF0F1F7),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
-              borderSide: BorderSide.none,
+            shape: SmoothRectangleBorder(
+              borderRadius: SmoothBorderRadius(
+                cornerRadius: 16,
+                cornerSmoothing: 0.6,
+              ),
+              side: BorderSide(
+                color: theme.brightness == Brightness.dark
+                    ? const Color(0xFF3A3A3A)
+                    : Colors.grey[200]!,
+                width: 1,
+              ),
             ),
-            contentPadding: const EdgeInsets.all(16),
+            shadows: [
+              BoxShadow(
+                color: theme.brightness == Brightness.dark
+                    ? Colors.black.withOpacity(0.2)
+                    : Colors.black.withOpacity(0.05),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: ClipSmoothRect(
+            radius: SmoothBorderRadius(cornerRadius: 16, cornerSmoothing: 0.6),
+            child: TextField(
+              controller: _carbsController,
+              keyboardType: TextInputType.number,
+              style: TextStyle(
+                fontSize: 16,
+                color: theme.textTheme.bodyLarge?.color,
+              ),
+              decoration: InputDecoration(
+                hintText: 'Carbs (g)',
+                hintStyle: TextStyle(
+                  color: theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
+                  fontSize: 16,
+                ),
+                filled: false,
+                border: InputBorder.none,
+                focusedBorder: InputBorder.none,
+                enabledBorder: InputBorder.none,
+                errorBorder: InputBorder.none,
+                focusedErrorBorder: InputBorder.none,
+                contentPadding: const EdgeInsets.all(16),
+              ),
+            ),
           ),
         ),
         const SizedBox(height: 16),
-        TextField(
-          controller: _foodController,
-          decoration: InputDecoration(
-            hintText: 'Food',
-            filled: true,
-            fillColor: theme.brightness == Brightness.dark
+        Container(
+          decoration: ShapeDecoration(
+            color: theme.brightness == Brightness.dark
                 ? const Color(0xFF2A2A2A)
                 : const Color(0xFFF0F1F7),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
-              borderSide: BorderSide.none,
+            shape: SmoothRectangleBorder(
+              borderRadius: SmoothBorderRadius(
+                cornerRadius: 16,
+                cornerSmoothing: 0.6,
+              ),
+              side: BorderSide(
+                color: theme.brightness == Brightness.dark
+                    ? const Color(0xFF3A3A3A)
+                    : Colors.grey[200]!,
+                width: 1,
+              ),
             ),
-            contentPadding: const EdgeInsets.all(16),
+            shadows: [
+              BoxShadow(
+                color: theme.brightness == Brightness.dark
+                    ? Colors.black.withOpacity(0.2)
+                    : Colors.black.withOpacity(0.05),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: ClipSmoothRect(
+            radius: SmoothBorderRadius(cornerRadius: 16, cornerSmoothing: 0.6),
+            child: TextField(
+              controller: _foodController,
+              style: TextStyle(
+                fontSize: 16,
+                color: theme.textTheme.bodyLarge?.color,
+              ),
+              decoration: InputDecoration(
+                hintText: 'Food',
+                hintStyle: TextStyle(
+                  color: theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
+                  fontSize: 16,
+                ),
+                filled: false,
+                border: InputBorder.none,
+                focusedBorder: InputBorder.none,
+                enabledBorder: InputBorder.none,
+                errorBorder: InputBorder.none,
+                focusedErrorBorder: InputBorder.none,
+                contentPadding: const EdgeInsets.all(16),
+              ),
+            ),
           ),
         ),
       ],
@@ -482,36 +635,110 @@ class _LogBottomSheetState extends State<LogBottomSheet> {
           ),
         ),
         const SizedBox(height: 16),
-        TextField(
-          controller: _activityController,
-          decoration: InputDecoration(
-            hintText: 'Activity',
-            filled: true,
-            fillColor: theme.brightness == Brightness.dark
+        Container(
+          decoration: ShapeDecoration(
+            color: theme.brightness == Brightness.dark
                 ? const Color(0xFF2A2A2A)
                 : const Color(0xFFF0F1F7),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
-              borderSide: BorderSide.none,
+            shape: SmoothRectangleBorder(
+              borderRadius: SmoothBorderRadius(
+                cornerRadius: 16,
+                cornerSmoothing: 0.6,
+              ),
+              side: BorderSide(
+                color: theme.brightness == Brightness.dark
+                    ? const Color(0xFF3A3A3A)
+                    : Colors.grey[200]!,
+                width: 1,
+              ),
             ),
-            contentPadding: const EdgeInsets.all(16),
+            shadows: [
+              BoxShadow(
+                color: theme.brightness == Brightness.dark
+                    ? Colors.black.withOpacity(0.2)
+                    : Colors.black.withOpacity(0.05),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: ClipSmoothRect(
+            radius: SmoothBorderRadius(cornerRadius: 16, cornerSmoothing: 0.6),
+            child: TextField(
+              controller: _activityController,
+              style: TextStyle(
+                fontSize: 16,
+                color: theme.textTheme.bodyLarge?.color,
+              ),
+              decoration: InputDecoration(
+                hintText: 'Activity',
+                hintStyle: TextStyle(
+                  color: theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
+                  fontSize: 16,
+                ),
+                filled: false,
+                border: InputBorder.none,
+                focusedBorder: InputBorder.none,
+                enabledBorder: InputBorder.none,
+                errorBorder: InputBorder.none,
+                focusedErrorBorder: InputBorder.none,
+                contentPadding: const EdgeInsets.all(16),
+              ),
+            ),
           ),
         ),
         const SizedBox(height: 16),
-        TextField(
-          controller: _durationController,
-          keyboardType: TextInputType.number,
-          decoration: InputDecoration(
-            hintText: 'Duration (min)',
-            filled: true,
-            fillColor: theme.brightness == Brightness.dark
+        Container(
+          decoration: ShapeDecoration(
+            color: theme.brightness == Brightness.dark
                 ? const Color(0xFF2A2A2A)
                 : const Color(0xFFF0F1F7),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
-              borderSide: BorderSide.none,
+            shape: SmoothRectangleBorder(
+              borderRadius: SmoothBorderRadius(
+                cornerRadius: 16,
+                cornerSmoothing: 0.6,
+              ),
+              side: BorderSide(
+                color: theme.brightness == Brightness.dark
+                    ? const Color(0xFF3A3A3A)
+                    : Colors.grey[200]!,
+                width: 1,
+              ),
             ),
-            contentPadding: const EdgeInsets.all(16),
+            shadows: [
+              BoxShadow(
+                color: theme.brightness == Brightness.dark
+                    ? Colors.black.withOpacity(0.2)
+                    : Colors.black.withOpacity(0.05),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: ClipSmoothRect(
+            radius: SmoothBorderRadius(cornerRadius: 16, cornerSmoothing: 0.6),
+            child: TextField(
+              controller: _durationController,
+              keyboardType: TextInputType.number,
+              style: TextStyle(
+                fontSize: 16,
+                color: theme.textTheme.bodyLarge?.color,
+              ),
+              decoration: InputDecoration(
+                hintText: 'Duration (min)',
+                hintStyle: TextStyle(
+                  color: theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
+                  fontSize: 16,
+                ),
+                filled: false,
+                border: InputBorder.none,
+                focusedBorder: InputBorder.none,
+                enabledBorder: InputBorder.none,
+                errorBorder: InputBorder.none,
+                focusedErrorBorder: InputBorder.none,
+                contentPadding: const EdgeInsets.all(16),
+              ),
+            ),
           ),
         ),
       ],
@@ -532,35 +759,109 @@ class _LogBottomSheetState extends State<LogBottomSheet> {
           ),
         ),
         const SizedBox(height: 16),
-        TextField(
-          controller: _medicationController,
-          decoration: InputDecoration(
-            hintText: 'Medication',
-            filled: true,
-            fillColor: theme.brightness == Brightness.dark
+        Container(
+          decoration: ShapeDecoration(
+            color: theme.brightness == Brightness.dark
                 ? const Color(0xFF2A2A2A)
                 : const Color(0xFFF0F1F7),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
-              borderSide: BorderSide.none,
+            shape: SmoothRectangleBorder(
+              borderRadius: SmoothBorderRadius(
+                cornerRadius: 16,
+                cornerSmoothing: 0.6,
+              ),
+              side: BorderSide(
+                color: theme.brightness == Brightness.dark
+                    ? const Color(0xFF3A3A3A)
+                    : Colors.grey[200]!,
+                width: 1,
+              ),
             ),
-            contentPadding: const EdgeInsets.all(16),
+            shadows: [
+              BoxShadow(
+                color: theme.brightness == Brightness.dark
+                    ? Colors.black.withOpacity(0.2)
+                    : Colors.black.withOpacity(0.05),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: ClipSmoothRect(
+            radius: SmoothBorderRadius(cornerRadius: 16, cornerSmoothing: 0.6),
+            child: TextField(
+              controller: _medicationController,
+              style: TextStyle(
+                fontSize: 16,
+                color: theme.textTheme.bodyLarge?.color,
+              ),
+              decoration: InputDecoration(
+                hintText: 'Medication',
+                hintStyle: TextStyle(
+                  color: theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
+                  fontSize: 16,
+                ),
+                filled: false,
+                border: InputBorder.none,
+                focusedBorder: InputBorder.none,
+                enabledBorder: InputBorder.none,
+                errorBorder: InputBorder.none,
+                focusedErrorBorder: InputBorder.none,
+                contentPadding: const EdgeInsets.all(16),
+              ),
+            ),
           ),
         ),
         const SizedBox(height: 16),
-        TextField(
-          controller: _doseController,
-          decoration: InputDecoration(
-            hintText: 'Dose (units)',
-            filled: true,
-            fillColor: theme.brightness == Brightness.dark
+        Container(
+          decoration: ShapeDecoration(
+            color: theme.brightness == Brightness.dark
                 ? const Color(0xFF2A2A2A)
                 : const Color(0xFFF0F1F7),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
-              borderSide: BorderSide.none,
+            shape: SmoothRectangleBorder(
+              borderRadius: SmoothBorderRadius(
+                cornerRadius: 16,
+                cornerSmoothing: 0.6,
+              ),
+              side: BorderSide(
+                color: theme.brightness == Brightness.dark
+                    ? const Color(0xFF3A3A3A)
+                    : Colors.grey[200]!,
+                width: 1,
+              ),
             ),
-            contentPadding: const EdgeInsets.all(16),
+            shadows: [
+              BoxShadow(
+                color: theme.brightness == Brightness.dark
+                    ? Colors.black.withOpacity(0.2)
+                    : Colors.black.withOpacity(0.05),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: ClipSmoothRect(
+            radius: SmoothBorderRadius(cornerRadius: 16, cornerSmoothing: 0.6),
+            child: TextField(
+              controller: _doseController,
+              style: TextStyle(
+                fontSize: 16,
+                color: theme.textTheme.bodyLarge?.color,
+              ),
+              decoration: InputDecoration(
+                hintText: 'Dose (units)',
+                hintStyle: TextStyle(
+                  color: theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
+                  fontSize: 16,
+                ),
+                filled: false,
+                border: InputBorder.none,
+                focusedBorder: InputBorder.none,
+                enabledBorder: InputBorder.none,
+                errorBorder: InputBorder.none,
+                focusedErrorBorder: InputBorder.none,
+                contentPadding: const EdgeInsets.all(16),
+              ),
+            ),
           ),
         ),
       ],
@@ -586,33 +887,63 @@ class _LogBottomSheetState extends State<LogBottomSheet> {
             // Date Picker
             Expanded(
               flex: 3,
-              child: Material(
-                color: theme.brightness == Brightness.dark
-                    ? const Color(0xFF2A2A2A)
-                    : const Color(0xFFF0F1F7),
-                borderRadius: BorderRadius.circular(10),
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(10),
-                  onTap: () => _selectDate(),
-                  child: Container(
-                    padding: const EdgeInsets.all(16),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.calendar_today,
-                          color: theme.colorScheme.primary,
-                          size: 20,
-                        ),
-                        const SizedBox(width: 12),
-                        Text(
-                          _formatDate(_selectedDateTime),
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: theme.textTheme.bodyLarge?.color,
-                            fontWeight: FontWeight.w500,
+              child: Container(
+                decoration: ShapeDecoration(
+                  color: theme.brightness == Brightness.dark
+                      ? const Color(0xFF2A2A2A)
+                      : const Color(0xFFF0F1F7),
+                  shape: SmoothRectangleBorder(
+                    borderRadius: SmoothBorderRadius(
+                      cornerRadius: 16,
+                      cornerSmoothing: 0.6,
+                    ),
+                    side: BorderSide(
+                      color: theme.brightness == Brightness.dark
+                          ? const Color(0xFF3A3A3A)
+                          : Colors.grey[200]!,
+                      width: 1,
+                    ),
+                  ),
+                  shadows: [
+                    BoxShadow(
+                      color: theme.brightness == Brightness.dark
+                          ? Colors.black.withOpacity(0.2)
+                          : Colors.black.withOpacity(0.05),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    customBorder: SmoothRectangleBorder(
+                      borderRadius: SmoothBorderRadius(
+                        cornerRadius: 16,
+                        cornerSmoothing: 0.6,
+                      ),
+                    ),
+                    onTap: () => _selectDate(),
+                    child: Container(
+                      padding: const EdgeInsets.all(16),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.calendar_today,
+                            color: theme.colorScheme.primary,
+                            size: 20,
                           ),
-                        ),
-                      ],
+                          const SizedBox(width: 12),
+                          Text(
+                            _formatDate(_selectedDateTime),
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: theme.textTheme.bodyLarge?.color,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -622,33 +953,63 @@ class _LogBottomSheetState extends State<LogBottomSheet> {
             // Time Picker
             Expanded(
               flex: 2,
-              child: Material(
-                color: theme.brightness == Brightness.dark
-                    ? const Color(0xFF2A2A2A)
-                    : const Color(0xFFF0F1F7),
-                borderRadius: BorderRadius.circular(10),
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(10),
-                  onTap: () => _selectTime(),
-                  child: Container(
-                    padding: const EdgeInsets.all(16),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.access_time,
-                          color: theme.colorScheme.primary,
-                          size: 20,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          _formatTime(_selectedDateTime),
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: theme.textTheme.bodyLarge?.color,
-                            fontWeight: FontWeight.w500,
+              child: Container(
+                decoration: ShapeDecoration(
+                  color: theme.brightness == Brightness.dark
+                      ? const Color(0xFF2A2A2A)
+                      : const Color(0xFFF0F1F7),
+                  shape: SmoothRectangleBorder(
+                    borderRadius: SmoothBorderRadius(
+                      cornerRadius: 16,
+                      cornerSmoothing: 0.6,
+                    ),
+                    side: BorderSide(
+                      color: theme.brightness == Brightness.dark
+                          ? const Color(0xFF3A3A3A)
+                          : Colors.grey[200]!,
+                      width: 1,
+                    ),
+                  ),
+                  shadows: [
+                    BoxShadow(
+                      color: theme.brightness == Brightness.dark
+                          ? Colors.black.withOpacity(0.2)
+                          : Colors.black.withOpacity(0.05),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    customBorder: SmoothRectangleBorder(
+                      borderRadius: SmoothBorderRadius(
+                        cornerRadius: 16,
+                        cornerSmoothing: 0.6,
+                      ),
+                    ),
+                    onTap: () => _selectTime(),
+                    child: Container(
+                      padding: const EdgeInsets.all(16),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.access_time,
+                            color: theme.colorScheme.primary,
+                            size: 20,
                           ),
-                        ),
-                      ],
+                          const SizedBox(width: 8),
+                          Text(
+                            _formatTime(_selectedDateTime),
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: theme.textTheme.bodyLarge?.color,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -656,27 +1017,55 @@ class _LogBottomSheetState extends State<LogBottomSheet> {
             ),
             const SizedBox(width: 12),
             // Now Button
-            Material(
-              color: theme.colorScheme.primary.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(10),
-              child: InkWell(
-                borderRadius: BorderRadius.circular(10),
-                onTap: () {
-                  setState(() {
-                    _selectedDateTime = DateTime.now();
-                  });
-                },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 16,
+            Container(
+              decoration: ShapeDecoration(
+                color: theme.colorScheme.primary.withOpacity(0.1),
+                shape: SmoothRectangleBorder(
+                  borderRadius: SmoothBorderRadius(
+                    cornerRadius: 16,
+                    cornerSmoothing: 0.6,
                   ),
-                  child: Text(
-                    'Now',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: theme.colorScheme.primary,
-                      fontWeight: FontWeight.w600,
+                  side: BorderSide(
+                    color: theme.colorScheme.primary.withOpacity(0.3),
+                    width: 1,
+                  ),
+                ),
+                shadows: [
+                  BoxShadow(
+                    color: theme.brightness == Brightness.dark
+                        ? Colors.black.withOpacity(0.2)
+                        : Colors.black.withOpacity(0.05),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  customBorder: SmoothRectangleBorder(
+                    borderRadius: SmoothBorderRadius(
+                      cornerRadius: 16,
+                      cornerSmoothing: 0.6,
+                    ),
+                  ),
+                  onTap: () {
+                    setState(() {
+                      _selectedDateTime = DateTime.now();
+                    });
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 16,
+                    ),
+                    child: Text(
+                      'Now',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: theme.colorScheme.primary,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ),
@@ -739,7 +1128,7 @@ class _LogBottomSheetState extends State<LogBottomSheet> {
                   : Colors.white,
               onSurface: theme.textTheme.bodyLarge?.color ?? Colors.black,
               background: theme.brightness == Brightness.dark
-                  ? const Color(0xFF1A1A1A)
+                  ? const Color(0xFF2A2A2A)
                   : const Color(0xFFF5F5F5),
             ),
             dialogBackgroundColor: theme.brightness == Brightness.dark
@@ -924,7 +1313,7 @@ class _LogBottomSheetState extends State<LogBottomSheet> {
                   : Colors.white,
               onSurface: theme.textTheme.bodyLarge?.color ?? Colors.black,
               background: theme.brightness == Brightness.dark
-                  ? const Color(0xFF1A1A1A)
+                  ? const Color(0xFF2A2A2A)
                   : const Color(0xFFF5F5F5),
               tertiary: theme.brightness == Brightness.dark
                   ? const Color(0xFF3A3A3A)
@@ -1029,8 +1418,8 @@ class _LogBottomSheetState extends State<LogBottomSheet> {
       autoCloseDuration: const Duration(seconds: 3),
       showProgressBar: false,
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 50),
-      borderRadius: BorderRadius.circular(12),
-      backgroundColor: theme.cardColor,
+      borderRadius: SmoothBorderRadius(cornerRadius: 12, cornerSmoothing: 0.6),
+      backgroundColor: theme.scaffoldBackgroundColor,
       foregroundColor: Colors.red[600],
       borderSide: BorderSide(
         color: theme.brightness == Brightness.dark
@@ -1080,8 +1469,8 @@ class _LogBottomSheetState extends State<LogBottomSheet> {
       autoCloseDuration: const Duration(seconds: 3),
       showProgressBar: false,
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 50),
-      borderRadius: BorderRadius.circular(12),
-      backgroundColor: theme.cardColor,
+      borderRadius: SmoothBorderRadius(cornerRadius: 12, cornerSmoothing: 0.6),
+      backgroundColor: theme.scaffoldBackgroundColor,
       foregroundColor: theme.colorScheme.primary,
       borderSide: BorderSide(
         color: theme.brightness == Brightness.dark

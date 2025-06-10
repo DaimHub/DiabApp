@@ -94,9 +94,7 @@ class CommunityScreenContent extends StatelessWidget {
     final theme = Theme.of(context);
     return Container(
       decoration: ShapeDecoration(
-        color: theme.brightness == Brightness.dark
-            ? const Color(0xFF2A2A2A)
-            : const Color(0xFFF0F1F7),
+        color: theme.scaffoldBackgroundColor,
         shape: SmoothRectangleBorder(
           borderRadius: SmoothBorderRadius(
             cornerRadius: 16,
@@ -111,7 +109,9 @@ class CommunityScreenContent extends StatelessWidget {
         ),
         shadows: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: theme.brightness == Brightness.dark
+                ? Colors.black.withOpacity(0.2)
+                : Colors.black.withOpacity(0.05),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),

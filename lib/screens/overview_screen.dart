@@ -4,6 +4,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:provider/provider.dart';
 import 'package:figma_squircle/figma_squircle.dart';
+import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 import '../services/firestore_service.dart';
 import '../providers/glucose_data_provider.dart';
 import '../providers/medication_data_provider.dart';
@@ -91,7 +92,7 @@ class _OverviewScreenContentState extends State<OverviewScreenContent> {
     return Scaffold(
       backgroundColor: theme.colorScheme.background,
       body: SafeArea(
-        child: RefreshIndicator(
+        child: LiquidPullToRefresh(
           onRefresh: () async {
             // Refresh both provider data and other data
             final glucoseProvider = Provider.of<GlucoseDataProvider>(
@@ -112,6 +113,11 @@ class _OverviewScreenContentState extends State<OverviewScreenContent> {
               trendProvider.refreshData(),
             ]);
           },
+          color: theme.colorScheme.primary,
+          backgroundColor: theme.scaffoldBackgroundColor,
+          height: 80,
+          animSpeedFactor: 6,
+          showChildOpacityTransition: false,
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
             child: Padding(
@@ -121,6 +127,8 @@ class _OverviewScreenContentState extends State<OverviewScreenContent> {
                 children: [
                   const SizedBox(height: 10),
 
+                  // Icon Testing Section
+
                   // Blood Glucose Card
                   Consumer<GlucoseDataProvider>(
                     builder: (context, glucoseProvider, child) {
@@ -128,9 +136,7 @@ class _OverviewScreenContentState extends State<OverviewScreenContent> {
                         margin: const EdgeInsets.only(top: 20),
                         padding: const EdgeInsets.all(20),
                         decoration: ShapeDecoration(
-                          color: theme.brightness == Brightness.dark
-                              ? const Color(0xFF2A2A2A)
-                              : const Color(0xFFF0F1F7),
+                          color: theme.scaffoldBackgroundColor,
                           shape: SmoothRectangleBorder(
                             borderRadius: SmoothBorderRadius(
                               cornerRadius: 16,
@@ -145,7 +151,9 @@ class _OverviewScreenContentState extends State<OverviewScreenContent> {
                           ),
                           shadows: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.03),
+                              color: theme.brightness == Brightness.dark
+                                  ? Colors.black.withOpacity(0.2)
+                                  : Colors.black.withOpacity(0.05),
                               blurRadius: 8,
                               offset: const Offset(0, 2),
                             ),
@@ -366,16 +374,9 @@ class _OverviewScreenContentState extends State<OverviewScreenContent> {
                                 padding: const EdgeInsets.all(20),
                                 decoration: ShapeDecoration(
                                   color: isPastDue
-                                      ? (theme.brightness == Brightness.dark
-                                            ? const Color(
-                                                0xFF2A2A2A,
-                                              ).withOpacity(0.5)
-                                            : const Color(
-                                                0xFFF0F1F7,
-                                              ).withOpacity(0.7))
-                                      : (theme.brightness == Brightness.dark
-                                            ? const Color(0xFF2A2A2A)
-                                            : const Color(0xFFF0F1F7)),
+                                      ? theme.scaffoldBackgroundColor
+                                            .withOpacity(0.5)
+                                      : theme.scaffoldBackgroundColor,
                                   shape: SmoothRectangleBorder(
                                     borderRadius: SmoothBorderRadius(
                                       cornerRadius: 16,
@@ -394,7 +395,9 @@ class _OverviewScreenContentState extends State<OverviewScreenContent> {
                                   ),
                                   shadows: [
                                     BoxShadow(
-                                      color: Colors.black.withOpacity(0.03),
+                                      color: theme.brightness == Brightness.dark
+                                          ? Colors.black.withOpacity(0.2)
+                                          : Colors.black.withOpacity(0.05),
                                       blurRadius: 8,
                                       offset: const Offset(0, 2),
                                     ),
@@ -493,8 +496,8 @@ class _OverviewScreenContentState extends State<OverviewScreenContent> {
                                     if (isPastDue)
                                       Container(
                                         padding: const EdgeInsets.symmetric(
-                                          horizontal: 8,
-                                          vertical: 4,
+                                          horizontal: 12,
+                                          vertical: 6,
                                         ),
                                         decoration: ShapeDecoration(
                                           color: Colors.orange.withOpacity(0.1),
@@ -512,17 +515,20 @@ class _OverviewScreenContentState extends State<OverviewScreenContent> {
                                           ),
                                         ),
                                         child: Text(
-                                          'PAST',
+                                          'Past',
                                           style: TextStyle(
-                                            fontSize: 10,
-                                            fontWeight: FontWeight.bold,
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w600,
                                             color: Colors.orange[700],
                                           ),
                                         ),
                                       )
                                     else
                                       Container(
-                                        padding: const EdgeInsets.all(6),
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 12,
+                                          vertical: 6,
+                                        ),
                                         decoration: ShapeDecoration(
                                           color: theme.colorScheme.primary
                                               .withOpacity(0.1),
@@ -531,12 +537,20 @@ class _OverviewScreenContentState extends State<OverviewScreenContent> {
                                               cornerRadius: 8,
                                               cornerSmoothing: 0.6,
                                             ),
+                                            side: BorderSide(
+                                              color: theme.colorScheme.primary
+                                                  .withOpacity(0.3),
+                                              width: 1,
+                                            ),
                                           ),
                                         ),
-                                        child: Icon(
-                                          Icons.schedule,
-                                          color: theme.colorScheme.primary,
-                                          size: 18,
+                                        child: Text(
+                                          'Incoming',
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w600,
+                                            color: theme.colorScheme.primary,
+                                          ),
                                         ),
                                       ),
                                   ],
@@ -550,9 +564,7 @@ class _OverviewScreenContentState extends State<OverviewScreenContent> {
                         return Container(
                           padding: const EdgeInsets.all(20),
                           decoration: ShapeDecoration(
-                            color: theme.brightness == Brightness.dark
-                                ? const Color(0xFF2A2A2A)
-                                : const Color(0xFFF0F1F7),
+                            color: theme.scaffoldBackgroundColor,
                             shape: SmoothRectangleBorder(
                               borderRadius: SmoothBorderRadius(
                                 cornerRadius: 16,
@@ -567,7 +579,9 @@ class _OverviewScreenContentState extends State<OverviewScreenContent> {
                             ),
                             shadows: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.03),
+                                color: theme.brightness == Brightness.dark
+                                    ? Colors.black.withOpacity(0.2)
+                                    : Colors.black.withOpacity(0.05),
                                 blurRadius: 8,
                                 offset: const Offset(0, 2),
                               ),
@@ -649,16 +663,29 @@ class _OverviewScreenContentState extends State<OverviewScreenContent> {
                         return Container(
                           width: double.infinity,
                           padding: const EdgeInsets.all(32),
-                          decoration: BoxDecoration(
-                            color: theme.brightness == Brightness.dark
-                                ? const Color(0xFF2A2A2A)
-                                : const Color(0xFFF0F1F7),
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(
-                              color: theme.brightness == Brightness.dark
-                                  ? const Color(0xFF3A3A3A)
-                                  : Colors.grey[200]!,
+                          decoration: ShapeDecoration(
+                            color: theme.scaffoldBackgroundColor,
+                            shape: SmoothRectangleBorder(
+                              borderRadius: SmoothBorderRadius(
+                                cornerRadius: 16,
+                                cornerSmoothing: 0.6,
+                              ),
+                              side: BorderSide(
+                                color: theme.brightness == Brightness.dark
+                                    ? const Color(0xFF3A3A3A)
+                                    : Colors.grey[200]!,
+                                width: 1,
+                              ),
                             ),
+                            shadows: [
+                              BoxShadow(
+                                color: theme.brightness == Brightness.dark
+                                    ? Colors.black.withOpacity(0.2)
+                                    : Colors.black.withOpacity(0.05),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
                           ),
                           child: Column(
                             children: [
@@ -688,22 +715,61 @@ class _OverviewScreenContentState extends State<OverviewScreenContent> {
                                 textAlign: TextAlign.center,
                               ),
                               const SizedBox(height: 20),
-                              ElevatedButton.icon(
-                                onPressed: () {
-                                  // Trigger the log bottom sheet via callback
-                                  widget.onLogButtonPressed?.call();
-                                },
-                                icon: const Icon(Icons.add, size: 20),
-                                label: const Text('Log First Reading'),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: theme.colorScheme.primary,
-                                  foregroundColor: Colors.white,
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 24,
-                                    vertical: 12,
+                              Container(
+                                decoration: ShapeDecoration(
+                                  color: theme.colorScheme.primary,
+                                  shape: SmoothRectangleBorder(
+                                    borderRadius: SmoothBorderRadius(
+                                      cornerRadius: 12,
+                                      cornerSmoothing: 0.6,
+                                    ),
                                   ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
+                                  shadows: [
+                                    BoxShadow(
+                                      color: theme.colorScheme.primary
+                                          .withOpacity(0.3),
+                                      blurRadius: 8,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
+                                child: Material(
+                                  color: Colors.transparent,
+                                  child: InkWell(
+                                    onTap: () {
+                                      widget.onLogButtonPressed?.call();
+                                    },
+                                    customBorder: SmoothRectangleBorder(
+                                      borderRadius: SmoothBorderRadius(
+                                        cornerRadius: 12,
+                                        cornerSmoothing: 0.6,
+                                      ),
+                                    ),
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 24,
+                                        vertical: 12,
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: const [
+                                          Icon(
+                                            Icons.add,
+                                            size: 20,
+                                            color: Colors.white,
+                                          ),
+                                          SizedBox(width: 8),
+                                          Text(
+                                            'Log First Reading',
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ),
@@ -905,12 +971,10 @@ class _OverviewScreenContentState extends State<OverviewScreenContent> {
   }
 
   Widget _buildDayLabel(BuildContext context, String day) {
+    final theme = Theme.of(context);
     return Text(
       day,
-      style: TextStyle(
-        color: Theme.of(context).colorScheme.primary,
-        fontSize: 14,
-      ),
+      style: TextStyle(color: theme.colorScheme.primary, fontSize: 14),
     );
   }
 
@@ -955,6 +1019,7 @@ class _OverviewScreenContentState extends State<OverviewScreenContent> {
     BuildContext context,
     GlucoseTrendDataProvider trendProvider,
   ) {
+    final theme = Theme.of(context);
     return LineChart(
       LineChartData(
         gridData: FlGridData(show: false),
@@ -968,23 +1033,25 @@ class _OverviewScreenContentState extends State<OverviewScreenContent> {
           LineChartBarData(
             spots: _buildChartSpots(trendProvider.dailyAverages),
             isCurved: true,
-            color: Theme.of(context).colorScheme.primary,
+            color: theme.colorScheme.primary,
             barWidth: 3,
             isStrokeCapRound: true,
             dotData: FlDotData(show: false),
             belowBarData: BarAreaData(
               show: true,
-              color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+              color: theme.colorScheme.primary.withOpacity(0.1),
             ),
           ),
         ],
         lineTouchData: LineTouchData(
           enabled: true,
           touchTooltipData: LineTouchTooltipData(
-            getTooltipColor: (touchedSpot) =>
-                Theme.of(context).colorScheme.primary,
-            tooltipRoundedRadius: 8,
-            tooltipPadding: const EdgeInsets.all(8),
+            getTooltipColor: (touchedSpot) => theme.colorScheme.primary,
+            tooltipRoundedRadius: 16,
+            tooltipPadding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 8,
+            ),
             tooltipMargin: 8,
             fitInsideHorizontally: true,
             fitInsideVertically: true,
@@ -1006,7 +1073,7 @@ class _OverviewScreenContentState extends State<OverviewScreenContent> {
 
                   return LineTooltipItem(
                     '$dayLabel\n$displayText',
-                    const TextStyle(
+                    TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
                       fontSize: 12,
@@ -1015,7 +1082,7 @@ class _OverviewScreenContentState extends State<OverviewScreenContent> {
                 } else {
                   return LineTooltipItem(
                     'No data',
-                    const TextStyle(
+                    TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
                       fontSize: 12,

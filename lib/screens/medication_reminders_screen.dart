@@ -106,7 +106,7 @@ class _MedicationRemindersScreenState extends State<MedicationRemindersScreen> {
             width: double.infinity,
             padding: const EdgeInsets.all(24),
             decoration: ShapeDecoration(
-              color: Theme.of(context).dialogBackgroundColor,
+              color: Theme.of(context).scaffoldBackgroundColor,
               shape: SmoothRectangleBorder(
                 borderRadius: SmoothBorderRadius(
                   cornerRadius: 20,
@@ -125,19 +125,9 @@ class _MedicationRemindersScreenState extends State<MedicationRemindersScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Header
+                  // Header with close button
                   Row(
                     children: [
-                      Text(
-                        'Add Medication',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(
-                            context,
-                          ).textTheme.headlineMedium?.color,
-                        ),
-                      ),
                       const Spacer(),
                       Container(
                         width: 36,
@@ -171,7 +161,63 @@ class _MedicationRemindersScreenState extends State<MedicationRemindersScreen> {
                       ),
                     ],
                   ),
+                  const SizedBox(height: 20),
+
+                  // Large medication icon
+                  Container(
+                    height: 80,
+                    width: 80,
+                    decoration: ShapeDecoration(
+                      color: Theme.of(context).colorScheme.primary,
+                      shape: SmoothRectangleBorder(
+                        borderRadius: SmoothBorderRadius(
+                          cornerRadius: 24,
+                          cornerSmoothing: 0.6,
+                        ),
+                      ),
+                      shadows: [
+                        BoxShadow(
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.primary.withOpacity(0.3),
+                          blurRadius: 20,
+                          offset: const Offset(0, 8),
+                        ),
+                      ],
+                    ),
+                    child: const Center(
+                      child: FaIcon(
+                        FontAwesomeIcons.pills,
+                        color: Colors.white,
+                        size: 36,
+                      ),
+                    ),
+                  ),
                   const SizedBox(height: 24),
+
+                  // Title
+                  Text(
+                    'Add Medication',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).textTheme.headlineMedium?.color,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+
+                  // Description
+                  Text(
+                    'Set up a reminder for your medication',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Theme.of(context).textTheme.bodyMedium?.color,
+                      height: 1.4,
+                    ),
+                  ),
+                  const SizedBox(height: 32),
 
                   // Medication name input
                   Focus(
@@ -887,7 +933,7 @@ class _MedicationRemindersScreenState extends State<MedicationRemindersScreen> {
       autoCloseDuration: const Duration(seconds: 3),
       showProgressBar: false,
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 50),
-      borderRadius: BorderRadius.circular(10),
+      borderRadius: SmoothBorderRadius(cornerRadius: 12, cornerSmoothing: 0.6),
       backgroundColor: theme.cardColor,
       foregroundColor: theme.colorScheme.primary,
       borderSide: BorderSide(
@@ -1305,7 +1351,7 @@ class _MedicationRemindersScreenState extends State<MedicationRemindersScreen> {
           width: double.infinity,
           padding: const EdgeInsets.all(24),
           decoration: ShapeDecoration(
-            color: Theme.of(context).dialogBackgroundColor,
+            color: Theme.of(context).scaffoldBackgroundColor,
             shape: SmoothRectangleBorder(
               borderRadius: SmoothBorderRadius(
                 cornerRadius: 20,
@@ -1326,14 +1372,6 @@ class _MedicationRemindersScreenState extends State<MedicationRemindersScreen> {
               // Header with close button
               Row(
                 children: [
-                  Text(
-                    'Delete Medication',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).textTheme.headlineMedium?.color,
-                    ),
-                  ),
                   const Spacer(),
                   Container(
                     width: 36,
@@ -1365,7 +1403,45 @@ class _MedicationRemindersScreenState extends State<MedicationRemindersScreen> {
                   ),
                 ],
               ),
+              const SizedBox(height: 20),
+
+              // Large delete icon
+              Container(
+                height: 80,
+                width: 80,
+                decoration: ShapeDecoration(
+                  color: Colors.red[500],
+                  shape: SmoothRectangleBorder(
+                    borderRadius: SmoothBorderRadius(
+                      cornerRadius: 24,
+                      cornerSmoothing: 0.6,
+                    ),
+                  ),
+                  shadows: [
+                    BoxShadow(
+                      color: Colors.red.withOpacity(0.3),
+                      blurRadius: 20,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
+                ),
+                child: const Center(
+                  child: Icon(Icons.delete, color: Colors.white, size: 36),
+                ),
+              ),
               const SizedBox(height: 24),
+
+              // Title
+              Text(
+                'Delete Medication',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).textTheme.headlineMedium?.color,
+                ),
+              ),
+              const SizedBox(height: 8),
 
               // Content
               Text(
@@ -1374,6 +1450,7 @@ class _MedicationRemindersScreenState extends State<MedicationRemindersScreen> {
                 style: TextStyle(
                   fontSize: 16,
                   color: Theme.of(context).textTheme.bodyMedium?.color,
+                  height: 1.4,
                 ),
               ),
               const SizedBox(height: 32),

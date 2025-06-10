@@ -150,43 +150,9 @@ class _LoginScreenState extends State<LoginScreen>
 
       if (userCredential != null) {
         // Successfully signed in
-
-        toastification.show(
-          context: context,
-          type: ToastificationType.success,
-          style: ToastificationStyle.flat,
-          title: Text(
-            'Welcome Back!',
-            style: TextStyle(
-              fontWeight: FontWeight.w600,
-              color: Theme.of(context).brightness == Brightness.dark
-                  ? Colors.white
-                  : Colors.black,
-            ),
-          ),
-          description: Text(
-            'Successfully signed in with Google',
-            style: TextStyle(
-              color: Theme.of(context).brightness == Brightness.dark
-                  ? Colors.white70
-                  : Colors.black54,
-            ),
-          ),
-          icon: Icon(
-            Icons.check_circle_outline,
-            color: Theme.of(context).colorScheme.primary,
-          ),
-          borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(
-            color: Theme.of(context).brightness == Brightness.dark
-                ? const Color(0xFF2A2A2A)
-                : const Color(0xFFF0F1F7),
-            width: 1,
-          ),
-          backgroundColor: Theme.of(context).brightness == Brightness.dark
-              ? const Color(0xFF2A2A2A)
-              : const Color(0xFFF0F1F7),
-          autoCloseDuration: const Duration(seconds: 3),
+        _showToast(
+          'Successfully signed in with Google',
+          ToastificationType.success,
         );
 
         Navigator.pushNamedAndRemoveUntil(
@@ -222,40 +188,7 @@ class _LoginScreenState extends State<LoginScreen>
         errorMessage = 'An unexpected error occurred: $e';
       }
 
-      toastification.show(
-        context: context,
-        type: ToastificationType.error,
-        style: ToastificationStyle.flat,
-        title: Text(
-          'Sign In Failed',
-          style: TextStyle(
-            fontWeight: FontWeight.w600,
-            color: Theme.of(context).brightness == Brightness.dark
-                ? Colors.white
-                : Colors.black,
-          ),
-        ),
-        description: Text(
-          errorMessage,
-          style: TextStyle(
-            color: Theme.of(context).brightness == Brightness.dark
-                ? Colors.white70
-                : Colors.black54,
-          ),
-        ),
-        icon: const Icon(Icons.error_outline, color: Colors.red),
-        borderRadius: BorderRadius.circular(10),
-        borderSide: BorderSide(
-          color: Theme.of(context).brightness == Brightness.dark
-              ? const Color(0xFF2A2A2A)
-              : const Color(0xFFF0F1F7),
-          width: 1,
-        ),
-        backgroundColor: Theme.of(context).brightness == Brightness.dark
-            ? const Color(0xFF2A2A2A)
-            : const Color(0xFFF0F1F7),
-        autoCloseDuration: const Duration(seconds: 3),
-      );
+      _showToast(errorMessage, ToastificationType.error);
     } finally {
       setState(() {
         _isGoogleLoading = false;
@@ -319,7 +252,7 @@ class _LoginScreenState extends State<LoginScreen>
       autoCloseDuration: const Duration(seconds: 3),
       showProgressBar: false,
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 50),
-      borderRadius: BorderRadius.circular(10),
+      borderRadius: SmoothBorderRadius(cornerRadius: 12, cornerSmoothing: 0.6),
       backgroundColor: theme.cardColor,
       foregroundColor: theme.colorScheme.primary,
       borderSide: BorderSide(
@@ -453,7 +386,10 @@ class _LoginScreenState extends State<LoginScreen>
                                   onTap: () {
                                     _showForgotPasswordDialog();
                                   },
-                                  borderRadius: BorderRadius.circular(8),
+                                  borderRadius: SmoothBorderRadius(
+                                    cornerRadius: 8,
+                                    cornerSmoothing: 0.6,
+                                  ),
                                   child: Padding(
                                     padding: const EdgeInsets.symmetric(
                                       horizontal: 8.0,
@@ -540,7 +476,10 @@ class _LoginScreenState extends State<LoginScreen>
                             onTap: () {
                               Navigator.pushNamed(context, '/register');
                             },
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: SmoothBorderRadius(
+                              cornerRadius: 12,
+                              cornerSmoothing: 0.6,
+                            ),
                             child: Padding(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 16.0,
@@ -708,7 +647,7 @@ class _LoginScreenState extends State<LoginScreen>
                 decoration: InputDecoration(
                   hintText: hintText,
                   hintStyle: TextStyle(
-                    color: const Color(0xFF5C5FC1).withOpacity(0.7),
+                    color: theme.colorScheme.primary.withOpacity(0.7),
                     fontSize: 16,
                   ),
                   border: InputBorder.none,
@@ -738,7 +677,7 @@ class _LoginScreenState extends State<LoginScreen>
       width: double.infinity,
       height: 56,
       decoration: ShapeDecoration(
-        color: const Color(0xFF5D74FB),
+        color: theme.colorScheme.primary,
         shape: SmoothRectangleBorder(
           borderRadius: SmoothBorderRadius(
             cornerRadius: 16,
@@ -747,7 +686,7 @@ class _LoginScreenState extends State<LoginScreen>
         ),
         shadows: [
           BoxShadow(
-            color: const Color(0xFF5D74FB).withOpacity(0.3),
+            color: theme.colorScheme.primary.withOpacity(0.3),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -969,8 +908,8 @@ class _ForgotPasswordDialogState extends State<ForgotPasswordDialog> {
       autoCloseDuration: const Duration(seconds: 3),
       showProgressBar: false,
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 50),
-      borderRadius: BorderRadius.circular(10),
-      backgroundColor: theme.cardColor,
+      borderRadius: SmoothBorderRadius(cornerRadius: 12, cornerSmoothing: 0.6),
+      backgroundColor: theme.scaffoldBackgroundColor,
       foregroundColor: theme.colorScheme.primary,
       borderSide: BorderSide(
         color: theme.brightness == Brightness.dark
@@ -996,29 +935,30 @@ class _ForgotPasswordDialogState extends State<ForgotPasswordDialog> {
     return Dialog(
       backgroundColor: Colors.transparent,
       child: Container(
+        width: double.infinity,
         padding: const EdgeInsets.all(24),
         decoration: ShapeDecoration(
-          color: theme.dialogBackgroundColor,
+          color: theme.scaffoldBackgroundColor,
           shape: SmoothRectangleBorder(
             borderRadius: SmoothBorderRadius(
               cornerRadius: 20,
               cornerSmoothing: 0.6,
             ),
           ),
+          shadows: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.15),
+              blurRadius: 20,
+              offset: const Offset(0, 10),
+            ),
+          ],
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            // Header with close button
             Row(
               children: [
-                Text(
-                  'Reset Password',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: theme.textTheme.headlineMedium?.color,
-                  ),
-                ),
                 const Spacer(),
                 Container(
                   width: 36,
@@ -1029,7 +969,7 @@ class _ForgotPasswordDialogState extends State<ForgotPasswordDialog> {
                         : const Color(0xFFF0F1F7),
                     shape: SmoothRectangleBorder(
                       borderRadius: SmoothBorderRadius(
-                        cornerRadius: 12,
+                        cornerRadius: 10,
                         cornerSmoothing: 0.6,
                       ),
                     ),
@@ -1040,7 +980,7 @@ class _ForgotPasswordDialogState extends State<ForgotPasswordDialog> {
                       onTap: () => Navigator.pop(context),
                       customBorder: SmoothRectangleBorder(
                         borderRadius: SmoothBorderRadius(
-                          cornerRadius: 12,
+                          cornerRadius: 10,
                           cornerSmoothing: 0.6,
                         ),
                       ),
@@ -1050,15 +990,59 @@ class _ForgotPasswordDialogState extends State<ForgotPasswordDialog> {
                 ),
               ],
             ),
-            const SizedBox(height: 16),
-            Text(
-              'Enter your email address and we\'ll send you a link to reset your password.',
-              style: TextStyle(
-                fontSize: 14,
-                color: theme.textTheme.bodyMedium?.color,
+            const SizedBox(height: 20),
+
+            // Large reset password icon
+            Container(
+              height: 80,
+              width: 80,
+              decoration: ShapeDecoration(
+                color: theme.colorScheme.primary,
+                shape: SmoothRectangleBorder(
+                  borderRadius: SmoothBorderRadius(
+                    cornerRadius: 24,
+                    cornerSmoothing: 0.6,
+                  ),
+                ),
+                shadows: [
+                  BoxShadow(
+                    color: theme.colorScheme.primary.withOpacity(0.3),
+                    blurRadius: 20,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
+              ),
+              child: const Center(
+                child: Icon(Icons.lock_reset, color: Colors.white, size: 36),
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 24),
+
+            // Title
+            Text(
+              'Reset Password',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: theme.textTheme.headlineMedium?.color,
+              ),
+            ),
+            const SizedBox(height: 8),
+
+            // Description
+            Text(
+              'Enter your email address and we\'ll send you a link to reset your password.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 16,
+                color: theme.textTheme.bodyMedium?.color,
+                height: 1.4,
+              ),
+            ),
+            const SizedBox(height: 32),
+
+            // Email input field
             Focus(
               child: Builder(
                 builder: (context) {
@@ -1116,7 +1100,7 @@ class _ForgotPasswordDialogState extends State<ForgotPasswordDialog> {
                         decoration: InputDecoration(
                           hintText: 'Email',
                           hintStyle: TextStyle(
-                            color: const Color(0xFF5C5FC1).withOpacity(0.7),
+                            color: theme.colorScheme.primary.withOpacity(0.7),
                             fontSize: 16,
                           ),
                           border: InputBorder.none,
@@ -1134,6 +1118,8 @@ class _ForgotPasswordDialogState extends State<ForgotPasswordDialog> {
               ),
             ),
             const SizedBox(height: 20),
+
+            // Send reset email button
             Container(
               width: double.infinity,
               height: 48,

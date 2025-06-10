@@ -104,35 +104,6 @@ class _WelcomeScreenState extends State<WelcomeScreen>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const SizedBox(height: 20),
-                  FadeTransition(
-                    opacity: _fadeAnimation,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 12,
-                      ),
-                      decoration: ShapeDecoration(
-                        color: theme.brightness == Brightness.dark
-                            ? const Color(0xFF2A2A2A)
-                            : const Color(0xFFF0F1F7),
-                        shape: SmoothRectangleBorder(
-                          borderRadius: SmoothBorderRadius(
-                            cornerRadius: 16,
-                            cornerSmoothing: 0.6,
-                          ),
-                        ),
-                      ),
-                      child: Text(
-                        'DiabApp',
-                        textAlign: TextAlign.center,
-                        style: theme.textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: theme.colorScheme.primary,
-                        ),
-                      ),
-                    ),
-                  ),
                   const SizedBox(height: 80),
                   SlideTransition(
                     position: _slideAnimation,

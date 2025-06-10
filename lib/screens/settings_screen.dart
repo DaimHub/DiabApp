@@ -169,9 +169,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             // Profile card
                             Container(
                               decoration: ShapeDecoration(
-                                color: theme.brightness == Brightness.dark
-                                    ? const Color(0xFF2A2A2A)
-                                    : const Color(0xFFF0F1F7),
+                                color: Theme.of(
+                                  context,
+                                ).scaffoldBackgroundColor,
                                 shape: SmoothRectangleBorder(
                                   borderRadius: SmoothBorderRadius(
                                     cornerRadius: 16,
@@ -186,7 +186,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 ),
                                 shadows: [
                                   BoxShadow(
-                                    color: Colors.black.withOpacity(0.03),
+                                    color: theme.brightness == Brightness.dark
+                                        ? Colors.black.withOpacity(0.2)
+                                        : Colors.black.withOpacity(0.05),
                                     blurRadius: 8,
                                     offset: const Offset(0, 2),
                                   ),
@@ -230,10 +232,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                             ),
                                             shadows: [
                                               BoxShadow(
-                                                color: Colors.black.withOpacity(
-                                                  0.05,
-                                                ),
-                                                blurRadius: 6,
+                                                color:
+                                                    theme.brightness ==
+                                                        Brightness.dark
+                                                    ? Colors.black.withOpacity(
+                                                        0.2,
+                                                      )
+                                                    : Colors.black.withOpacity(
+                                                        0.05,
+                                                      ),
+                                                blurRadius: 8,
                                                 offset: const Offset(0, 2),
                                               ),
                                             ],
@@ -589,7 +597,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           width: double.infinity,
           padding: const EdgeInsets.all(24),
           decoration: ShapeDecoration(
-            color: Theme.of(context).dialogBackgroundColor,
+            color: Theme.of(context).scaffoldBackgroundColor,
             shape: SmoothRectangleBorder(
               borderRadius: SmoothBorderRadius(
                 cornerRadius: 20,
@@ -853,9 +861,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     return Container(
       decoration: ShapeDecoration(
-        color: theme.brightness == Brightness.dark
-            ? const Color(0xFF2A2A2A)
-            : const Color(0xFFF0F1F7),
+        color: theme.scaffoldBackgroundColor,
         shape: SmoothRectangleBorder(
           borderRadius: SmoothBorderRadius(
             cornerRadius: 16,
@@ -870,7 +876,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
         shadows: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: theme.brightness == Brightness.dark
+                ? Colors.black.withOpacity(0.2)
+                : Colors.black.withOpacity(0.05),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -897,8 +905,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                   shadows: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 6,
+                      color: theme.brightness == Brightness.dark
+                          ? Colors.black.withOpacity(0.2)
+                          : Colors.black.withOpacity(0.05),
+                      blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
                   ],
@@ -984,9 +994,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final theme = Theme.of(context);
     return Container(
       decoration: ShapeDecoration(
-        color: theme.brightness == Brightness.dark
-            ? const Color(0xFF2A2A2A)
-            : const Color(0xFFF0F1F7),
+        color: theme.scaffoldBackgroundColor,
         shape: SmoothRectangleBorder(
           borderRadius: SmoothBorderRadius(
             cornerRadius: 16,
@@ -1001,7 +1009,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
         shadows: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: theme.brightness == Brightness.dark
+                ? Colors.black.withOpacity(0.2)
+                : Colors.black.withOpacity(0.05),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -1036,8 +1046,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                     shadows: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 6,
+                        color: theme.brightness == Brightness.dark
+                            ? Colors.black.withOpacity(0.2)
+                            : Colors.black.withOpacity(0.05),
+                        blurRadius: 8,
                         offset: const Offset(0, 2),
                       ),
                     ],
@@ -1130,9 +1142,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final theme = Theme.of(context);
     return Container(
       decoration: ShapeDecoration(
-        color: theme.brightness == Brightness.dark
-            ? const Color(0xFF2A2A2A)
-            : const Color(0xFFF0F1F7),
+        color: theme.scaffoldBackgroundColor,
         shape: SmoothRectangleBorder(
           borderRadius: SmoothBorderRadius(
             cornerRadius: 16,
@@ -1147,7 +1157,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
         shadows: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: theme.brightness == Brightness.dark
+                ? Colors.black.withOpacity(0.2)
+                : Colors.black.withOpacity(0.05),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -1172,8 +1184,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
                 shadows: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 6,
+                    color: theme.brightness == Brightness.dark
+                        ? Colors.black.withOpacity(0.2)
+                        : Colors.black.withOpacity(0.05),
+                    blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
                 ],
@@ -1329,9 +1343,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       decoration: ShapeDecoration(
         color: isDestructive
             ? Colors.red.withOpacity(0.05)
-            : theme.brightness == Brightness.dark
-            ? const Color(0xFF2A2A2A)
-            : const Color(0xFFF0F1F7),
+            : theme.scaffoldBackgroundColor,
         shape: SmoothRectangleBorder(
           borderRadius: SmoothBorderRadius(
             cornerRadius: 16,
@@ -1348,7 +1360,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
         shadows: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: theme.brightness == Brightness.dark
+                ? Colors.black.withOpacity(0.2)
+                : Colors.black.withOpacity(0.05),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -1511,7 +1525,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           width: double.infinity,
           padding: const EdgeInsets.all(24),
           decoration: ShapeDecoration(
-            color: Theme.of(context).dialogBackgroundColor,
+            color: Theme.of(context).scaffoldBackgroundColor,
             shape: SmoothRectangleBorder(
               borderRadius: SmoothBorderRadius(
                 cornerRadius: 20,
@@ -1750,7 +1764,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           width: double.infinity,
           padding: const EdgeInsets.all(24),
           decoration: ShapeDecoration(
-            color: Theme.of(context).dialogBackgroundColor,
+            color: Theme.of(context).scaffoldBackgroundColor,
             shape: SmoothRectangleBorder(
               borderRadius: SmoothBorderRadius(
                 cornerRadius: 20,
@@ -1859,9 +1873,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     return Container(
       decoration: ShapeDecoration(
-        color: theme.brightness == Brightness.dark
-            ? const Color(0xFF2A2A2A)
-            : const Color(0xFFF0F1F7),
+        color: Theme.of(context).scaffoldBackgroundColor,
         shape: SmoothRectangleBorder(
           borderRadius: SmoothBorderRadius(
             cornerRadius: 16,
@@ -1876,7 +1888,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
         shadows: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: theme.brightness == Brightness.dark
+                ? Colors.black.withOpacity(0.2)
+                : Colors.black.withOpacity(0.05),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -1917,8 +1931,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                     shadows: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 6,
+                        color: theme.brightness == Brightness.dark
+                            ? Colors.black.withOpacity(0.2)
+                            : Colors.black.withOpacity(0.05),
+                        blurRadius: 8,
                         offset: const Offset(0, 2),
                       ),
                     ],
@@ -2099,7 +2115,7 @@ class _LogoutDialogState extends State<_LogoutDialog> {
         width: double.infinity,
         padding: const EdgeInsets.all(24),
         decoration: ShapeDecoration(
-          color: theme.dialogBackgroundColor,
+          color: theme.scaffoldBackgroundColor,
           shape: SmoothRectangleBorder(
             borderRadius: SmoothBorderRadius(
               cornerRadius: 20,

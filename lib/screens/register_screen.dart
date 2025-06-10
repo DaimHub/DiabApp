@@ -285,7 +285,7 @@ class _RegisterScreenState extends State<RegisterScreen>
       autoCloseDuration: const Duration(seconds: 3),
       showProgressBar: false,
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 50),
-      borderRadius: BorderRadius.circular(10),
+      borderRadius: SmoothBorderRadius(cornerRadius: 12, cornerSmoothing: 0.6),
       backgroundColor: theme.cardColor,
       foregroundColor: theme.colorScheme.primary,
       borderSide: BorderSide(
@@ -719,7 +719,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                 decoration: InputDecoration(
                   hintText: hintText,
                   hintStyle: TextStyle(
-                    color: const Color(0xFF5C5FC1).withOpacity(0.7),
+                    color: theme.colorScheme.primary.withOpacity(0.7),
                     fontSize: 16,
                   ),
                   border: InputBorder.none,
@@ -749,7 +749,7 @@ class _RegisterScreenState extends State<RegisterScreen>
       width: double.infinity,
       height: 56,
       decoration: ShapeDecoration(
-        color: const Color(0xFF5D74FB),
+        color: theme.colorScheme.primary,
         shape: SmoothRectangleBorder(
           borderRadius: SmoothBorderRadius(
             cornerRadius: 16,
@@ -758,7 +758,7 @@ class _RegisterScreenState extends State<RegisterScreen>
         ),
         shadows: [
           BoxShadow(
-            color: const Color(0xFF5D74FB).withOpacity(0.3),
+            color: theme.colorScheme.primary.withOpacity(0.3),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),

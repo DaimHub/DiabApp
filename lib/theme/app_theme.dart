@@ -39,15 +39,6 @@ class AppTheme {
         labelMedium: TextStyle(color: LightThemeColors.textPrimary),
         labelSmall: TextStyle(color: LightThemeColors.textSecondary),
       ),
-      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-        backgroundColor: Colors.white,
-        selectedItemColor: LightThemeColors.primary,
-        unselectedItemColor: Colors.grey,
-        showSelectedLabels: true,
-        showUnselectedLabels: true,
-        type: BottomNavigationBarType.fixed,
-        elevation: 0,
-      ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: LightThemeColors.inputFieldBackground,
@@ -128,15 +119,6 @@ class AppTheme {
         labelLarge: TextStyle(color: DarkThemeColors.textPrimary),
         labelMedium: TextStyle(color: DarkThemeColors.textPrimary),
         labelSmall: TextStyle(color: DarkThemeColors.textSecondary),
-      ),
-      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-        backgroundColor: Color(0xFF1E1E1E),
-        selectedItemColor: DarkThemeColors.primary,
-        unselectedItemColor: Colors.grey,
-        showSelectedLabels: true,
-        showUnselectedLabels: true,
-        type: BottomNavigationBarType.fixed,
-        elevation: 0,
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
