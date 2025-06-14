@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:toastification/toastification.dart';
 import 'package:figma_squircle/figma_squircle.dart';
 import '../services/firestore_service.dart';
@@ -8,6 +6,7 @@ import '../providers/glucose_data_provider.dart';
 import '../providers/glucose_trend_data_provider.dart';
 import '../providers/log_history_data_provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 
 // This is a placeholder screen for the Log tab
 // We'll actually be using a bottom sheet that opens when the Log tab is pressed
@@ -432,7 +431,7 @@ class _LogBottomSheetState extends State<LogBottomSheet> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Glucose',
+          'Blood Glucose',
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
@@ -440,58 +439,10 @@ class _LogBottomSheetState extends State<LogBottomSheet> {
           ),
         ),
         const SizedBox(height: 16),
-        Container(
-          decoration: ShapeDecoration(
-            color: theme.brightness == Brightness.dark
-                ? const Color(0xFF2A2A2A)
-                : const Color(0xFFF0F1F7),
-            shape: SmoothRectangleBorder(
-              borderRadius: SmoothBorderRadius(
-                cornerRadius: 16,
-                cornerSmoothing: 0.6,
-              ),
-              side: BorderSide(
-                color: theme.brightness == Brightness.dark
-                    ? const Color(0xFF3A3A3A)
-                    : Colors.grey[200]!,
-                width: 1,
-              ),
-            ),
-            shadows: [
-              BoxShadow(
-                color: theme.brightness == Brightness.dark
-                    ? Colors.black.withOpacity(0.2)
-                    : Colors.black.withOpacity(0.05),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: ClipSmoothRect(
-            radius: SmoothBorderRadius(cornerRadius: 16, cornerSmoothing: 0.6),
-            child: TextField(
-              controller: _glucoseController,
-              keyboardType: TextInputType.number,
-              style: TextStyle(
-                fontSize: 16,
-                color: theme.textTheme.bodyLarge?.color,
-              ),
-              decoration: InputDecoration(
-                hintText: 'mg/dL',
-                hintStyle: TextStyle(
-                  color: theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
-                  fontSize: 16,
-                ),
-                filled: false,
-                border: InputBorder.none,
-                focusedBorder: InputBorder.none,
-                enabledBorder: InputBorder.none,
-                errorBorder: InputBorder.none,
-                focusedErrorBorder: InputBorder.none,
-                contentPadding: const EdgeInsets.all(16),
-              ),
-            ),
-          ),
+        _buildTextField(
+          controller: _glucoseController,
+          hintText: 'mg/dL',
+          keyboardType: TextInputType.number,
         ),
       ],
     );
@@ -511,112 +462,13 @@ class _LogBottomSheetState extends State<LogBottomSheet> {
           ),
         ),
         const SizedBox(height: 16),
-        Container(
-          decoration: ShapeDecoration(
-            color: theme.brightness == Brightness.dark
-                ? const Color(0xFF2A2A2A)
-                : const Color(0xFFF0F1F7),
-            shape: SmoothRectangleBorder(
-              borderRadius: SmoothBorderRadius(
-                cornerRadius: 16,
-                cornerSmoothing: 0.6,
-              ),
-              side: BorderSide(
-                color: theme.brightness == Brightness.dark
-                    ? const Color(0xFF3A3A3A)
-                    : Colors.grey[200]!,
-                width: 1,
-              ),
-            ),
-            shadows: [
-              BoxShadow(
-                color: theme.brightness == Brightness.dark
-                    ? Colors.black.withOpacity(0.2)
-                    : Colors.black.withOpacity(0.05),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: ClipSmoothRect(
-            radius: SmoothBorderRadius(cornerRadius: 16, cornerSmoothing: 0.6),
-            child: TextField(
-              controller: _carbsController,
-              keyboardType: TextInputType.number,
-              style: TextStyle(
-                fontSize: 16,
-                color: theme.textTheme.bodyLarge?.color,
-              ),
-              decoration: InputDecoration(
-                hintText: 'Carbs (g)',
-                hintStyle: TextStyle(
-                  color: theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
-                  fontSize: 16,
-                ),
-                filled: false,
-                border: InputBorder.none,
-                focusedBorder: InputBorder.none,
-                enabledBorder: InputBorder.none,
-                errorBorder: InputBorder.none,
-                focusedErrorBorder: InputBorder.none,
-                contentPadding: const EdgeInsets.all(16),
-              ),
-            ),
-          ),
+        _buildTextField(
+          controller: _carbsController,
+          hintText: 'Carbs (g)',
+          keyboardType: TextInputType.number,
         ),
         const SizedBox(height: 16),
-        Container(
-          decoration: ShapeDecoration(
-            color: theme.brightness == Brightness.dark
-                ? const Color(0xFF2A2A2A)
-                : const Color(0xFFF0F1F7),
-            shape: SmoothRectangleBorder(
-              borderRadius: SmoothBorderRadius(
-                cornerRadius: 16,
-                cornerSmoothing: 0.6,
-              ),
-              side: BorderSide(
-                color: theme.brightness == Brightness.dark
-                    ? const Color(0xFF3A3A3A)
-                    : Colors.grey[200]!,
-                width: 1,
-              ),
-            ),
-            shadows: [
-              BoxShadow(
-                color: theme.brightness == Brightness.dark
-                    ? Colors.black.withOpacity(0.2)
-                    : Colors.black.withOpacity(0.05),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: ClipSmoothRect(
-            radius: SmoothBorderRadius(cornerRadius: 16, cornerSmoothing: 0.6),
-            child: TextField(
-              controller: _foodController,
-              style: TextStyle(
-                fontSize: 16,
-                color: theme.textTheme.bodyLarge?.color,
-              ),
-              decoration: InputDecoration(
-                hintText: 'Food',
-                hintStyle: TextStyle(
-                  color: theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
-                  fontSize: 16,
-                ),
-                filled: false,
-                border: InputBorder.none,
-                focusedBorder: InputBorder.none,
-                enabledBorder: InputBorder.none,
-                errorBorder: InputBorder.none,
-                focusedErrorBorder: InputBorder.none,
-                contentPadding: const EdgeInsets.all(16),
-              ),
-            ),
-          ),
-        ),
+        _buildTextField(controller: _foodController, hintText: 'Food'),
       ],
     );
   }
@@ -635,111 +487,12 @@ class _LogBottomSheetState extends State<LogBottomSheet> {
           ),
         ),
         const SizedBox(height: 16),
-        Container(
-          decoration: ShapeDecoration(
-            color: theme.brightness == Brightness.dark
-                ? const Color(0xFF2A2A2A)
-                : const Color(0xFFF0F1F7),
-            shape: SmoothRectangleBorder(
-              borderRadius: SmoothBorderRadius(
-                cornerRadius: 16,
-                cornerSmoothing: 0.6,
-              ),
-              side: BorderSide(
-                color: theme.brightness == Brightness.dark
-                    ? const Color(0xFF3A3A3A)
-                    : Colors.grey[200]!,
-                width: 1,
-              ),
-            ),
-            shadows: [
-              BoxShadow(
-                color: theme.brightness == Brightness.dark
-                    ? Colors.black.withOpacity(0.2)
-                    : Colors.black.withOpacity(0.05),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: ClipSmoothRect(
-            radius: SmoothBorderRadius(cornerRadius: 16, cornerSmoothing: 0.6),
-            child: TextField(
-              controller: _activityController,
-              style: TextStyle(
-                fontSize: 16,
-                color: theme.textTheme.bodyLarge?.color,
-              ),
-              decoration: InputDecoration(
-                hintText: 'Activity',
-                hintStyle: TextStyle(
-                  color: theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
-                  fontSize: 16,
-                ),
-                filled: false,
-                border: InputBorder.none,
-                focusedBorder: InputBorder.none,
-                enabledBorder: InputBorder.none,
-                errorBorder: InputBorder.none,
-                focusedErrorBorder: InputBorder.none,
-                contentPadding: const EdgeInsets.all(16),
-              ),
-            ),
-          ),
-        ),
+        _buildTextField(controller: _activityController, hintText: 'Activity'),
         const SizedBox(height: 16),
-        Container(
-          decoration: ShapeDecoration(
-            color: theme.brightness == Brightness.dark
-                ? const Color(0xFF2A2A2A)
-                : const Color(0xFFF0F1F7),
-            shape: SmoothRectangleBorder(
-              borderRadius: SmoothBorderRadius(
-                cornerRadius: 16,
-                cornerSmoothing: 0.6,
-              ),
-              side: BorderSide(
-                color: theme.brightness == Brightness.dark
-                    ? const Color(0xFF3A3A3A)
-                    : Colors.grey[200]!,
-                width: 1,
-              ),
-            ),
-            shadows: [
-              BoxShadow(
-                color: theme.brightness == Brightness.dark
-                    ? Colors.black.withOpacity(0.2)
-                    : Colors.black.withOpacity(0.05),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: ClipSmoothRect(
-            radius: SmoothBorderRadius(cornerRadius: 16, cornerSmoothing: 0.6),
-            child: TextField(
-              controller: _durationController,
-              keyboardType: TextInputType.number,
-              style: TextStyle(
-                fontSize: 16,
-                color: theme.textTheme.bodyLarge?.color,
-              ),
-              decoration: InputDecoration(
-                hintText: 'Duration (min)',
-                hintStyle: TextStyle(
-                  color: theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
-                  fontSize: 16,
-                ),
-                filled: false,
-                border: InputBorder.none,
-                focusedBorder: InputBorder.none,
-                enabledBorder: InputBorder.none,
-                errorBorder: InputBorder.none,
-                focusedErrorBorder: InputBorder.none,
-                contentPadding: const EdgeInsets.all(16),
-              ),
-            ),
-          ),
+        _buildTextField(
+          controller: _durationController,
+          hintText: 'Duration (minutes)',
+          keyboardType: TextInputType.number,
         ),
       ],
     );
@@ -759,112 +512,99 @@ class _LogBottomSheetState extends State<LogBottomSheet> {
           ),
         ),
         const SizedBox(height: 16),
-        Container(
-          decoration: ShapeDecoration(
-            color: theme.brightness == Brightness.dark
-                ? const Color(0xFF2A2A2A)
-                : const Color(0xFFF0F1F7),
-            shape: SmoothRectangleBorder(
-              borderRadius: SmoothBorderRadius(
-                cornerRadius: 16,
-                cornerSmoothing: 0.6,
-              ),
-              side: BorderSide(
-                color: theme.brightness == Brightness.dark
-                    ? const Color(0xFF3A3A3A)
-                    : Colors.grey[200]!,
-                width: 1,
-              ),
-            ),
-            shadows: [
-              BoxShadow(
-                color: theme.brightness == Brightness.dark
-                    ? Colors.black.withOpacity(0.2)
-                    : Colors.black.withOpacity(0.05),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: ClipSmoothRect(
-            radius: SmoothBorderRadius(cornerRadius: 16, cornerSmoothing: 0.6),
-            child: TextField(
-              controller: _medicationController,
-              style: TextStyle(
-                fontSize: 16,
-                color: theme.textTheme.bodyLarge?.color,
-              ),
-              decoration: InputDecoration(
-                hintText: 'Medication',
-                hintStyle: TextStyle(
-                  color: theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
-                  fontSize: 16,
-                ),
-                filled: false,
-                border: InputBorder.none,
-                focusedBorder: InputBorder.none,
-                enabledBorder: InputBorder.none,
-                errorBorder: InputBorder.none,
-                focusedErrorBorder: InputBorder.none,
-                contentPadding: const EdgeInsets.all(16),
-              ),
-            ),
-          ),
+        _buildTextField(
+          controller: _medicationController,
+          hintText: 'Medication',
         ),
         const SizedBox(height: 16),
-        Container(
-          decoration: ShapeDecoration(
-            color: theme.brightness == Brightness.dark
-                ? const Color(0xFF2A2A2A)
-                : const Color(0xFFF0F1F7),
-            shape: SmoothRectangleBorder(
-              borderRadius: SmoothBorderRadius(
+        _buildTextField(controller: _doseController, hintText: 'Dosage'),
+      ],
+    );
+  }
+
+  // Helper method for consistent text field styling with focus-aware borders
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String hintText,
+    TextInputType? keyboardType,
+    int maxLines = 1,
+  }) {
+    final theme = Theme.of(context);
+
+    return Focus(
+      child: Builder(
+        builder: (context) {
+          final isFocused = Focus.of(context).hasFocus;
+
+          return Container(
+            decoration: ShapeDecoration(
+              color: theme.brightness == Brightness.dark
+                  ? const Color(0xFF2A2A2A)
+                  : const Color(0xFFF0F1F7),
+              shape: SmoothRectangleBorder(
+                borderRadius: SmoothBorderRadius(
+                  cornerRadius: 16,
+                  cornerSmoothing: 0.6,
+                ),
+                side: BorderSide(
+                  color: isFocused
+                      ? theme.colorScheme.primary.withOpacity(0.8)
+                      : theme.brightness == Brightness.dark
+                      ? const Color(0xFF3A3A3A)
+                      : Colors.grey[200]!,
+                  width: isFocused ? 2 : 1,
+                ),
+              ),
+              shadows: isFocused
+                  ? [
+                      BoxShadow(
+                        color: theme.colorScheme.primary.withOpacity(0.1),
+                        blurRadius: 12,
+                        offset: const Offset(0, 2),
+                      ),
+                    ]
+                  : [
+                      BoxShadow(
+                        color: theme.brightness == Brightness.dark
+                            ? Colors.black.withOpacity(0.2)
+                            : Colors.black.withOpacity(0.05),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+            ),
+            child: ClipSmoothRect(
+              radius: SmoothBorderRadius(
                 cornerRadius: 16,
                 cornerSmoothing: 0.6,
               ),
-              side: BorderSide(
-                color: theme.brightness == Brightness.dark
-                    ? const Color(0xFF3A3A3A)
-                    : Colors.grey[200]!,
-                width: 1,
-              ),
-            ),
-            shadows: [
-              BoxShadow(
-                color: theme.brightness == Brightness.dark
-                    ? Colors.black.withOpacity(0.2)
-                    : Colors.black.withOpacity(0.05),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: ClipSmoothRect(
-            radius: SmoothBorderRadius(cornerRadius: 16, cornerSmoothing: 0.6),
-            child: TextField(
-              controller: _doseController,
-              style: TextStyle(
-                fontSize: 16,
-                color: theme.textTheme.bodyLarge?.color,
-              ),
-              decoration: InputDecoration(
-                hintText: 'Dose (units)',
-                hintStyle: TextStyle(
-                  color: theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
+              child: TextField(
+                controller: controller,
+                keyboardType: keyboardType,
+                maxLines: maxLines,
+                style: TextStyle(
                   fontSize: 16,
+                  color: theme.textTheme.bodyLarge?.color,
                 ),
-                filled: false,
-                border: InputBorder.none,
-                focusedBorder: InputBorder.none,
-                enabledBorder: InputBorder.none,
-                errorBorder: InputBorder.none,
-                focusedErrorBorder: InputBorder.none,
-                contentPadding: const EdgeInsets.all(16),
+                decoration: InputDecoration(
+                  hintText: hintText,
+                  hintStyle: TextStyle(
+                    color: theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
+                    fontSize: 16,
+                  ),
+                  filled: false,
+                  border: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                  enabledBorder: InputBorder.none,
+                  errorBorder: InputBorder.none,
+                  focusedErrorBorder: InputBorder.none,
+                  contentPadding: const EdgeInsets.all(16),
+                ),
               ),
             ),
-          ),
-        ),
-      ],
+          );
+        },
+      ),
     );
   }
 
@@ -1111,177 +851,9 @@ class _LogBottomSheetState extends State<LogBottomSheet> {
   }
 
   Future<void> _selectDate() async {
-    final theme = Theme.of(context);
-    final DateTime? picked = await showDatePicker(
+    final DateTime? picked = await showDialog<DateTime>(
       context: context,
-      initialDate: _selectedDateTime,
-      firstDate: DateTime.now().subtract(const Duration(days: 365)),
-      lastDate: DateTime.now().add(const Duration(days: 1)),
-      builder: (context, child) {
-        return Theme(
-          data: theme.copyWith(
-            colorScheme: theme.colorScheme.copyWith(
-              primary: theme.colorScheme.primary,
-              onPrimary: Colors.white,
-              surface: theme.brightness == Brightness.dark
-                  ? const Color(0xFF2A2A2A)
-                  : Colors.white,
-              onSurface: theme.textTheme.bodyLarge?.color ?? Colors.black,
-              background: theme.brightness == Brightness.dark
-                  ? const Color(0xFF2A2A2A)
-                  : const Color(0xFFF5F5F5),
-            ),
-            dialogBackgroundColor: theme.brightness == Brightness.dark
-                ? const Color(0xFF2A2A2A)
-                : Colors.white,
-            dialogTheme: DialogThemeData(
-              backgroundColor: theme.brightness == Brightness.dark
-                  ? const Color(0xFF2A2A2A)
-                  : Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              elevation: 8,
-            ),
-            datePickerTheme: DatePickerThemeData(
-              backgroundColor: theme.brightness == Brightness.dark
-                  ? const Color(0xFF2A2A2A)
-                  : Colors.white,
-              headerBackgroundColor: theme.colorScheme.primary,
-              headerForegroundColor: Colors.white,
-              headerHeadlineStyle: const TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-              headerHelpStyle: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: Colors.white,
-              ),
-              weekdayStyle: TextStyle(
-                color: theme.textTheme.bodyMedium?.color,
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-              ),
-              dayStyle: TextStyle(
-                color: theme.textTheme.bodyLarge?.color,
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-              ),
-              dayForegroundColor: MaterialStateProperty.resolveWith((states) {
-                if (states.contains(MaterialState.selected)) {
-                  return Colors.white;
-                }
-                if (states.contains(MaterialState.disabled)) {
-                  return theme.textTheme.bodyMedium?.color?.withOpacity(0.3);
-                }
-                return theme.textTheme.bodyLarge?.color;
-              }),
-              dayBackgroundColor: MaterialStateProperty.resolveWith((states) {
-                if (states.contains(MaterialState.selected)) {
-                  return theme.colorScheme.primary;
-                }
-                return Colors.transparent;
-              }),
-              dayOverlayColor: MaterialStateProperty.resolveWith((states) {
-                if (states.contains(MaterialState.hovered)) {
-                  return theme.colorScheme.primary.withOpacity(0.1);
-                }
-                if (states.contains(MaterialState.pressed)) {
-                  return theme.colorScheme.primary.withOpacity(0.2);
-                }
-                return null;
-              }),
-              todayForegroundColor: MaterialStateProperty.resolveWith((states) {
-                if (states.contains(MaterialState.selected)) {
-                  return Colors.white;
-                }
-                return theme.colorScheme.primary;
-              }),
-              todayBackgroundColor: MaterialStateProperty.resolveWith((states) {
-                if (states.contains(MaterialState.selected)) {
-                  return theme.colorScheme.primary;
-                }
-                return Colors.transparent;
-              }),
-              todayBorder: BorderSide(
-                color: theme.colorScheme.primary,
-                width: 1.5,
-              ),
-              yearStyle: TextStyle(
-                color: theme.textTheme.bodyLarge?.color,
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-              ),
-              yearForegroundColor: MaterialStateProperty.resolveWith((states) {
-                if (states.contains(MaterialState.selected)) {
-                  return Colors.white;
-                }
-                return theme.textTheme.bodyLarge?.color;
-              }),
-              yearBackgroundColor: MaterialStateProperty.resolveWith((states) {
-                if (states.contains(MaterialState.selected)) {
-                  return theme.colorScheme.primary;
-                }
-                return Colors.transparent;
-              }),
-              yearOverlayColor: MaterialStateProperty.resolveWith((states) {
-                if (states.contains(MaterialState.hovered)) {
-                  return theme.colorScheme.primary.withOpacity(0.1);
-                }
-                if (states.contains(MaterialState.pressed)) {
-                  return theme.colorScheme.primary.withOpacity(0.2);
-                }
-                return null;
-              }),
-              rangePickerBackgroundColor: theme.brightness == Brightness.dark
-                  ? const Color(0xFF2A2A2A)
-                  : Colors.white,
-              rangePickerHeaderBackgroundColor: theme.colorScheme.primary,
-              rangePickerHeaderForegroundColor: Colors.white,
-              rangeSelectionBackgroundColor: theme.colorScheme.primary
-                  .withOpacity(0.1),
-              rangeSelectionOverlayColor: MaterialStateProperty.all(
-                theme.colorScheme.primary.withOpacity(0.1),
-              ),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              inputDecorationTheme: InputDecorationTheme(
-                filled: true,
-                fillColor: theme.brightness == Brightness.dark
-                    ? const Color(0xFF3A3A3A)
-                    : const Color(0xFFF0F1F7),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide.none,
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(
-                    color: theme.colorScheme.primary,
-                    width: 2,
-                  ),
-                ),
-              ),
-            ),
-            textButtonTheme: TextButtonThemeData(
-              style: TextButton.styleFrom(
-                foregroundColor: theme.colorScheme.primary,
-                textStyle: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-            ),
-          ),
-          child: child!,
-        );
-      },
+      builder: (context) => _DatePickerDialog(initialDate: _selectedDateTime),
     );
 
     if (picked != null) {
@@ -1298,80 +870,11 @@ class _LogBottomSheetState extends State<LogBottomSheet> {
   }
 
   Future<void> _selectTime() async {
-    final theme = Theme.of(context);
-    final TimeOfDay? picked = await showTimePicker(
+    final TimeOfDay? picked = await showDialog<TimeOfDay>(
       context: context,
-      initialTime: TimeOfDay.fromDateTime(_selectedDateTime),
-      builder: (context, child) {
-        return Theme(
-          data: theme.copyWith(
-            colorScheme: theme.colorScheme.copyWith(
-              primary: theme.colorScheme.primary,
-              onPrimary: Colors.white,
-              surface: theme.brightness == Brightness.dark
-                  ? const Color(0xFF2A2A2A)
-                  : Colors.white,
-              onSurface: theme.textTheme.bodyLarge?.color ?? Colors.black,
-              background: theme.brightness == Brightness.dark
-                  ? const Color(0xFF2A2A2A)
-                  : const Color(0xFFF5F5F5),
-              tertiary: theme.brightness == Brightness.dark
-                  ? const Color(0xFF3A3A3A)
-                  : const Color(0xFFF0F1F7),
-            ),
-            dialogBackgroundColor: theme.brightness == Brightness.dark
-                ? const Color(0xFF2A2A2A)
-                : Colors.white,
-            dialogTheme: DialogThemeData(
-              backgroundColor: theme.brightness == Brightness.dark
-                  ? const Color(0xFF2A2A2A)
-                  : Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              elevation: 8,
-            ),
-            textButtonTheme: TextButtonThemeData(
-              style: TextButton.styleFrom(
-                foregroundColor: theme.colorScheme.primary,
-                textStyle: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-            ),
-            timePickerTheme: TimePickerThemeData(
-              backgroundColor: theme.brightness == Brightness.dark
-                  ? const Color(0xFF2A2A2A)
-                  : Colors.white,
-              hourMinuteTextColor: theme.textTheme.bodyLarge?.color,
-              hourMinuteColor: theme.brightness == Brightness.dark
-                  ? const Color(0xFF3A3A3A)
-                  : const Color(0xFFF0F1F7),
-              dialHandColor: theme.colorScheme.primary,
-              dialBackgroundColor: theme.brightness == Brightness.dark
-                  ? const Color(0xFF3A3A3A)
-                  : const Color(0xFFF0F1F7),
-              dialTextColor: theme.textTheme.bodyLarge?.color,
-              entryModeIconColor: theme.colorScheme.primary,
-              dayPeriodTextColor: theme.textTheme.bodyLarge?.color,
-              dayPeriodColor: theme.brightness == Brightness.dark
-                  ? const Color(0xFF3A3A3A)
-                  : const Color(0xFFF0F1F7),
-              dayPeriodBorderSide: BorderSide(
-                color: theme.colorScheme.primary.withOpacity(0.2),
-              ),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-          ),
-          child: child!,
-        );
-      },
+      builder: (context) => _TimePickerDialog(
+        initialTime: TimeOfDay.fromDateTime(_selectedDateTime),
+      ),
     );
 
     if (picked != null) {
@@ -1501,5 +1004,539 @@ class _LogBottomSheetState extends State<LogBottomSheet> {
     _durationController.clear();
     _medicationController.clear();
     _doseController.clear();
+  }
+}
+
+class _DatePickerDialog extends StatefulWidget {
+  final DateTime initialDate;
+
+  const _DatePickerDialog({required this.initialDate});
+
+  @override
+  State<_DatePickerDialog> createState() => _DatePickerDialogState();
+}
+
+class _DatePickerDialogState extends State<_DatePickerDialog> {
+  late DateTime _selectedDate;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedDate = widget.initialDate;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      insetPadding: const EdgeInsets.all(20),
+      child: Container(
+        constraints: const BoxConstraints(maxWidth: 400, maxHeight: 600),
+        decoration: ShapeDecoration(
+          color: theme.scaffoldBackgroundColor,
+          shape: SmoothRectangleBorder(
+            borderRadius: SmoothBorderRadius(
+              cornerRadius: 20,
+              cornerSmoothing: 0.6,
+            ),
+          ),
+          shadows: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.2),
+              blurRadius: 20,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Header
+            Container(
+              padding: const EdgeInsets.all(20),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      'Select Date',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: theme.textTheme.headlineSmall?.color,
+                      ),
+                    ),
+                  ),
+                  Container(
+                    decoration: ShapeDecoration(
+                      color: theme.brightness == Brightness.dark
+                          ? const Color(0xFF2A2A2A)
+                          : const Color(0xFFF0F1F7),
+                      shape: SmoothRectangleBorder(
+                        borderRadius: SmoothBorderRadius(
+                          cornerRadius: 10,
+                          cornerSmoothing: 0.6,
+                        ),
+                      ),
+                    ),
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: () => Navigator.pop(context),
+                        customBorder: SmoothRectangleBorder(
+                          borderRadius: SmoothBorderRadius(
+                            cornerRadius: 10,
+                            cornerSmoothing: 0.6,
+                          ),
+                        ),
+                        child: Container(
+                          padding: const EdgeInsets.all(10),
+                          child: Icon(
+                            Icons.close,
+                            color: theme.iconTheme.color,
+                            size: 18,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // Date Picker
+            Expanded(
+              child: Container(
+                margin: const EdgeInsets.symmetric(horizontal: 20),
+                decoration: ShapeDecoration(
+                  color: theme.scaffoldBackgroundColor,
+                  shape: SmoothRectangleBorder(
+                    borderRadius: SmoothBorderRadius(
+                      cornerRadius: 16,
+                      cornerSmoothing: 0.6,
+                    ),
+                  ),
+                ),
+                child: SfDateRangePicker(
+                  backgroundColor: theme.scaffoldBackgroundColor,
+                  view: DateRangePickerView.month,
+                  selectionMode: DateRangePickerSelectionMode.single,
+                  initialSelectedDate: _selectedDate,
+                  minDate: DateTime.now().subtract(const Duration(days: 365)),
+                  maxDate: DateTime.now().add(const Duration(days: 1)),
+                  onSelectionChanged:
+                      (DateRangePickerSelectionChangedArgs args) {
+                        if (args.value is DateTime) {
+                          setState(() {
+                            _selectedDate = args.value;
+                          });
+                        }
+                      },
+                  monthViewSettings: DateRangePickerMonthViewSettings(
+                    firstDayOfWeek: 1, // Monday
+                    dayFormat: 'EEE',
+                    viewHeaderStyle: DateRangePickerViewHeaderStyle(
+                      backgroundColor: theme.scaffoldBackgroundColor,
+                      textStyle: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: theme.textTheme.bodyMedium?.color?.withOpacity(
+                          0.7,
+                        ),
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ),
+                  yearCellStyle: DateRangePickerYearCellStyle(
+                    textStyle: TextStyle(
+                      color: theme.textTheme.bodyLarge?.color,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    todayTextStyle: TextStyle(
+                      color: theme.colorScheme.primary,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  monthCellStyle: DateRangePickerMonthCellStyle(
+                    textStyle: TextStyle(
+                      color: theme.textTheme.bodyLarge?.color,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    todayTextStyle: TextStyle(
+                      color: theme.colorScheme.primary,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    disabledDatesTextStyle: TextStyle(
+                      color: theme.textTheme.bodyMedium?.color?.withOpacity(
+                        0.3,
+                      ),
+                      fontSize: 16,
+                    ),
+                    weekendTextStyle: TextStyle(
+                      color: theme.textTheme.bodyLarge?.color,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  selectionTextStyle: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  selectionColor: theme.colorScheme.primary,
+                  todayHighlightColor: theme.colorScheme.primary.withOpacity(
+                    0.3,
+                  ),
+                  headerStyle: DateRangePickerHeaderStyle(
+                    backgroundColor: theme.scaffoldBackgroundColor,
+                    textAlign: TextAlign.center,
+                    textStyle: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: theme.textTheme.headlineSmall?.color,
+                    ),
+                  ),
+                  navigationDirection:
+                      DateRangePickerNavigationDirection.horizontal,
+                  allowViewNavigation: true,
+                  enablePastDates: true,
+                  showNavigationArrow: true,
+                  navigationMode: DateRangePickerNavigationMode.snap,
+                ),
+              ),
+            ),
+
+            // Apply Button
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context, _selectedDate);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: theme.colorScheme.primary,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: SmoothRectangleBorder(
+                      borderRadius: SmoothBorderRadius(
+                        cornerRadius: 16,
+                        cornerSmoothing: 0.6,
+                      ),
+                    ),
+                  ),
+                  child: const Text(
+                    'Apply',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _TimePickerDialog extends StatefulWidget {
+  final TimeOfDay initialTime;
+
+  const _TimePickerDialog({required this.initialTime});
+
+  @override
+  State<_TimePickerDialog> createState() => _TimePickerDialogState();
+}
+
+class _TimePickerDialogState extends State<_TimePickerDialog> {
+  late TimeOfDay _selectedTime;
+  late int _selectedHour;
+  late int _selectedMinute;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedTime = widget.initialTime;
+    _selectedHour = _selectedTime.hour; // Use 24-hour format
+    _selectedMinute = _selectedTime.minute;
+  }
+
+  void _updateSelectedTime() {
+    _selectedTime = TimeOfDay(hour: _selectedHour, minute: _selectedMinute);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      insetPadding: const EdgeInsets.all(20),
+      child: Container(
+        constraints: const BoxConstraints(maxWidth: 400, maxHeight: 500),
+        decoration: ShapeDecoration(
+          color: theme.scaffoldBackgroundColor,
+          shape: SmoothRectangleBorder(
+            borderRadius: SmoothBorderRadius(
+              cornerRadius: 20,
+              cornerSmoothing: 0.6,
+            ),
+          ),
+          shadows: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.2),
+              blurRadius: 20,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Header
+            Container(
+              padding: const EdgeInsets.all(20),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      'Select Time',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: theme.textTheme.headlineSmall?.color,
+                      ),
+                    ),
+                  ),
+                  Container(
+                    decoration: ShapeDecoration(
+                      color: theme.brightness == Brightness.dark
+                          ? const Color(0xFF2A2A2A)
+                          : const Color(0xFFF0F1F7),
+                      shape: SmoothRectangleBorder(
+                        borderRadius: SmoothBorderRadius(
+                          cornerRadius: 10,
+                          cornerSmoothing: 0.6,
+                        ),
+                      ),
+                    ),
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: () => Navigator.pop(context),
+                        customBorder: SmoothRectangleBorder(
+                          borderRadius: SmoothBorderRadius(
+                            cornerRadius: 10,
+                            cornerSmoothing: 0.6,
+                          ),
+                        ),
+                        child: Container(
+                          padding: const EdgeInsets.all(10),
+                          child: Icon(
+                            Icons.close,
+                            color: theme.iconTheme.color,
+                            size: 18,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // Time Display (24-hour format)
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: 20),
+              padding: const EdgeInsets.all(20),
+              decoration: ShapeDecoration(
+                color: theme.colorScheme.primary.withOpacity(0.1),
+                shape: SmoothRectangleBorder(
+                  borderRadius: SmoothBorderRadius(
+                    cornerRadius: 16,
+                    cornerSmoothing: 0.6,
+                  ),
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    '${_selectedHour.toString().padLeft(2, '0')}:${_selectedMinute.toString().padLeft(2, '0')}',
+                    style: TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                      color: theme.colorScheme.primary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            // Time Pickers
+            Expanded(
+              child: Container(
+                margin: const EdgeInsets.symmetric(horizontal: 20),
+                child: Row(
+                  children: [
+                    // Hour Picker (24-hour format)
+                    Expanded(
+                      child: Column(
+                        children: [
+                          Text(
+                            'Hour',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: theme.textTheme.bodyMedium?.color
+                                  ?.withOpacity(0.7),
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          Expanded(
+                            child: _buildScrollPicker(
+                              itemCount: 24, // 0-23 hours
+                              selectedIndex: _selectedHour,
+                              onSelectedItemChanged: (index) {
+                                setState(() {
+                                  _selectedHour = index;
+                                  _updateSelectedTime();
+                                });
+                              },
+                              itemBuilder: (index) =>
+                                  index.toString().padLeft(2, '0'),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(width: 20),
+
+                    // Minute Picker
+                    Expanded(
+                      child: Column(
+                        children: [
+                          Text(
+                            'Minute',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: theme.textTheme.bodyMedium?.color
+                                  ?.withOpacity(0.7),
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          Expanded(
+                            child: _buildScrollPicker(
+                              itemCount: 60,
+                              selectedIndex: _selectedMinute,
+                              onSelectedItemChanged: (index) {
+                                setState(() {
+                                  _selectedMinute = index;
+                                  _updateSelectedTime();
+                                });
+                              },
+                              itemBuilder: (index) =>
+                                  index.toString().padLeft(2, '0'),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            // Apply Button
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context, _selectedTime);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: theme.colorScheme.primary,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: SmoothRectangleBorder(
+                      borderRadius: SmoothBorderRadius(
+                        cornerRadius: 16,
+                        cornerSmoothing: 0.6,
+                      ),
+                    ),
+                  ),
+                  child: const Text(
+                    'Apply',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildScrollPicker({
+    required int itemCount,
+    required int selectedIndex,
+    required ValueChanged<int> onSelectedItemChanged,
+    required String Function(int) itemBuilder,
+  }) {
+    final theme = Theme.of(context);
+
+    return Container(
+      decoration: ShapeDecoration(
+        color: theme.brightness == Brightness.dark
+            ? const Color(0xFF2A2A2A)
+            : const Color(0xFFF0F1F7),
+        shape: SmoothRectangleBorder(
+          borderRadius: SmoothBorderRadius(
+            cornerRadius: 12,
+            cornerSmoothing: 0.6,
+          ),
+        ),
+      ),
+      child: ListWheelScrollView.useDelegate(
+        itemExtent: 50,
+        perspective: 0.005,
+        diameterRatio: 1.2,
+        physics: const FixedExtentScrollPhysics(),
+        controller: FixedExtentScrollController(initialItem: selectedIndex),
+        onSelectedItemChanged: onSelectedItemChanged,
+        childDelegate: ListWheelChildBuilderDelegate(
+          childCount: itemCount,
+          builder: (context, index) {
+            final isSelected = index == selectedIndex;
+            return Container(
+              alignment: Alignment.center,
+              child: Text(
+                itemBuilder(index),
+                style: TextStyle(
+                  fontSize: isSelected ? 20 : 16,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                  color: isSelected
+                      ? theme.colorScheme.primary
+                      : theme.textTheme.bodyLarge?.color?.withOpacity(0.7),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
   }
 }

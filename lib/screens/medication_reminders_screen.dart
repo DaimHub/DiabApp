@@ -327,9 +327,10 @@ class _MedicationRemindersScreenState extends State<MedicationRemindersScreen> {
                       color: Colors.transparent,
                       child: InkWell(
                         onTap: () async {
-                          final time = await showTimePicker(
+                          final time = await showDialog<TimeOfDay>(
                             context: context,
-                            initialTime: selectedTime,
+                            builder: (context) =>
+                                _TimePickerDialog(initialTime: selectedTime),
                           );
                           if (time != null) {
                             setDialogState(() {
@@ -1207,10 +1208,9 @@ class _MedicationRemindersScreenState extends State<MedicationRemindersScreen> {
         return Padding(
           padding: const EdgeInsets.only(bottom: 12),
           child: Container(
+            padding: const EdgeInsets.all(20),
             decoration: ShapeDecoration(
-              color: theme.brightness == Brightness.dark
-                  ? const Color(0xFF2A2A2A)
-                  : const Color(0xFFF0F1F7),
+              color: theme.scaffoldBackgroundColor,
               shape: SmoothRectangleBorder(
                 borderRadius: SmoothBorderRadius(
                   cornerRadius: 16,
@@ -1225,114 +1225,121 @@ class _MedicationRemindersScreenState extends State<MedicationRemindersScreen> {
               ),
               shadows: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.03),
+                  color: theme.brightness == Brightness.dark
+                      ? Colors.black.withOpacity(0.2)
+                      : Colors.black.withOpacity(0.05),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
               ],
             ),
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  Container(
-                    height: 50,
-                    width: 50,
-                    decoration: ShapeDecoration(
+            child: Row(
+              children: [
+                Container(
+                  height: 50,
+                  width: 50,
+                  decoration: ShapeDecoration(
+                    color: medication['enabled']
+                        ? theme.colorScheme.primary.withOpacity(0.1)
+                        : theme.brightness == Brightness.dark
+                        ? const Color(0xFF3A3A3A)
+                        : Colors.white,
+                    shape: SmoothRectangleBorder(
+                      borderRadius: SmoothBorderRadius(
+                        cornerRadius: 14,
+                        cornerSmoothing: 0.6,
+                      ),
+                    ),
+                    shadows: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 6,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Center(
+                    child: FaIcon(
+                      FontAwesomeIcons.pills,
                       color: medication['enabled']
-                          ? theme.colorScheme.primary.withOpacity(0.1)
-                          : theme.brightness == Brightness.dark
-                          ? const Color(0xFF3A3A3A)
-                          : Colors.white,
-                      shape: SmoothRectangleBorder(
-                        borderRadius: SmoothBorderRadius(
-                          cornerRadius: 14,
-                          cornerSmoothing: 0.6,
+                          ? theme.colorScheme.primary
+                          : theme.iconTheme.color?.withOpacity(0.5),
+                      size: 20,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        medication['name'],
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: medication['enabled']
+                              ? theme.textTheme.titleMedium?.color
+                              : theme.textTheme.titleMedium?.color?.withOpacity(
+                                  0.6,
+                                ),
                         ),
                       ),
-                    ),
-                    child: Center(
-                      child: FaIcon(
-                        FontAwesomeIcons.pills,
-                        color: medication['enabled']
-                            ? theme.colorScheme.primary
-                            : theme.iconTheme.color?.withOpacity(0.5),
-                        size: 20,
+                      const SizedBox(height: 4),
+                      Text(
+                        daysText,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: medication['enabled']
+                              ? theme.colorScheme.primary
+                              : theme.textTheme.bodyMedium?.color?.withOpacity(
+                                  0.5,
+                                ),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Switch(
+                  value: medication['enabled'],
+                  onChanged: (value) => _toggleMedication(index, value),
+                  activeColor: Colors.white,
+                  activeTrackColor: theme.colorScheme.primary,
+                  inactiveThumbColor: Colors.white,
+                  inactiveTrackColor: Colors.grey[300],
+                ),
+                const SizedBox(width: 8),
+                Container(
+                  decoration: ShapeDecoration(
+                    color: Colors.red.withOpacity(0.1),
+                    shape: SmoothRectangleBorder(
+                      borderRadius: SmoothBorderRadius(
+                        cornerRadius: 10,
+                        cornerSmoothing: 0.6,
                       ),
                     ),
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          medication['name'],
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: medication['enabled']
-                                ? theme.textTheme.titleMedium?.color
-                                : theme.textTheme.titleMedium?.color
-                                      ?.withOpacity(0.6),
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          daysText,
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: medication['enabled']
-                                ? theme.textTheme.bodyMedium?.color
-                                : theme.textTheme.bodyMedium?.color
-                                      ?.withOpacity(0.5),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Switch(
-                    value: medication['enabled'],
-                    onChanged: (value) => _toggleMedication(index, value),
-                    activeColor: Colors.white,
-                    activeTrackColor: theme.colorScheme.primary,
-                    inactiveThumbColor: Colors.white,
-                    inactiveTrackColor: Colors.grey[300],
-                  ),
-                  const SizedBox(width: 8),
-                  Container(
-                    decoration: ShapeDecoration(
-                      color: Colors.red.withOpacity(0.1),
-                      shape: SmoothRectangleBorder(
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: () => _showDeleteConfirmation(index),
+                      customBorder: SmoothRectangleBorder(
                         borderRadius: SmoothBorderRadius(
                           cornerRadius: 10,
                           cornerSmoothing: 0.6,
                         ),
                       ),
-                    ),
-                    child: Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        onTap: () => _showDeleteConfirmation(index),
-                        customBorder: SmoothRectangleBorder(
-                          borderRadius: SmoothBorderRadius(
-                            cornerRadius: 10,
-                            cornerSmoothing: 0.6,
-                          ),
-                        ),
-                        child: Container(
-                          padding: const EdgeInsets.all(8),
-                          child: Icon(
-                            Icons.delete_outline,
-                            color: Colors.red[600],
-                            size: 20,
-                          ),
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        child: Icon(
+                          Icons.delete_outline,
+                          color: Colors.red[600],
+                          size: 20,
                         ),
                       ),
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         );
@@ -1553,6 +1560,302 @@ class _MedicationRemindersScreenState extends State<MedicationRemindersScreen> {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _TimePickerDialog extends StatefulWidget {
+  final TimeOfDay initialTime;
+
+  const _TimePickerDialog({required this.initialTime});
+
+  @override
+  State<_TimePickerDialog> createState() => _TimePickerDialogState();
+}
+
+class _TimePickerDialogState extends State<_TimePickerDialog> {
+  late TimeOfDay _selectedTime;
+  late int _selectedHour;
+  late int _selectedMinute;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedTime = widget.initialTime;
+    _selectedHour = _selectedTime.hour; // Use 24-hour format
+    _selectedMinute = _selectedTime.minute;
+  }
+
+  void _updateSelectedTime() {
+    _selectedTime = TimeOfDay(hour: _selectedHour, minute: _selectedMinute);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      insetPadding: const EdgeInsets.all(20),
+      child: Container(
+        constraints: const BoxConstraints(maxWidth: 400, maxHeight: 500),
+        decoration: ShapeDecoration(
+          color: theme.scaffoldBackgroundColor,
+          shape: SmoothRectangleBorder(
+            borderRadius: SmoothBorderRadius(
+              cornerRadius: 20,
+              cornerSmoothing: 0.6,
+            ),
+          ),
+          shadows: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.2),
+              blurRadius: 20,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Header
+            Container(
+              padding: const EdgeInsets.all(20),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      'Select Time',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: theme.textTheme.headlineSmall?.color,
+                      ),
+                    ),
+                  ),
+                  Container(
+                    decoration: ShapeDecoration(
+                      color: theme.brightness == Brightness.dark
+                          ? const Color(0xFF2A2A2A)
+                          : const Color(0xFFF0F1F7),
+                      shape: SmoothRectangleBorder(
+                        borderRadius: SmoothBorderRadius(
+                          cornerRadius: 10,
+                          cornerSmoothing: 0.6,
+                        ),
+                      ),
+                    ),
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: () => Navigator.pop(context),
+                        customBorder: SmoothRectangleBorder(
+                          borderRadius: SmoothBorderRadius(
+                            cornerRadius: 10,
+                            cornerSmoothing: 0.6,
+                          ),
+                        ),
+                        child: Container(
+                          padding: const EdgeInsets.all(10),
+                          child: Icon(
+                            Icons.close,
+                            color: theme.iconTheme.color,
+                            size: 18,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // Time Display (24-hour format)
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: 20),
+              padding: const EdgeInsets.all(20),
+              decoration: ShapeDecoration(
+                color: theme.colorScheme.primary.withOpacity(0.1),
+                shape: SmoothRectangleBorder(
+                  borderRadius: SmoothBorderRadius(
+                    cornerRadius: 16,
+                    cornerSmoothing: 0.6,
+                  ),
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    '${_selectedHour.toString().padLeft(2, '0')}:${_selectedMinute.toString().padLeft(2, '0')}',
+                    style: TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                      color: theme.colorScheme.primary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            // Time Pickers
+            Expanded(
+              child: Container(
+                margin: const EdgeInsets.symmetric(horizontal: 20),
+                child: Row(
+                  children: [
+                    // Hour Picker (24-hour format)
+                    Expanded(
+                      child: Column(
+                        children: [
+                          Text(
+                            'Hour',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: theme.textTheme.bodyMedium?.color
+                                  ?.withOpacity(0.7),
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          Expanded(
+                            child: _buildScrollPicker(
+                              itemCount: 24, // 0-23 hours
+                              selectedIndex: _selectedHour,
+                              onSelectedItemChanged: (index) {
+                                setState(() {
+                                  _selectedHour = index;
+                                  _updateSelectedTime();
+                                });
+                              },
+                              itemBuilder: (index) =>
+                                  index.toString().padLeft(2, '0'),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(width: 20),
+
+                    // Minute Picker
+                    Expanded(
+                      child: Column(
+                        children: [
+                          Text(
+                            'Minute',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: theme.textTheme.bodyMedium?.color
+                                  ?.withOpacity(0.7),
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          Expanded(
+                            child: _buildScrollPicker(
+                              itemCount: 60,
+                              selectedIndex: _selectedMinute,
+                              onSelectedItemChanged: (index) {
+                                setState(() {
+                                  _selectedMinute = index;
+                                  _updateSelectedTime();
+                                });
+                              },
+                              itemBuilder: (index) =>
+                                  index.toString().padLeft(2, '0'),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            // Apply Button
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context, _selectedTime);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: theme.colorScheme.primary,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: SmoothRectangleBorder(
+                      borderRadius: SmoothBorderRadius(
+                        cornerRadius: 16,
+                        cornerSmoothing: 0.6,
+                      ),
+                    ),
+                  ),
+                  child: const Text(
+                    'Apply',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildScrollPicker({
+    required int itemCount,
+    required int selectedIndex,
+    required ValueChanged<int> onSelectedItemChanged,
+    required String Function(int) itemBuilder,
+  }) {
+    final theme = Theme.of(context);
+
+    return Container(
+      decoration: ShapeDecoration(
+        color: theme.brightness == Brightness.dark
+            ? const Color(0xFF2A2A2A)
+            : const Color(0xFFF0F1F7),
+        shape: SmoothRectangleBorder(
+          borderRadius: SmoothBorderRadius(
+            cornerRadius: 12,
+            cornerSmoothing: 0.6,
+          ),
+        ),
+      ),
+      child: ListWheelScrollView.useDelegate(
+        itemExtent: 50,
+        perspective: 0.005,
+        diameterRatio: 1.2,
+        physics: const FixedExtentScrollPhysics(),
+        controller: FixedExtentScrollController(initialItem: selectedIndex),
+        onSelectedItemChanged: onSelectedItemChanged,
+        childDelegate: ListWheelChildBuilderDelegate(
+          childCount: itemCount,
+          builder: (context, index) {
+            final isSelected = index == selectedIndex;
+            return Container(
+              alignment: Alignment.center,
+              child: Text(
+                itemBuilder(index),
+                style: TextStyle(
+                  fontSize: isSelected ? 20 : 16,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                  color: isSelected
+                      ? theme.colorScheme.primary
+                      : theme.textTheme.bodyLarge?.color?.withOpacity(0.7),
+                ),
+              ),
+            );
+          },
         ),
       ),
     );

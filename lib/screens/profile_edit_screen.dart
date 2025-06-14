@@ -15,8 +15,6 @@ class ProfileEditScreen extends StatefulWidget {
 
 class _ProfileEditScreenState extends State<ProfileEditScreen> {
   String _selectedDiabetesType = 'Type 1';
-  final TextEditingController _glucoseMinController = TextEditingController();
-  final TextEditingController _glucoseMaxController = TextEditingController();
   final TextEditingController _firstNameController = TextEditingController();
   final TextEditingController _lastNameController = TextEditingController();
 
@@ -30,8 +28,6 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
 
   @override
   void dispose() {
-    _glucoseMinController.dispose();
-    _glucoseMaxController.dispose();
     _firstNameController.dispose();
     _lastNameController.dispose();
     super.dispose();
@@ -42,20 +38,14 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
       final userData = await FirestoreService.getUserData();
       if (userData != null && mounted) {
         setState(() {
-          // Charger les données personnelles
+          // Load personal data
           _firstNameController.text = userData['firstName'] ?? '';
           _lastNameController.text = userData['lastName'] ?? '';
           _selectedDiabetesType = userData['diabetesType'] ?? 'Type 1';
-
-          // Charger les objectifs de glucose
-          _glucoseMinController.text =
-              userData['targetGlucoseMin']?.toString() ?? '80';
-          _glucoseMaxController.text =
-              userData['targetGlucoseMax']?.toString() ?? '180';
         });
       } else {
         setState(() {
-          // Fallback vers les données Firebase Auth si pas de données Firestore
+          // Fallback to Firebase Auth data if no Firestore data
           final user = FirebaseAuth.instance.currentUser;
           if (user?.displayName != null) {
             final nameParts = user!.displayName!.split(' ');
@@ -66,18 +56,10 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                 ? nameParts.sublist(1).join(' ')
                 : '';
           }
-
-          // Valeurs par défaut
-          _glucoseMinController.text = '80';
-          _glucoseMaxController.text = '180';
         });
       }
     } catch (e) {
-      setState(() {
-        // Valeurs par défaut en cas d'erreur
-        _glucoseMinController.text = '80';
-        _glucoseMaxController.text = '180';
-      });
+      // Handle error silently with default values
     }
   }
 
@@ -87,32 +69,18 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
     });
 
     try {
-      // Valider les données
-      final glucoseMin = int.tryParse(_glucoseMinController.text);
-      final glucoseMax = int.tryParse(_glucoseMaxController.text);
-
-      if (glucoseMin == null || glucoseMax == null) {
-        throw Exception('Valeurs de glucose invalides');
-      }
-
-      if (glucoseMin >= glucoseMax) {
-        throw Exception('Le minimum doit être inférieur au maximum');
-      }
-
-      // Préparer les données à sauvegarder
+      // Prepare data to save
       final updateData = {
         'firstName': _firstNameController.text.trim(),
         'lastName': _lastNameController.text.trim(),
         'diabetesType': _selectedDiabetesType,
-        'targetGlucoseMin': glucoseMin,
-        'targetGlucoseMax': glucoseMax,
       };
 
-      // Sauvegarder dans Firestore
+      // Save to Firestore
       final success = await FirestoreService.saveUserData(updateData);
 
       if (!success) {
-        throw Exception('Échec de la sauvegarde');
+        throw Exception('Failed to save profile');
       }
 
       if (mounted) {
@@ -327,77 +295,100 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Personal Information Section
-                      Text(
-                        'Personal Information',
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: theme.textTheme.headlineMedium?.color,
+                      // Profile Header
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(24),
+                        decoration: ShapeDecoration(
+                          color: theme.brightness == Brightness.dark
+                              ? const Color(0xFF2A2A2A)
+                              : const Color(0xFFF0F1F7),
+                          shape: SmoothRectangleBorder(
+                            borderRadius: SmoothBorderRadius(
+                              cornerRadius: 20,
+                              cornerSmoothing: 0.6,
+                            ),
+                          ),
+                          shadows: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.05),
+                              blurRadius: 10,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          children: [
+                            // Profile Avatar
+                            Container(
+                              height: 80,
+                              width: 80,
+                              decoration: ShapeDecoration(
+                                color: theme.colorScheme.primary,
+                                shape: SmoothRectangleBorder(
+                                  borderRadius: SmoothBorderRadius(
+                                    cornerRadius: 24,
+                                    cornerSmoothing: 0.6,
+                                  ),
+                                ),
+                                shadows: [
+                                  BoxShadow(
+                                    color: theme.colorScheme.primary
+                                        .withOpacity(0.3),
+                                    blurRadius: 20,
+                                    offset: const Offset(0, 8),
+                                  ),
+                                ],
+                              ),
+                              child: const Center(
+                                child: Icon(
+                                  FontAwesomeIcons.user,
+                                  color: Colors.white,
+                                  size: 32,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'Personal Information',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: theme.textTheme.headlineMedium?.color,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Update your profile details',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: theme.textTheme.bodyMedium?.color,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      const SizedBox(height: 20),
 
+                      const SizedBox(height: 32),
+
+                      // Form Fields
                       _buildTextField(
                         controller: _firstNameController,
                         label: 'First Name',
                         icon: FontAwesomeIcons.user,
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 20),
 
                       _buildTextField(
                         controller: _lastNameController,
                         label: 'Last Name',
                         icon: FontAwesomeIcons.user,
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 20),
 
                       _buildDiabetesTypeSelector(),
 
                       const SizedBox(height: 40),
-
-                      // Glucose Goals Section
-                      Text(
-                        'Glucose Goals',
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: theme.textTheme.headlineMedium?.color,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Set your target glucose range in mg/dL',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: theme.textTheme.bodyMedium?.color,
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _buildTextField(
-                              controller: _glucoseMinController,
-                              label: 'Minimum',
-                              icon: Icons.trending_down,
-                              keyboardType: TextInputType.number,
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: _buildTextField(
-                              controller: _glucoseMaxController,
-                              label: 'Maximum',
-                              icon: Icons.trending_up,
-                              keyboardType: TextInputType.number,
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      const SizedBox(height: 30),
                     ],
                   ),
                 ),
@@ -467,6 +458,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                 keyboardType: keyboardType,
                 style: TextStyle(
                   fontSize: 16,
+                  fontWeight: FontWeight.w500,
                   color: theme.textTheme.bodyLarge?.color,
                 ),
                 decoration: InputDecoration(
@@ -474,6 +466,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                   labelStyle: TextStyle(
                     color: theme.colorScheme.primary.withOpacity(0.7),
                     fontSize: 16,
+                    fontWeight: FontWeight.w500,
                   ),
                   prefixIcon: Padding(
                     padding: const EdgeInsets.all(16.0),
@@ -559,6 +552,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                         'Diabetes Type',
                         style: TextStyle(
                           fontSize: 16,
+                          fontWeight: FontWeight.w500,
                           color: theme.colorScheme.primary.withOpacity(0.7),
                         ),
                       ),

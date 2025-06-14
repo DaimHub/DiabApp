@@ -357,7 +357,7 @@ class _LogHistoryScreenState extends State<LogHistoryScreen> {
                       height: 6,
                       width: 6,
                       decoration: BoxDecoration(
-                        color: _getEventColor(context, type),
+                        color: _getCalendarMarkerColor(type),
                         shape: BoxShape.circle,
                       ),
                     );
@@ -977,6 +977,22 @@ class _LogHistoryScreenState extends State<LogHistoryScreen> {
     }
   }
 
+  // Helper function to get distinct colors for calendar markers
+  Color _getCalendarMarkerColor(String eventType) {
+    switch (eventType.toLowerCase()) {
+      case 'glucose':
+        return Colors.red[400]!.withOpacity(0.3); // Red for glucose
+      case 'meal':
+        return Colors.orange[400]!.withOpacity(0.3); // Orange for meals
+      case 'activity':
+        return Colors.green[400]!.withOpacity(0.3); // Green for activity
+      case 'medication':
+        return Colors.blue[400]!.withOpacity(0.3); // Blue for medication
+      default:
+        return Colors.grey[400]!.withOpacity(0.3);
+    }
+  }
+
   // Helper function to get icon container decoration for each event type
   Decoration _getIconContainerDecoration(
     BuildContext context,
@@ -1140,7 +1156,6 @@ class EventDetailsBottomSheet extends StatelessWidget {
     String eventType,
   ) {
     final theme = Theme.of(context);
-    final baseColor = theme.colorScheme.primary;
 
     switch (eventType.toLowerCase()) {
       case 'glucose':

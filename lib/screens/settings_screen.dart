@@ -12,6 +12,7 @@ import '../providers/glucose_trend_data_provider.dart';
 import '../providers/log_history_data_provider.dart';
 import '../services/overview_cache_service.dart';
 import '../services/events_cache_service.dart';
+import 'export_data_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -24,10 +25,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _notificationsEnabled = false;
   bool _bloodSugarCheckEnabled = false;
   bool _medicationRemindersEnabled = false;
-
-  // Unit preferences
-  String _selectedBloodSugarUnit = 'mg/dL';
-  String _selectedCarbohydrateUnit = 'grams';
 
   // User profile data
   String _userDiabetesType = 'Type 1';
@@ -57,12 +54,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
               userData['bloodSugarCheckNotifications'] ?? false;
           _medicationRemindersEnabled =
               userData['medicationReminders'] ?? false;
-
-          // Units
-          _selectedBloodSugarUnit = userData['glucoseUnit'] ?? 'mg/dL';
-          // Convertir carbohydrateUnit de Firestore (g) vers l'interface (grams)
-          final carbUnit = userData['carbohydrateUnit'] ?? 'g';
-          _selectedCarbohydrateUnit = carbUnit == 'g' ? 'grams' : 'ounces';
 
           // Profile info
           _userDiabetesType = userData['diabetesType'] ?? 'Type 1';
@@ -416,6 +407,36 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
                             const SizedBox(height: 30),
 
+                            // Data Management Section
+                            Text(
+                              'Data Management',
+                              style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: theme.textTheme.headlineMedium?.color,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+
+                            _buildActionSettingItem(
+                              icon: Icons.download,
+                              title: 'Export Data',
+                              description:
+                                  'Export your glucose readings and health data',
+                              isDestructive: false,
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        const ExportDataScreen(),
+                                  ),
+                                );
+                              },
+                            ),
+
+                            const SizedBox(height: 30),
+
                             // Notifications Section
                             Text(
                               'Notifications',
@@ -480,42 +501,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             const SizedBox(height: 12),
 
                             _buildMedicationReminderItem(),
-
-                            const SizedBox(height: 30),
-
-                            // Units Section
-                            Text(
-                              'Units',
-                              style: TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                color: theme.textTheme.headlineMedium?.color,
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-
-                            _buildValueSettingItem(
-                              icon: Icons.straighten,
-                              title: 'Blood Sugar Units',
-                              description:
-                                  'Choose between mg/dL or mmol/L for blood sugar',
-                              value: _selectedBloodSugarUnit,
-                              onTap: () {
-                                _showBloodSugarUnitsDialog();
-                              },
-                            ),
-                            const SizedBox(height: 12),
-
-                            _buildValueSettingItem(
-                              icon: FontAwesomeIcons.scaleBalanced,
-                              title: 'Carbohydrate Units',
-                              description:
-                                  'Select between grams or ounces for carbohydrate measurements.',
-                              value: _selectedCarbohydrateUnit,
-                              onTap: () {
-                                _showCarbohydrateUnitsDialog();
-                              },
-                            ),
 
                             const SizedBox(height: 30),
 
@@ -1514,357 +1499,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
   void _showLogoutConfirmation(BuildContext context) {
     final theme = Theme.of(context);
     showDialog(context: context, builder: (context) => _LogoutDialog());
-  }
-
-  void _showBloodSugarUnitsDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => Dialog(
-        backgroundColor: Colors.transparent,
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(24),
-          decoration: ShapeDecoration(
-            color: Theme.of(context).scaffoldBackgroundColor,
-            shape: SmoothRectangleBorder(
-              borderRadius: SmoothBorderRadius(
-                cornerRadius: 20,
-                cornerSmoothing: 0.6,
-              ),
-            ),
-            shadows: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.15),
-                blurRadius: 20,
-                offset: const Offset(0, 10),
-              ),
-            ],
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Header with close button
-              Row(
-                children: [
-                  Text(
-                    'Blood Sugar Units',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).textTheme.headlineMedium?.color,
-                    ),
-                  ),
-                  const Spacer(),
-                  Container(
-                    width: 36,
-                    height: 36,
-                    decoration: ShapeDecoration(
-                      color: Theme.of(context).brightness == Brightness.dark
-                          ? const Color(0xFF2A2A2A)
-                          : const Color(0xFFF0F1F7),
-                      shape: SmoothRectangleBorder(
-                        borderRadius: SmoothBorderRadius(
-                          cornerRadius: 10,
-                          cornerSmoothing: 0.6,
-                        ),
-                      ),
-                    ),
-                    child: Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        onTap: () => Navigator.pop(context),
-                        customBorder: SmoothRectangleBorder(
-                          borderRadius: SmoothBorderRadius(
-                            cornerRadius: 10,
-                            cornerSmoothing: 0.6,
-                          ),
-                        ),
-                        child: const Center(child: Icon(Icons.close, size: 18)),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-
-              // Unit options
-              _buildUnitOption(
-                context,
-                'mg/dL',
-                'Milligrams per deciliter',
-                Icons.straighten,
-                _selectedBloodSugarUnit == 'mg/dL',
-                () async {
-                  setState(() {
-                    _selectedBloodSugarUnit = 'mg/dL';
-                  });
-
-                  // Sauvegarder dans Firestore
-                  await FirestoreService.updateUnits(glucoseUnit: 'mg/dL');
-                  Navigator.pop(context);
-                },
-              ),
-              const SizedBox(height: 12),
-              _buildUnitOption(
-                context,
-                'mmol/L',
-                'Millimoles per liter',
-                Icons.straighten,
-                _selectedBloodSugarUnit == 'mmol/L',
-                () async {
-                  setState(() {
-                    _selectedBloodSugarUnit = 'mmol/L';
-                  });
-
-                  // Sauvegarder dans Firestore
-                  await FirestoreService.updateUnits(glucoseUnit: 'mmol/L');
-                  Navigator.pop(context);
-                },
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildUnitOption(
-    BuildContext context,
-    String value,
-    String description,
-    IconData icon,
-    bool isSelected,
-    VoidCallback onTap,
-  ) {
-    final theme = Theme.of(context);
-    return Container(
-      decoration: ShapeDecoration(
-        color: isSelected
-            ? theme.colorScheme.primary.withOpacity(0.1)
-            : theme.brightness == Brightness.dark
-            ? const Color(0xFF2A2A2A)
-            : const Color(0xFFF0F1F7),
-        shape: SmoothRectangleBorder(
-          borderRadius: SmoothBorderRadius(
-            cornerRadius: 14,
-            cornerSmoothing: 0.6,
-          ),
-          side: BorderSide(
-            color: isSelected
-                ? theme.colorScheme.primary
-                : theme.brightness == Brightness.dark
-                ? const Color(0xFF3A3A3A)
-                : Colors.grey[200]!,
-            width: isSelected ? 2 : 1,
-          ),
-        ),
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          customBorder: SmoothRectangleBorder(
-            borderRadius: SmoothBorderRadius(
-              cornerRadius: 14,
-              cornerSmoothing: 0.6,
-            ),
-          ),
-          child: Container(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                Container(
-                  height: 40,
-                  width: 40,
-                  decoration: ShapeDecoration(
-                    color: isSelected
-                        ? theme.colorScheme.primary.withOpacity(0.1)
-                        : theme.brightness == Brightness.dark
-                        ? const Color(0xFF3A3A3A)
-                        : Colors.white,
-                    shape: SmoothRectangleBorder(
-                      borderRadius: SmoothBorderRadius(
-                        cornerRadius: 10,
-                        cornerSmoothing: 0.6,
-                      ),
-                    ),
-                  ),
-                  child: Center(
-                    child: icon == FontAwesomeIcons.scaleBalanced
-                        ? FaIcon(
-                            icon,
-                            color: isSelected
-                                ? theme.colorScheme.primary
-                                : theme.iconTheme.color,
-                            size: 18,
-                          )
-                        : Icon(
-                            icon,
-                            color: isSelected
-                                ? theme.colorScheme.primary
-                                : theme.iconTheme.color,
-                            size: 20,
-                          ),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        value,
-                        style: TextStyle(
-                          color: isSelected
-                              ? theme.colorScheme.primary
-                              : theme.textTheme.bodyLarge?.color,
-                          fontWeight: isSelected
-                              ? FontWeight.w600
-                              : FontWeight.normal,
-                          fontSize: 16,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        description,
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: theme.textTheme.bodyMedium?.color,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                if (isSelected)
-                  Container(
-                    height: 20,
-                    width: 20,
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.primary,
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Center(
-                      child: Icon(Icons.check, color: Colors.white, size: 14),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _showCarbohydrateUnitsDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => Dialog(
-        backgroundColor: Colors.transparent,
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(24),
-          decoration: ShapeDecoration(
-            color: Theme.of(context).scaffoldBackgroundColor,
-            shape: SmoothRectangleBorder(
-              borderRadius: SmoothBorderRadius(
-                cornerRadius: 20,
-                cornerSmoothing: 0.6,
-              ),
-            ),
-            shadows: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.15),
-                blurRadius: 20,
-                offset: const Offset(0, 10),
-              ),
-            ],
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Header with close button
-              Row(
-                children: [
-                  Text(
-                    'Carbohydrate Units',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).textTheme.headlineMedium?.color,
-                    ),
-                  ),
-                  const Spacer(),
-                  Container(
-                    width: 36,
-                    height: 36,
-                    decoration: ShapeDecoration(
-                      color: Theme.of(context).brightness == Brightness.dark
-                          ? const Color(0xFF2A2A2A)
-                          : const Color(0xFFF0F1F7),
-                      shape: SmoothRectangleBorder(
-                        borderRadius: SmoothBorderRadius(
-                          cornerRadius: 10,
-                          cornerSmoothing: 0.6,
-                        ),
-                      ),
-                    ),
-                    child: Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        onTap: () => Navigator.pop(context),
-                        customBorder: SmoothRectangleBorder(
-                          borderRadius: SmoothBorderRadius(
-                            cornerRadius: 10,
-                            cornerSmoothing: 0.6,
-                          ),
-                        ),
-                        child: const Center(child: Icon(Icons.close, size: 18)),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-
-              // Unit options
-              _buildUnitOption(
-                context,
-                'grams',
-                'Grams (g) - Standard metric unit',
-                FontAwesomeIcons.scaleBalanced,
-                _selectedCarbohydrateUnit == 'grams',
-                () async {
-                  setState(() {
-                    _selectedCarbohydrateUnit = 'grams';
-                  });
-
-                  // Sauvegarder dans Firestore (convertir grams -> g)
-                  await FirestoreService.updateUnits(carbohydrateUnit: 'g');
-                  Navigator.pop(context);
-                },
-              ),
-              const SizedBox(height: 12),
-              _buildUnitOption(
-                context,
-                'ounces',
-                'Ounces (oz) - Imperial unit',
-                FontAwesomeIcons.scaleBalanced,
-                _selectedCarbohydrateUnit == 'ounces',
-                () async {
-                  setState(() {
-                    _selectedCarbohydrateUnit = 'ounces';
-                  });
-
-                  // Sauvegarder dans Firestore (convertir ounces -> oz)
-                  await FirestoreService.updateUnits(carbohydrateUnit: 'oz');
-                  Navigator.pop(context);
-                },
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
   }
 
   Widget _buildMedicationReminderItem() {

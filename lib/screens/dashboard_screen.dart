@@ -7,7 +7,6 @@ import 'overview_screen.dart';
 import 'log_screen.dart';
 import 'log_history_screen.dart';
 import 'learn_screen.dart';
-import 'community_screen.dart';
 import 'settings_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -24,7 +23,7 @@ class _DashboardScreenState extends State<DashboardScreen>
   GlobalKey _logHistoryKey = GlobalKey();
   GlobalKey _overviewKey = GlobalKey();
 
-  final List<String> _titles = ['My Health', 'Log', 'Library', 'Community'];
+  final List<String> _titles = ['My Health', 'Log', 'Library'];
 
   @override
   void initState() {
@@ -85,7 +84,6 @@ class _DashboardScreenState extends State<DashboardScreen>
         },
       ),
       const LearnScreenContent(),
-      const CommunityScreenContent(),
     ];
 
     return Scaffold(
@@ -97,37 +95,127 @@ class _DashboardScreenState extends State<DashboardScreen>
             fontWeight: FontWeight.bold,
           ),
         ),
+        centerTitle: false,
         backgroundColor: theme.appBarTheme.backgroundColor,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         automaticallyImplyLeading: false,
-        actions: _selectedIndex == 1
-            ? [
-                Padding(
-                  padding: const EdgeInsets.only(right: 16),
-                  child: TextButton.icon(
-                    onPressed: () {
-                      setState(() {
-                        _isCalendarView = !_isCalendarView;
-                      });
-                    },
-                    icon: Icon(
-                      _isCalendarView ? Icons.list : Icons.calendar_today,
-                      color: theme.colorScheme.primary,
-                      size: 16,
+        actions: [
+          if (_selectedIndex == 1) ...[
+            // Calendar/List toggle for Log History screen
+            Container(
+              margin: const EdgeInsets.only(right: 8),
+              decoration: ShapeDecoration(
+                color: theme.brightness == Brightness.dark
+                    ? const Color(0xFF2A2A2A)
+                    : const Color(0xFFF0F1F7),
+                shape: SmoothRectangleBorder(
+                  borderRadius: SmoothBorderRadius(
+                    cornerRadius: 10,
+                    cornerSmoothing: 0.6,
+                  ),
+                ),
+                shadows: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 4,
+                    offset: const Offset(0, 1),
+                  ),
+                ],
+              ),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () {
+                    setState(() {
+                      _isCalendarView = !_isCalendarView;
+                    });
+                  },
+                  customBorder: SmoothRectangleBorder(
+                    borderRadius: SmoothBorderRadius(
+                      cornerRadius: 10,
+                      cornerSmoothing: 0.6,
                     ),
-                    label: Text(
-                      _isCalendarView ? 'List' : 'Calendar',
-                      style: TextStyle(
-                        color: theme.colorScheme.primary,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                      ),
+                  ),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          _isCalendarView ? Icons.list : Icons.calendar_today,
+                          color: theme.colorScheme.primary,
+                          size: 16,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          _isCalendarView ? 'List' : 'Calendar',
+                          style: TextStyle(
+                            color: theme.colorScheme.primary,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
-              ]
-            : null,
+              ),
+            ),
+          ],
+          // Settings button for all screens
+          Container(
+            margin: const EdgeInsets.only(right: 16),
+            decoration: ShapeDecoration(
+              color: theme.brightness == Brightness.dark
+                  ? const Color(0xFF2A2A2A)
+                  : const Color(0xFFF0F1F7),
+              shape: SmoothRectangleBorder(
+                borderRadius: SmoothBorderRadius(
+                  cornerRadius: 10,
+                  cornerSmoothing: 0.6,
+                ),
+              ),
+              shadows: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 4,
+                  offset: const Offset(0, 1),
+                ),
+              ],
+            ),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    CupertinoPageRoute(
+                      builder: (context) => const SettingsScreen(),
+                    ),
+                  );
+                },
+                customBorder: SmoothRectangleBorder(
+                  borderRadius: SmoothBorderRadius(
+                    cornerRadius: 10,
+                    cornerSmoothing: 0.6,
+                  ),
+                ),
+                child: Container(
+                  padding: const EdgeInsets.all(10),
+                  child: Icon(
+                    Icons.settings,
+                    color: theme.colorScheme.primary,
+                    size: 20,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
       body: screens[_selectedIndex],
       floatingActionButton: Container(
@@ -210,11 +298,6 @@ class _DashboardScreenState extends State<DashboardScreen>
             icon: Icon(FontAwesomeIcons.book, size: 22),
             activeIcon: FaIcon(FontAwesomeIcons.book, size: 22),
             label: 'Learn',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(FontAwesomeIcons.users, size: 22),
-            activeIcon: FaIcon(FontAwesomeIcons.users, size: 22),
-            label: 'Community',
           ),
         ],
       ),
