@@ -95,6 +95,9 @@ class _LoginScreenState extends State<LoginScreen>
         password: _passwordController.text,
       );
 
+      // Dismiss keyboard
+      FocusScope.of(context).unfocus();
+
       // Show success message
       _showToast('Welcome back!', ToastificationType.success);
 
@@ -141,6 +144,9 @@ class _LoginScreenState extends State<LoginScreen>
   }
 
   Future<void> _handleGoogleSignIn() async {
+    // Dismiss keyboard immediately when Google sign-in is tapped
+    FocusScope.of(context).unfocus();
+
     setState(() {
       _isGoogleLoading = true;
     });
@@ -150,6 +156,9 @@ class _LoginScreenState extends State<LoginScreen>
 
       if (userCredential != null) {
         // Successfully signed in
+        // Dismiss keyboard
+        FocusScope.of(context).unfocus();
+
         _showToast(
           'Successfully signed in with Google',
           ToastificationType.success,

@@ -16,6 +16,10 @@ class MedicationDataProvider with ChangeNotifier {
   // Getters
   Map<String, dynamic>? get userData => _userData;
   List<Map<String, dynamic>> get todaysMedications => _todaysMedications;
+  List<Map<String, dynamic>> get allMedications =>
+      _userData?['medications'] != null
+      ? List<Map<String, dynamic>>.from(_userData!['medications'])
+      : [];
   bool get isLoading => _isLoading;
   bool get hasData => _userData != null;
   String? get error => _error;
@@ -25,6 +29,32 @@ class MedicationDataProvider with ChangeNotifier {
   bool get isCacheValid {
     if (_lastFetchTime == null) return false;
     return DateTime.now().difference(_lastFetchTime!) < _cacheValidDuration;
+  }
+
+  /// Get all medication data with caching strategy
+  /// Returns cached data immediately if available, then fetches fresh data in background
+  Future<List<Map<String, dynamic>>> getMedicationData({
+    bool forceRefresh = false,
+  }) async {
+    // If we have cached data and not forcing refresh, return it immediately
+    if (!forceRefresh && hasData && isCacheValid) {
+      return allMedications;
+    }
+
+    // If we have cached data but it might be stale, return it first then fetch fresh data
+    if (!forceRefresh && hasData) {
+      // Return cached data immediately
+      final cachedData = allMedications;
+
+      // Fetch fresh data in background
+      _fetchFreshDataInBackground();
+
+      return cachedData;
+    }
+
+    // No cached data or force refresh - fetch fresh data and show loading
+    await _fetchFreshData(showLoading: true);
+    return allMedications;
   }
 
   /// Get medication data with caching strategy

@@ -109,6 +109,9 @@ class _RegisterScreenState extends State<RegisterScreen>
         '${_firstNameController.text.trim()} ${_lastNameController.text.trim()}',
       );
 
+      // Dismiss keyboard
+      FocusScope.of(context).unfocus();
+
       // Show success message
       _showToast('Account created successfully!', ToastificationType.success);
 
@@ -157,6 +160,9 @@ class _RegisterScreenState extends State<RegisterScreen>
   }
 
   Future<void> _handleGoogleSignIn() async {
+    // Dismiss keyboard immediately when Google sign-in is tapped
+    FocusScope.of(context).unfocus();
+
     setState(() {
       _isGoogleLoading = true;
     });
@@ -174,6 +180,9 @@ class _RegisterScreenState extends State<RegisterScreen>
         final lastName = nameParts.length > 1
             ? nameParts.sublist(1).join(' ')
             : '';
+
+        // Dismiss keyboard
+        FocusScope.of(context).unfocus();
 
         _showToast('Account created successfully!', ToastificationType.success);
 

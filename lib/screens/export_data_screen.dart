@@ -386,8 +386,8 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
                 child: Center(
                   child: FaIcon(
                     format == 'CSV'
-                        ? FontAwesomeIcons.fileCsv
-                        : FontAwesomeIcons.filePdf,
+                        ? FontAwesomeIcons.table
+                        : FontAwesomeIcons.file,
                     color: theme.colorScheme.primary,
                     size: 20,
                   ),

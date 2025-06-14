@@ -295,81 +295,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Profile Header
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(24),
-                        decoration: ShapeDecoration(
-                          color: theme.brightness == Brightness.dark
-                              ? const Color(0xFF2A2A2A)
-                              : const Color(0xFFF0F1F7),
-                          shape: SmoothRectangleBorder(
-                            borderRadius: SmoothBorderRadius(
-                              cornerRadius: 20,
-                              cornerSmoothing: 0.6,
-                            ),
-                          ),
-                          shadows: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.05),
-                              blurRadius: 10,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          children: [
-                            // Profile Avatar
-                            Container(
-                              height: 80,
-                              width: 80,
-                              decoration: ShapeDecoration(
-                                color: theme.colorScheme.primary,
-                                shape: SmoothRectangleBorder(
-                                  borderRadius: SmoothBorderRadius(
-                                    cornerRadius: 24,
-                                    cornerSmoothing: 0.6,
-                                  ),
-                                ),
-                                shadows: [
-                                  BoxShadow(
-                                    color: theme.colorScheme.primary
-                                        .withOpacity(0.3),
-                                    blurRadius: 20,
-                                    offset: const Offset(0, 8),
-                                  ),
-                                ],
-                              ),
-                              child: const Center(
-                                child: Icon(
-                                  FontAwesomeIcons.user,
-                                  color: Colors.white,
-                                  size: 32,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              'Personal Information',
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: theme.textTheme.headlineMedium?.color,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'Update your profile details',
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: theme.textTheme.bodyMedium?.color,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      const SizedBox(height: 32),
+                      const SizedBox(height: 10),
 
                       // Form Fields
                       _buildTextField(
@@ -707,7 +633,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
               const SizedBox(height: 12),
               _buildTypeOption('Gestational'),
               const SizedBox(height: 12),
-              _buildTypeOption('Pre-diabetes'),
+              _buildTypeOption('Other'),
             ],
           ),
         ),

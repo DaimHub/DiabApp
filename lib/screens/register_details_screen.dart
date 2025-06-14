@@ -72,6 +72,9 @@ class _RegisterDetailsScreenState extends State<RegisterDetailsScreen> {
         throw Exception('Failed to save user profile data');
       }
 
+      // Dismiss keyboard
+      FocusScope.of(context).unfocus();
+
       // Show success message
       _showToast(
         'Welcome to your diabetes journey!',

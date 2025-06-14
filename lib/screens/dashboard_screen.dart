@@ -138,10 +138,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                     ),
                   ),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
-                    ),
+                    padding: const EdgeInsets.all(10),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [

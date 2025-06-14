@@ -17,6 +17,7 @@ import 'providers/medication_data_provider.dart';
 import 'providers/glucose_trend_data_provider.dart';
 import 'providers/log_history_data_provider.dart';
 import 'providers/learn_articles_provider.dart';
+import 'providers/settings_data_provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'services/firestore_service.dart';
@@ -44,6 +45,7 @@ void main() async {
         ChangeNotifierProvider(create: (context) => GlucoseTrendDataProvider()),
         ChangeNotifierProvider(create: (context) => LogHistoryDataProvider()),
         ChangeNotifierProvider(create: (context) => LearnArticlesProvider()),
+        ChangeNotifierProvider(create: (context) => SettingsDataProvider()),
       ],
       child: const MyApp(),
     ),

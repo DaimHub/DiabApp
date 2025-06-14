@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:toastification/toastification.dart';
 import 'package:figma_squircle/figma_squircle.dart';
+import 'package:provider/provider.dart';
 import '../services/firestore_service.dart';
 import '../providers/medication_data_provider.dart';
+import '../providers/settings_data_provider.dart';
 
 class MedicationRemindersScreen extends StatefulWidget {
   const MedicationRemindersScreen({super.key});
@@ -14,9 +16,6 @@ class MedicationRemindersScreen extends StatefulWidget {
 }
 
 class _MedicationRemindersScreenState extends State<MedicationRemindersScreen> {
-  List<Map<String, dynamic>> _medications = [];
-  bool _isLoading = false;
-
   @override
   void initState() {
     super.initState();
@@ -24,36 +23,30 @@ class _MedicationRemindersScreenState extends State<MedicationRemindersScreen> {
   }
 
   Future<void> _loadMedications() async {
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      final userData = await FirestoreService.getUserData();
-      if (userData != null && mounted) {
-        setState(() {
-          _medications = List<Map<String, dynamic>>.from(
-            userData['medications'] ?? [],
-          );
-        });
-      }
-    } catch (e) {
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
-    }
+    final medicationProvider = Provider.of<MedicationDataProvider>(
+      context,
+      listen: false,
+    );
+    await medicationProvider.getMedicationData();
   }
 
-  Future<void> _saveMedications() async {
+  Future<void> _saveMedications(List<Map<String, dynamic>> medications) async {
     try {
-      await FirestoreService.saveUserData({'medications': _medications});
+      await FirestoreService.saveUserData({'medications': medications});
+      final hasActiveMedications = medications.any(
+        (med) => med['enabled'] == true,
+      );
+      await FirestoreService.updateNotificationSettings(
+        medicationReminders: hasActiveMedications,
+      );
+      await MedicationDataProvider.invalidateAndRefreshGlobally(context);
 
-      // Refresh medication cache
-
-      try {
-        await MedicationDataProvider.invalidateAndRefreshGlobally(context);
-      } catch (e) {}
+      // Also invalidate settings provider cache since medication status affects settings
+      final settingsProvider = Provider.of<SettingsDataProvider>(
+        context,
+        listen: false,
+      );
+      settingsProvider.invalidateCache();
 
       _showToast(
         'Medications updated successfully!',
@@ -64,24 +57,489 @@ class _MedicationRemindersScreenState extends State<MedicationRemindersScreen> {
     }
   }
 
-  Future<void> _saveMedicationsSilently() async {
+  Future<void> _saveMedicationsSilently(
+    List<Map<String, dynamic>> medications,
+  ) async {
     try {
-      await FirestoreService.saveUserData({'medications': _medications});
-
-      // Update medication reminders enabled status based on active medications
-      final hasActiveMedications = _medications.any(
+      await FirestoreService.saveUserData({'medications': medications});
+      final hasActiveMedications = medications.any(
         (med) => med['enabled'] == true,
       );
       await FirestoreService.updateNotificationSettings(
         medicationReminders: hasActiveMedications,
       );
+      await MedicationDataProvider.invalidateAndRefreshGlobally(context);
 
-      // Refresh medication cache silently
-
-      try {
-        await MedicationDataProvider.invalidateAndRefreshGlobally(context);
-      } catch (e) {}
+      // Also invalidate settings provider cache since medication status affects settings
+      final settingsProvider = Provider.of<SettingsDataProvider>(
+        context,
+        listen: false,
+      );
+      settingsProvider.invalidateCache();
     } catch (e) {}
+  }
+
+  void _showToast(String message, ToastificationType type) {
+    final theme = Theme.of(context);
+
+    String title;
+    String description;
+    IconData iconData;
+    Color iconColor;
+
+    switch (type) {
+      case ToastificationType.success:
+        title = 'Success';
+        description = message;
+        iconData = Icons.check_circle_outline;
+        iconColor = theme.colorScheme.primary;
+        break;
+      case ToastificationType.error:
+        title = 'Error';
+        description = message;
+        iconData = Icons.error_outline;
+        iconColor = Colors.red[600]!;
+        break;
+      default:
+        title = 'Notification';
+        description = message;
+        iconData = Icons.info_outline;
+        iconColor = theme.colorScheme.primary;
+    }
+
+    toastification.show(
+      context: context,
+      type: type,
+      style: ToastificationStyle.flat,
+      title: Text(
+        title,
+        style: TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w600,
+          color: theme.brightness == Brightness.dark
+              ? Colors.white
+              : Colors.black87,
+        ),
+      ),
+      description: Text(
+        description,
+        style: TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+          color: theme.brightness == Brightness.dark
+              ? Colors.grey[300]
+              : Colors.black54,
+        ),
+      ),
+      alignment: Alignment.topCenter,
+      autoCloseDuration: const Duration(seconds: 3),
+      showProgressBar: false,
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 50),
+      borderRadius: SmoothBorderRadius(cornerRadius: 12, cornerSmoothing: 0.6),
+      backgroundColor: theme.scaffoldBackgroundColor,
+      foregroundColor: type == ToastificationType.error
+          ? Colors.red[600]
+          : theme.colorScheme.primary,
+      borderSide: BorderSide(
+        color: theme.brightness == Brightness.dark
+            ? const Color(0xFF3A3A3A)
+            : Colors.grey[200]!,
+        width: 1,
+      ),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.08),
+          blurRadius: 12,
+          offset: const Offset(0, 4),
+        ),
+      ],
+      icon: Icon(iconData, color: iconColor, size: 24),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Custom App Bar
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              decoration: BoxDecoration(color: theme.scaffoldBackgroundColor),
+              child: Row(
+                children: [
+                  // Back Button
+                  Container(
+                    decoration: ShapeDecoration(
+                      color: theme.brightness == Brightness.dark
+                          ? const Color(0xFF2A2A2A)
+                          : const Color(0xFFF0F1F7),
+                      shape: SmoothRectangleBorder(
+                        borderRadius: SmoothBorderRadius(
+                          cornerRadius: 12,
+                          cornerSmoothing: 0.6,
+                        ),
+                      ),
+                    ),
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: () => Navigator.pop(context),
+                        customBorder: SmoothRectangleBorder(
+                          borderRadius: SmoothBorderRadius(
+                            cornerRadius: 12,
+                            cornerSmoothing: 0.6,
+                          ),
+                        ),
+                        child: Container(
+                          padding: const EdgeInsets.all(12),
+                          child: const Icon(Icons.arrow_back, size: 20),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  // Title
+                  Expanded(
+                    child: Text(
+                      'Medication Reminders',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: theme.textTheme.headlineMedium?.color,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  // Add Button
+                  Container(
+                    decoration: ShapeDecoration(
+                      color: theme.colorScheme.primary,
+                      shape: SmoothRectangleBorder(
+                        borderRadius: SmoothBorderRadius(
+                          cornerRadius: 12,
+                          cornerSmoothing: 0.6,
+                        ),
+                      ),
+                    ),
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: () => _showAddMedicationDialog(),
+                        customBorder: SmoothRectangleBorder(
+                          borderRadius: SmoothBorderRadius(
+                            cornerRadius: 12,
+                            cornerSmoothing: 0.6,
+                          ),
+                        ),
+                        child: Container(
+                          padding: const EdgeInsets.all(12),
+                          child: const Icon(
+                            Icons.add,
+                            color: Colors.white,
+                            size: 20,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // Content
+            Expanded(
+              child: Consumer<MedicationDataProvider>(
+                builder: (context, medicationProvider, child) {
+                  return medicationProvider.isLoading &&
+                          !medicationProvider.hasData
+                      ? const Center(child: CircularProgressIndicator())
+                      : medicationProvider.allMedications.isEmpty
+                      ? _buildEmptyState(theme)
+                      : _buildMedicationsList(
+                          theme,
+                          medicationProvider.allMedications,
+                        );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState(ThemeData theme) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              height: 100,
+              width: 100,
+              decoration: ShapeDecoration(
+                color: theme.brightness == Brightness.dark
+                    ? const Color(0xFF3A3A3A)
+                    : const Color(0xFFF0F1F7),
+                shape: SmoothRectangleBorder(
+                  borderRadius: SmoothBorderRadius(
+                    cornerRadius: 30,
+                    cornerSmoothing: 0.6,
+                  ),
+                ),
+              ),
+              child: Center(
+                child: FaIcon(
+                  FontAwesomeIcons.pills,
+                  color: theme.colorScheme.primary,
+                  size: 40,
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              'No Medications Yet',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: theme.textTheme.headlineMedium?.color,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Add your medications to set up personalized reminders',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 16,
+                color: theme.textTheme.bodyMedium?.color,
+              ),
+            ),
+            const SizedBox(height: 32),
+            Container(
+              decoration: ShapeDecoration(
+                color: theme.colorScheme.primary,
+                shape: SmoothRectangleBorder(
+                  borderRadius: SmoothBorderRadius(
+                    cornerRadius: 16,
+                    cornerSmoothing: 0.6,
+                  ),
+                ),
+                shadows: [
+                  BoxShadow(
+                    color: theme.colorScheme.primary.withOpacity(0.3),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: _showAddMedicationDialog,
+                  customBorder: SmoothRectangleBorder(
+                    borderRadius: SmoothBorderRadius(
+                      cornerRadius: 16,
+                      cornerSmoothing: 0.6,
+                    ),
+                  ),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 16,
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.add, size: 20, color: Colors.white),
+                        const SizedBox(width: 8),
+                        const Text(
+                          'Add Your First Medication',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMedicationsList(
+    ThemeData theme,
+    List<Map<String, dynamic>> medications,
+  ) {
+    return ListView.builder(
+      padding: const EdgeInsets.all(20),
+      itemCount: medications.length,
+      itemBuilder: (context, index) {
+        final medication = medications[index];
+        final time = TimeOfDay(
+          hour: medication['time']['hour'],
+          minute: medication['time']['minute'],
+        );
+
+        // Handle days - support both old and new format
+        final days = medication['days'] as List<dynamic>?;
+        // Format time in 24-hour format
+        final timeString =
+            '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
+
+        String daysText;
+        if (days == null || days.isEmpty) {
+          daysText = 'Daily at $timeString';
+        } else if (days.length == 7) {
+          daysText = 'Daily at $timeString';
+        } else if (days.length == 5 &&
+            days.contains('Monday') &&
+            days.contains('Tuesday') &&
+            days.contains('Wednesday') &&
+            days.contains('Thursday') &&
+            days.contains('Friday')) {
+          daysText = 'Weekdays at $timeString';
+        } else if (days.length == 2 &&
+            days.contains('Saturday') &&
+            days.contains('Sunday')) {
+          daysText = 'Weekends at $timeString';
+        } else {
+          // Show abbreviated days
+          final dayAbbreviations = days
+              .map((day) => day.toString().substring(0, 3))
+              .join(', ');
+          daysText = '$dayAbbreviations at $timeString';
+        }
+
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            decoration: ShapeDecoration(
+              color: theme.scaffoldBackgroundColor,
+              shape: SmoothRectangleBorder(
+                borderRadius: SmoothBorderRadius(
+                  cornerRadius: 16,
+                  cornerSmoothing: 0.6,
+                ),
+                side: BorderSide(
+                  color: theme.brightness == Brightness.dark
+                      ? const Color(0xFF3A3A3A)
+                      : Colors.grey[200]!,
+                  width: 1,
+                ),
+              ),
+              shadows: [
+                BoxShadow(
+                  color: theme.brightness == Brightness.dark
+                      ? Colors.black.withOpacity(0.2)
+                      : Colors.black.withOpacity(0.05),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                Container(
+                  height: 50,
+                  width: 50,
+                  decoration: ShapeDecoration(
+                    color: medication['enabled']
+                        ? theme.colorScheme.primary.withOpacity(0.1)
+                        : theme.brightness == Brightness.dark
+                        ? const Color(0xFF3A3A3A)
+                        : Colors.white,
+                    shape: SmoothRectangleBorder(
+                      borderRadius: SmoothBorderRadius(
+                        cornerRadius: 14,
+                        cornerSmoothing: 0.6,
+                      ),
+                    ),
+                    shadows: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 6,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Center(
+                    child: FaIcon(
+                      FontAwesomeIcons.pills,
+                      color: medication['enabled']
+                          ? theme.colorScheme.primary
+                          : theme.iconTheme.color?.withOpacity(0.5),
+                      size: 22,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        medication['name'],
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: medication['enabled']
+                              ? theme.textTheme.titleMedium?.color
+                              : theme.textTheme.titleMedium?.color?.withOpacity(
+                                  0.6,
+                                ),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        daysText,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: medication['enabled']
+                              ? theme.colorScheme.primary
+                              : theme.textTheme.bodyMedium?.color?.withOpacity(
+                                  0.5,
+                                ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Switch(
+                  value: medication['enabled'] ?? false,
+                  onChanged: (value) async {
+                    final updatedMedications = List<Map<String, dynamic>>.from(
+                      medications,
+                    );
+                    updatedMedications[index] = {
+                      ...medication,
+                      'enabled': value,
+                    };
+                    await _saveMedicationsSilently(updatedMedications);
+                  },
+                  activeColor: Colors.white,
+                  activeTrackColor: theme.colorScheme.primary,
+                  inactiveThumbColor: Colors.white,
+                  inactiveTrackColor: Colors.grey[300],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
   void _showAddMedicationDialog() {
@@ -390,7 +848,7 @@ class _MedicationRemindersScreenState extends State<MedicationRemindersScreen> {
                                     ),
                                     const SizedBox(height: 2),
                                     Text(
-                                      selectedTime.format(context),
+                                      '${selectedTime.hour.toString().padLeft(2, '0')}:${selectedTime.minute.toString().padLeft(2, '0')}',
                                       style: TextStyle(
                                         fontSize: 16,
                                         color: Theme.of(
@@ -504,7 +962,7 @@ class _MedicationRemindersScreenState extends State<MedicationRemindersScreen> {
                         ),
                         const SizedBox(height: 16),
 
-                        // Quick select buttons - moved above the days
+                        // Quick select buttons
                         Row(
                           children: [
                             Container(
@@ -794,7 +1252,7 @@ class _MedicationRemindersScreenState extends State<MedicationRemindersScreen> {
                           ),
                         ),
                       ),
-                      const SizedBox(width: 16),
+                      const SizedBox(width: 12),
                       Expanded(
                         child: Container(
                           height: 48,
@@ -819,21 +1277,31 @@ class _MedicationRemindersScreenState extends State<MedicationRemindersScreen> {
                           child: Material(
                             color: Colors.transparent,
                             child: InkWell(
-                              onTap: () {
+                              onTap: () async {
                                 if (nameController.text.trim().isNotEmpty &&
                                     selectedDays.isNotEmpty) {
-                                  setState(() {
-                                    _medications.add({
-                                      'name': nameController.text.trim(),
-                                      'time': {
-                                        'hour': selectedTime.hour,
-                                        'minute': selectedTime.minute,
-                                      },
-                                      'days': selectedDays,
-                                      'enabled': true,
-                                    });
+                                  final medicationProvider =
+                                      Provider.of<MedicationDataProvider>(
+                                        context,
+                                        listen: false,
+                                      );
+
+                                  final currentMedications =
+                                      List<Map<String, dynamic>>.from(
+                                        medicationProvider.allMedications,
+                                      );
+
+                                  currentMedications.add({
+                                    'name': nameController.text.trim(),
+                                    'time': {
+                                      'hour': selectedTime.hour,
+                                      'minute': selectedTime.minute,
+                                    },
+                                    'days': selectedDays,
+                                    'enabled': true,
                                   });
-                                  _saveMedications();
+
+                                  await _saveMedications(currentMedications);
                                   Navigator.pop(context);
                                 }
                               },
@@ -862,703 +1330,6 @@ class _MedicationRemindersScreenState extends State<MedicationRemindersScreen> {
                 ],
               ),
             ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _deleteMedication(int index) {
-    setState(() {
-      _medications.removeAt(index);
-    });
-    _saveMedicationsSilently();
-  }
-
-  void _toggleMedication(int index, bool enabled) {
-    setState(() {
-      _medications[index]['enabled'] = enabled;
-    });
-    _saveMedicationsSilently();
-  }
-
-  void _showToast(String message, ToastificationType type) {
-    final theme = Theme.of(context);
-
-    String title;
-    IconData iconData;
-    Color iconColor;
-
-    switch (type) {
-      case ToastificationType.success:
-        title = 'Success';
-        iconData = Icons.check_circle_outline;
-        iconColor = theme.colorScheme.primary;
-        break;
-      case ToastificationType.error:
-        title = 'Error';
-        iconData = Icons.error_outline;
-        iconColor = Colors.red[600]!;
-        break;
-      default:
-        title = 'Notification';
-        iconData = Icons.info_outline;
-        iconColor = theme.colorScheme.primary;
-    }
-
-    toastification.show(
-      context: context,
-      type: type,
-      style: ToastificationStyle.flat,
-      title: Text(
-        title,
-        style: TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.w600,
-          color: theme.brightness == Brightness.dark
-              ? Colors.white
-              : Colors.black87,
-        ),
-      ),
-      description: Text(
-        message,
-        style: TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.w500,
-          color: theme.brightness == Brightness.dark
-              ? Colors.grey[300]
-              : Colors.black54,
-        ),
-      ),
-      alignment: Alignment.topCenter,
-      autoCloseDuration: const Duration(seconds: 3),
-      showProgressBar: false,
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 50),
-      borderRadius: SmoothBorderRadius(cornerRadius: 12, cornerSmoothing: 0.6),
-      backgroundColor: theme.cardColor,
-      foregroundColor: theme.colorScheme.primary,
-      borderSide: BorderSide(
-        color: theme.brightness == Brightness.dark
-            ? const Color(0xFF2A2A2A)
-            : const Color(0xFFF0F1F7),
-        width: 1,
-      ),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black.withOpacity(0.1),
-          blurRadius: 8,
-          offset: const Offset(0, 2),
-        ),
-      ],
-      icon: Icon(iconData, color: iconColor, size: 24),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Custom App Bar
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-              decoration: BoxDecoration(color: theme.scaffoldBackgroundColor),
-              child: Row(
-                children: [
-                  // Back Button
-                  Container(
-                    decoration: ShapeDecoration(
-                      color: theme.brightness == Brightness.dark
-                          ? const Color(0xFF2A2A2A)
-                          : const Color(0xFFF0F1F7),
-                      shape: SmoothRectangleBorder(
-                        borderRadius: SmoothBorderRadius(
-                          cornerRadius: 12,
-                          cornerSmoothing: 0.6,
-                        ),
-                      ),
-                    ),
-                    child: Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        onTap: () => Navigator.pop(context),
-                        customBorder: SmoothRectangleBorder(
-                          borderRadius: SmoothBorderRadius(
-                            cornerRadius: 12,
-                            cornerSmoothing: 0.6,
-                          ),
-                        ),
-                        child: Container(
-                          padding: const EdgeInsets.all(12),
-                          child: const Icon(Icons.arrow_back, size: 20),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  // Title
-                  Expanded(
-                    child: Text(
-                      'Medication Reminders',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: theme.textTheme.headlineMedium?.color,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  // Add Button
-                  Container(
-                    decoration: ShapeDecoration(
-                      color: theme.colorScheme.primary,
-                      shape: SmoothRectangleBorder(
-                        borderRadius: SmoothBorderRadius(
-                          cornerRadius: 12,
-                          cornerSmoothing: 0.6,
-                        ),
-                      ),
-                    ),
-                    child: Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        onTap: _showAddMedicationDialog,
-                        customBorder: SmoothRectangleBorder(
-                          borderRadius: SmoothBorderRadius(
-                            cornerRadius: 12,
-                            cornerSmoothing: 0.6,
-                          ),
-                        ),
-                        child: Container(
-                          padding: const EdgeInsets.all(12),
-                          child: const Icon(
-                            Icons.add,
-                            color: Colors.white,
-                            size: 20,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            // Content
-            Expanded(
-              child: _isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : _medications.isEmpty
-                  ? _buildEmptyState(theme)
-                  : _buildMedicationsList(theme),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildEmptyState(ThemeData theme) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              height: 100,
-              width: 100,
-              decoration: ShapeDecoration(
-                color: theme.brightness == Brightness.dark
-                    ? const Color(0xFF3A3A3A)
-                    : const Color(0xFFF0F1F7),
-                shape: SmoothRectangleBorder(
-                  borderRadius: SmoothBorderRadius(
-                    cornerRadius: 30,
-                    cornerSmoothing: 0.6,
-                  ),
-                ),
-              ),
-              child: Center(
-                child: FaIcon(
-                  FontAwesomeIcons.pills,
-                  color: theme.colorScheme.primary,
-                  size: 40,
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
-            Text(
-              'No Medications Yet',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: theme.textTheme.headlineMedium?.color,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Add your medications to set up personalized reminders',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 16,
-                color: theme.textTheme.bodyMedium?.color,
-              ),
-            ),
-            const SizedBox(height: 32),
-            Container(
-              decoration: ShapeDecoration(
-                color: theme.colorScheme.primary,
-                shape: SmoothRectangleBorder(
-                  borderRadius: SmoothBorderRadius(
-                    cornerRadius: 16,
-                    cornerSmoothing: 0.6,
-                  ),
-                ),
-                shadows: [
-                  BoxShadow(
-                    color: theme.colorScheme.primary.withOpacity(0.3),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  onTap: _showAddMedicationDialog,
-                  customBorder: SmoothRectangleBorder(
-                    borderRadius: SmoothBorderRadius(
-                      cornerRadius: 16,
-                      cornerSmoothing: 0.6,
-                    ),
-                  ),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 24,
-                      vertical: 16,
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(Icons.add, size: 20, color: Colors.white),
-                        const SizedBox(width: 8),
-                        const Text(
-                          'Add Your First Medication',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildMedicationsList(ThemeData theme) {
-    return ListView.builder(
-      padding: const EdgeInsets.all(20),
-      itemCount: _medications.length,
-      itemBuilder: (context, index) {
-        final medication = _medications[index];
-        final time = TimeOfDay(
-          hour: medication['time']['hour'],
-          minute: medication['time']['minute'],
-        );
-
-        // Handle days - support both old and new format
-        final days = medication['days'] as List<dynamic>?;
-        String daysText;
-        if (days == null || days.isEmpty) {
-          daysText = 'Daily at ${time.format(context)}';
-        } else if (days.length == 7) {
-          daysText = 'Daily at ${time.format(context)}';
-        } else if (days.length == 5 &&
-            days.contains('Monday') &&
-            days.contains('Tuesday') &&
-            days.contains('Wednesday') &&
-            days.contains('Thursday') &&
-            days.contains('Friday')) {
-          daysText = 'Weekdays at ${time.format(context)}';
-        } else if (days.length == 2 &&
-            days.contains('Saturday') &&
-            days.contains('Sunday')) {
-          daysText = 'Weekends at ${time.format(context)}';
-        } else {
-          // Show abbreviated days
-          final dayAbbreviations = days
-              .map((day) => day.toString().substring(0, 3))
-              .join(', ');
-          daysText = '$dayAbbreviations at ${time.format(context)}';
-        }
-
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 12),
-          child: Container(
-            padding: const EdgeInsets.all(20),
-            decoration: ShapeDecoration(
-              color: theme.scaffoldBackgroundColor,
-              shape: SmoothRectangleBorder(
-                borderRadius: SmoothBorderRadius(
-                  cornerRadius: 16,
-                  cornerSmoothing: 0.6,
-                ),
-                side: BorderSide(
-                  color: theme.brightness == Brightness.dark
-                      ? const Color(0xFF3A3A3A)
-                      : Colors.grey[200]!,
-                  width: 1,
-                ),
-              ),
-              shadows: [
-                BoxShadow(
-                  color: theme.brightness == Brightness.dark
-                      ? Colors.black.withOpacity(0.2)
-                      : Colors.black.withOpacity(0.05),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Row(
-              children: [
-                Container(
-                  height: 50,
-                  width: 50,
-                  decoration: ShapeDecoration(
-                    color: medication['enabled']
-                        ? theme.colorScheme.primary.withOpacity(0.1)
-                        : theme.brightness == Brightness.dark
-                        ? const Color(0xFF3A3A3A)
-                        : Colors.white,
-                    shape: SmoothRectangleBorder(
-                      borderRadius: SmoothBorderRadius(
-                        cornerRadius: 14,
-                        cornerSmoothing: 0.6,
-                      ),
-                    ),
-                    shadows: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 6,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Center(
-                    child: FaIcon(
-                      FontAwesomeIcons.pills,
-                      color: medication['enabled']
-                          ? theme.colorScheme.primary
-                          : theme.iconTheme.color?.withOpacity(0.5),
-                      size: 20,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        medication['name'],
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: medication['enabled']
-                              ? theme.textTheme.titleMedium?.color
-                              : theme.textTheme.titleMedium?.color?.withOpacity(
-                                  0.6,
-                                ),
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        daysText,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: medication['enabled']
-                              ? theme.colorScheme.primary
-                              : theme.textTheme.bodyMedium?.color?.withOpacity(
-                                  0.5,
-                                ),
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Switch(
-                  value: medication['enabled'],
-                  onChanged: (value) => _toggleMedication(index, value),
-                  activeColor: Colors.white,
-                  activeTrackColor: theme.colorScheme.primary,
-                  inactiveThumbColor: Colors.white,
-                  inactiveTrackColor: Colors.grey[300],
-                ),
-                const SizedBox(width: 8),
-                Container(
-                  decoration: ShapeDecoration(
-                    color: Colors.red.withOpacity(0.1),
-                    shape: SmoothRectangleBorder(
-                      borderRadius: SmoothBorderRadius(
-                        cornerRadius: 10,
-                        cornerSmoothing: 0.6,
-                      ),
-                    ),
-                  ),
-                  child: Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      onTap: () => _showDeleteConfirmation(index),
-                      customBorder: SmoothRectangleBorder(
-                        borderRadius: SmoothBorderRadius(
-                          cornerRadius: 10,
-                          cornerSmoothing: 0.6,
-                        ),
-                      ),
-                      child: Container(
-                        padding: const EdgeInsets.all(8),
-                        child: Icon(
-                          Icons.delete_outline,
-                          color: Colors.red[600],
-                          size: 20,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  void _showDeleteConfirmation(int index) {
-    final medication = _medications[index];
-
-    showDialog(
-      context: context,
-      builder: (context) => Dialog(
-        backgroundColor: Colors.transparent,
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(24),
-          decoration: ShapeDecoration(
-            color: Theme.of(context).scaffoldBackgroundColor,
-            shape: SmoothRectangleBorder(
-              borderRadius: SmoothBorderRadius(
-                cornerRadius: 20,
-                cornerSmoothing: 0.6,
-              ),
-            ),
-            shadows: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.15),
-                blurRadius: 20,
-                offset: const Offset(0, 10),
-              ),
-            ],
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Header with close button
-              Row(
-                children: [
-                  const Spacer(),
-                  Container(
-                    width: 36,
-                    height: 36,
-                    decoration: ShapeDecoration(
-                      color: Theme.of(context).brightness == Brightness.dark
-                          ? const Color(0xFF2A2A2A)
-                          : const Color(0xFFF0F1F7),
-                      shape: SmoothRectangleBorder(
-                        borderRadius: SmoothBorderRadius(
-                          cornerRadius: 10,
-                          cornerSmoothing: 0.6,
-                        ),
-                      ),
-                    ),
-                    child: Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        onTap: () => Navigator.pop(context),
-                        customBorder: SmoothRectangleBorder(
-                          borderRadius: SmoothBorderRadius(
-                            cornerRadius: 10,
-                            cornerSmoothing: 0.6,
-                          ),
-                        ),
-                        child: const Center(child: Icon(Icons.close, size: 18)),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-
-              // Large delete icon
-              Container(
-                height: 80,
-                width: 80,
-                decoration: ShapeDecoration(
-                  color: Colors.red[500],
-                  shape: SmoothRectangleBorder(
-                    borderRadius: SmoothBorderRadius(
-                      cornerRadius: 24,
-                      cornerSmoothing: 0.6,
-                    ),
-                  ),
-                  shadows: [
-                    BoxShadow(
-                      color: Colors.red.withOpacity(0.3),
-                      blurRadius: 20,
-                      offset: const Offset(0, 8),
-                    ),
-                  ],
-                ),
-                child: const Center(
-                  child: Icon(Icons.delete, color: Colors.white, size: 36),
-                ),
-              ),
-              const SizedBox(height: 24),
-
-              // Title
-              Text(
-                'Delete Medication',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).textTheme.headlineMedium?.color,
-                ),
-              ),
-              const SizedBox(height: 8),
-
-              // Content
-              Text(
-                'Are you sure you want to delete "${medication['name']}"?',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Theme.of(context).textTheme.bodyMedium?.color,
-                  height: 1.4,
-                ),
-              ),
-              const SizedBox(height: 32),
-
-              // Action buttons
-              Row(
-                children: [
-                  Expanded(
-                    child: Container(
-                      height: 48,
-                      decoration: ShapeDecoration(
-                        color: Theme.of(context).brightness == Brightness.dark
-                            ? const Color(0xFF2A2A2A)
-                            : const Color(0xFFF0F1F7),
-                        shape: SmoothRectangleBorder(
-                          borderRadius: SmoothBorderRadius(
-                            cornerRadius: 14,
-                            cornerSmoothing: 0.6,
-                          ),
-                          side: BorderSide(
-                            color:
-                                Theme.of(context).brightness == Brightness.dark
-                                ? const Color(0xFF3A3A3A)
-                                : Colors.grey[200]!,
-                            width: 1,
-                          ),
-                        ),
-                      ),
-                      child: Material(
-                        color: Colors.transparent,
-                        child: InkWell(
-                          onTap: () => Navigator.pop(context),
-                          customBorder: SmoothRectangleBorder(
-                            borderRadius: SmoothBorderRadius(
-                              cornerRadius: 14,
-                              cornerSmoothing: 0.6,
-                            ),
-                          ),
-                          child: const Center(
-                            child: Text(
-                              'Cancel',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Container(
-                      height: 48,
-                      decoration: ShapeDecoration(
-                        color: Colors.red[500],
-                        shape: SmoothRectangleBorder(
-                          borderRadius: SmoothBorderRadius(
-                            cornerRadius: 14,
-                            cornerSmoothing: 0.6,
-                          ),
-                        ),
-                        shadows: [
-                          BoxShadow(
-                            color: Colors.red.withOpacity(0.3),
-                            blurRadius: 12,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: Material(
-                        color: Colors.transparent,
-                        child: InkWell(
-                          onTap: () {
-                            _deleteMedication(index);
-                            Navigator.pop(context);
-                          },
-                          customBorder: SmoothRectangleBorder(
-                            borderRadius: SmoothBorderRadius(
-                              cornerRadius: 14,
-                              cornerSmoothing: 0.6,
-                            ),
-                          ),
-                          child: const Center(
-                            child: Text(
-                              'Delete',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
           ),
         ),
       ),
@@ -1820,6 +1591,7 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
     final theme = Theme.of(context);
 
     return Container(
+      height: 150,
       decoration: ShapeDecoration(
         color: theme.brightness == Brightness.dark
             ? const Color(0xFF2A2A2A)
@@ -1832,15 +1604,14 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
         ),
       ),
       child: ListWheelScrollView.useDelegate(
-        itemExtent: 50,
-        perspective: 0.005,
-        diameterRatio: 1.2,
-        physics: const FixedExtentScrollPhysics(),
         controller: FixedExtentScrollController(initialItem: selectedIndex),
+        itemExtent: 40,
+        physics: const FixedExtentScrollPhysics(),
         onSelectedItemChanged: onSelectedItemChanged,
         childDelegate: ListWheelChildBuilderDelegate(
-          childCount: itemCount,
           builder: (context, index) {
+            if (index < 0 || index >= itemCount) return null;
+
             final isSelected = index == selectedIndex;
             return Container(
               alignment: Alignment.center,
@@ -1856,6 +1627,7 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
               ),
             );
           },
+          childCount: itemCount,
         ),
       ),
     );
