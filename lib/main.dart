@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:toastification/toastification.dart';
 import 'screens/welcome_screen.dart';
@@ -20,7 +19,6 @@ import 'providers/learn_articles_provider.dart';
 import 'providers/settings_data_provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
-import 'services/firestore_service.dart';
 
 final RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
 
@@ -29,11 +27,10 @@ void main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   // TODO: REMOVE AFTER ARTICLES ARE CREATED - One-time article population
-  // print('🚀 Attempting to populate articles...');
   // try {
   //   await FirestoreService.populateArticlesOnce();
   // } catch (e) {
-  //   print('❌ Article population failed: $e');
+  //   // Article population failed
   // }
 
   runApp(

@@ -176,7 +176,6 @@ class MedicationDataProvider with ChangeNotifier {
     }
 
     final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
 
     // Get today's day name
     const weekdays = [
@@ -195,7 +194,6 @@ class MedicationDataProvider with ChangeNotifier {
     List<Map<String, dynamic>> todaysMedications = [];
 
     for (final medication in enabledMedications) {
-      final medicationName = medication['name'];
       final timeData = medication['time'];
       final medicationTime = TimeOfDay(
         hour: timeData['hour'],

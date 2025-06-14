@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:figma_squircle/figma_squircle.dart';
-import '../theme/theme_manager.dart';
 import '../services/google_sign_in_service.dart';
 import '../providers/glucose_data_provider.dart';
 import '../providers/medication_data_provider.dart';

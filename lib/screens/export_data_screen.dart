@@ -12,9 +12,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
-import 'package:fl_chart/fl_chart.dart';
 import 'dart:ui' as ui;
-import '../theme/app_colors.dart';
 
 class ExportDataScreen extends StatefulWidget {
   const ExportDataScreen({super.key});
@@ -151,8 +149,8 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
                         shadows: [
                           BoxShadow(
                             color: theme.brightness == Brightness.dark
-                                ? Colors.black.withOpacity(0.2)
-                                : Colors.black.withOpacity(0.05),
+                                ? Colors.black.withValues(alpha: 0.2)
+                                : Colors.black.withValues(alpha: 0.05),
                             blurRadius: 8,
                             offset: const Offset(0, 2),
                           ),
@@ -237,8 +235,8 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
         shadows: [
           BoxShadow(
             color: theme.brightness == Brightness.dark
-                ? Colors.black.withOpacity(0.2)
-                : Colors.black.withOpacity(0.05),
+                ? Colors.black.withValues(alpha: 0.2)
+                : Colors.black.withValues(alpha: 0.05),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -273,7 +271,7 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
                     ),
                     shadows: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
+                        color: Colors.black.withValues(alpha: 0.05),
                         blurRadius: 6,
                         offset: const Offset(0, 2),
                       ),
@@ -313,7 +311,9 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
                 ),
                 FaIcon(
                   FontAwesomeIcons.chevronRight,
-                  color: theme.textTheme.bodyMedium?.color?.withOpacity(0.5),
+                  color: theme.textTheme.bodyMedium?.color?.withValues(
+                    alpha: 0.5,
+                  ),
                   size: 12,
                 ),
               ],
@@ -377,7 +377,7 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
                   ),
                   shadows: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
+                      color: Colors.black.withValues(alpha: 0.05),
                       blurRadius: 6,
                       offset: const Offset(0, 2),
                     ),
@@ -513,7 +513,7 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.08),
+                color: Colors.black.withValues(alpha: 0.08),
                 blurRadius: 12,
                 offset: const Offset(0, 4),
               ),
@@ -576,7 +576,7 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.08),
+              color: Colors.black.withValues(alpha: 0.08),
               blurRadius: 12,
               offset: const Offset(0, 4),
             ),
@@ -714,7 +714,7 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.08),
+              color: Colors.black.withValues(alpha: 0.08),
               blurRadius: 12,
               offset: const Offset(0, 4),
             ),
@@ -771,7 +771,7 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.08),
+              color: Colors.black.withValues(alpha: 0.08),
               blurRadius: 12,
               offset: const Offset(0, 4),
             ),
@@ -1138,7 +1138,7 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
                           ),
                         ],
                       );
-                    }).toList(),
+                    }),
                   ],
                 ),
             ];
@@ -1210,7 +1210,7 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.08),
+              color: Colors.black.withValues(alpha: 0.08),
               blurRadius: 12,
               offset: const Offset(0, 4),
             ),
@@ -1267,7 +1267,7 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.08),
+              color: Colors.black.withValues(alpha: 0.08),
               blurRadius: 12,
               offset: const Offset(0, 4),
             ),
@@ -1546,7 +1546,7 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
       // Draw area under the curve with app colors
       final areaPaint = Paint()
         ..color = const Color(0xFF617AFA)
-            .withOpacity(0.1) // App primary blue with opacity
+            .withValues(alpha: 0.1) // App primary blue with opacity
         ..style = PaintingStyle.fill;
 
       final areaPath = Path.from(path);
@@ -1658,7 +1658,7 @@ class _DateRangePickerDialogState extends State<_DateRangePickerDialog> {
           ),
           shadows: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.2),
+              color: Colors.black.withValues(alpha: 0.2),
               blurRadius: 20,
               offset: const Offset(0, 8),
             ),
@@ -1755,8 +1755,8 @@ class _DateRangePickerDialogState extends State<_DateRangePickerDialog> {
                       textStyle: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
-                        color: theme.textTheme.bodyMedium?.color?.withOpacity(
-                          0.7,
+                        color: theme.textTheme.bodyMedium?.color?.withValues(
+                          alpha: 0.7,
                         ),
                         letterSpacing: 0.5,
                       ),
@@ -1786,8 +1786,8 @@ class _DateRangePickerDialogState extends State<_DateRangePickerDialog> {
                       fontWeight: FontWeight.bold,
                     ),
                     disabledDatesTextStyle: TextStyle(
-                      color: theme.textTheme.bodyMedium?.color?.withOpacity(
-                        0.3,
+                      color: theme.textTheme.bodyMedium?.color?.withValues(
+                        alpha: 0.3,
                       ),
                       fontSize: 16,
                     ),
@@ -1810,11 +1810,11 @@ class _DateRangePickerDialogState extends State<_DateRangePickerDialog> {
                   selectionColor: theme.colorScheme.primary,
                   startRangeSelectionColor: theme.colorScheme.primary,
                   endRangeSelectionColor: theme.colorScheme.primary,
-                  rangeSelectionColor: theme.colorScheme.primary.withOpacity(
-                    0.15,
+                  rangeSelectionColor: theme.colorScheme.primary.withValues(
+                    alpha: 0.15,
                   ),
-                  todayHighlightColor: theme.colorScheme.primary.withOpacity(
-                    0.3,
+                  todayHighlightColor: theme.colorScheme.primary.withValues(
+                    alpha: 0.3,
                   ),
                   headerStyle: DateRangePickerHeaderStyle(
                     backgroundColor: theme.scaffoldBackgroundColor,

@@ -5,7 +5,6 @@ import 'package:skeletonizer/skeletonizer.dart';
 import 'package:provider/provider.dart';
 import 'package:figma_squircle/figma_squircle.dart';
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
-import '../services/firestore_service.dart';
 import '../providers/glucose_data_provider.dart';
 import '../providers/medication_data_provider.dart';
 import '../providers/glucose_trend_data_provider.dart';
@@ -60,28 +59,6 @@ class _OverviewScreenContentState extends State<OverviewScreenContent> {
       setState(() {
         _isLoading = false;
       });
-    }
-  }
-
-  String _formatTimeSince(DateTime date) {
-    final now = DateTime.now();
-    final difference = now.difference(date);
-
-    // Handle negative differences (future dates)
-    if (difference.isNegative) {
-      return 'Just now';
-    }
-
-    if (difference.inMinutes < 1) {
-      return 'Just now';
-    } else if (difference.inMinutes < 60) {
-      return 'Last updated ${difference.inMinutes} min ago';
-    } else if (difference.inHours < 24) {
-      return 'Last updated ${difference.inHours}h ago';
-    } else if (difference.inDays < 7) {
-      return 'Last updated ${difference.inDays}d ago';
-    } else {
-      return 'Last updated ${(difference.inDays / 7).floor()}w ago';
     }
   }
 
@@ -556,7 +533,7 @@ class _OverviewScreenContentState extends State<OverviewScreenContent> {
                                   ],
                                 ),
                               );
-                            }).toList(),
+                            }),
                           ],
                         );
                       } else {

@@ -18,9 +18,6 @@ class LogScreen extends StatefulWidget {
 }
 
 class _LogScreenState extends State<LogScreen> {
-  int _selectedSegment = 0;
-  DateTime _selectedDateTime = DateTime.now();
-
   final TextEditingController _glucoseController = TextEditingController();
   final TextEditingController _carbsController = TextEditingController();
   final TextEditingController _foodController = TextEditingController();
@@ -367,7 +364,9 @@ class _LogBottomSheetState extends State<LogBottomSheet> {
                         await GlucoseTrendDataProvider.invalidateAndRefreshGlobally(
                           context,
                         );
-                      } catch (e) {}
+                      } catch (e) {
+                        // Failed to refresh glucose data - this is non-critical
+                      }
                     }
 
                     // Refresh log history cache for any type of data
@@ -376,7 +375,9 @@ class _LogBottomSheetState extends State<LogBottomSheet> {
                       await LogHistoryDataProvider.invalidateAndRefreshGlobally(
                         context,
                       );
-                    } catch (e) {}
+                    } catch (e) {
+                      // Failed to refresh log history - this is non-critical
+                    }
 
                     // Clear form fields
                     _clearAllFields();

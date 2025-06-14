@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:toastification/toastification.dart';
-import 'package:skeletonizer/skeletonizer.dart';
 import 'package:provider/provider.dart';
 import 'package:figma_squircle/figma_squircle.dart';
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
@@ -11,7 +10,6 @@ import '../providers/glucose_data_provider.dart';
 import '../providers/glucose_trend_data_provider.dart';
 import '../providers/log_history_data_provider.dart';
 import '../models/log_entry.dart';
-import 'dart:math' as math;
 
 class LogHistoryScreen extends StatefulWidget {
   final bool isCalendarView;
@@ -342,7 +340,7 @@ class _LogHistoryScreenState extends State<LogHistoryScreen> {
 
               // Group events by type and show up to 4 different colored dots
               final eventTypes = events
-                  .map((e) => (e as LogEntry).title)
+                  .map((e) => e.title)
                   .toSet()
                   .take(4)
                   .toList();
@@ -1150,108 +1148,6 @@ class EventDetailsBottomSheet extends StatelessWidget {
     }
   }
 
-  // Helper function to get icon container decoration for each event type
-  Decoration _getIconContainerDecoration(
-    BuildContext context,
-    String eventType,
-  ) {
-    final theme = Theme.of(context);
-
-    switch (eventType.toLowerCase()) {
-      case 'glucose':
-        // Light red/pink background for glucose
-        return ShapeDecoration(
-          color: const Color(0xFFFFEBEE), // Light red background
-          shape: SmoothRectangleBorder(
-            borderRadius: SmoothBorderRadius(
-              cornerRadius: 14,
-              cornerSmoothing: 0.6,
-            ),
-          ),
-          shadows: [
-            BoxShadow(
-              color: Colors.red.withOpacity(0.1),
-              blurRadius: 6,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        );
-      case 'meal':
-        // Light orange background for meals
-        return ShapeDecoration(
-          color: const Color(0xFFFFF3E0), // Light orange background
-          shape: SmoothRectangleBorder(
-            borderRadius: SmoothBorderRadius(
-              cornerRadius: 14,
-              cornerSmoothing: 0.6,
-            ),
-          ),
-          shadows: [
-            BoxShadow(
-              color: Colors.orange.withOpacity(0.1),
-              blurRadius: 6,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        );
-      case 'activity':
-        // Light green background for activity
-        return ShapeDecoration(
-          color: const Color(0xFFE8F5E8), // Light green background
-          shape: SmoothRectangleBorder(
-            borderRadius: SmoothBorderRadius(
-              cornerRadius: 14,
-              cornerSmoothing: 0.6,
-            ),
-          ),
-          shadows: [
-            BoxShadow(
-              color: Colors.green.withOpacity(0.1),
-              blurRadius: 6,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        );
-      case 'medication':
-        // Light blue background for medication
-        return ShapeDecoration(
-          color: const Color(0xFFE3F2FD), // Light blue background
-          shape: SmoothRectangleBorder(
-            borderRadius: SmoothBorderRadius(
-              cornerRadius: 14,
-              cornerSmoothing: 0.6,
-            ),
-          ),
-          shadows: [
-            BoxShadow(
-              color: Colors.blue.withOpacity(0.1),
-              blurRadius: 6,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        );
-      default:
-        return ShapeDecoration(
-          color: theme.brightness == Brightness.dark
-              ? const Color(0xFF3A3A3A)
-              : Colors.white,
-          shape: SmoothRectangleBorder(
-            borderRadius: SmoothBorderRadius(
-              cornerRadius: 14,
-              cornerSmoothing: 0.6,
-            ),
-          ),
-          shadows: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 6,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        );
-    }
-  }
-
   // Helper function for detail sheet with larger corner radius
   Decoration _getIconContainerDecorationForDetail(
     BuildContext context,
@@ -1750,7 +1646,9 @@ class EventDetailsBottomSheet extends StatelessWidget {
                             await GlucoseTrendDataProvider.invalidateAndRefreshGlobally(
                               parentContext,
                             );
-                          } catch (e) {}
+                          } catch (e) {
+                            // Failed to refresh glucose data - this is non-critical
+                          }
                         }
 
                         // Refresh log history cache for any type of data
@@ -1758,7 +1656,9 @@ class EventDetailsBottomSheet extends StatelessWidget {
                           await LogHistoryDataProvider.invalidateAndRefreshGlobally(
                             parentContext,
                           );
-                        } catch (e) {}
+                        } catch (e) {
+                          // Failed to refresh log history - this is non-critical
+                        }
 
                         toastification.show(
                           context: parentContext,

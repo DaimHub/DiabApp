@@ -77,7 +77,6 @@ class LearnArticlesProvider with ChangeNotifier {
       notifyListeners();
       return articles;
     } catch (e) {
-      print('❌ Provider error: $e');
       _error = 'Failed to fetch articles: $e';
       if (showLoading) {
         _isLoading = false;
@@ -106,7 +105,6 @@ class LearnArticlesProvider with ChangeNotifier {
         notifyListeners();
       }
     } catch (e) {
-      print('❌ Background fetch error: $e');
       // Don't update error state for background fetches
     }
   }

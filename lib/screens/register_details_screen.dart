@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:toastification/toastification.dart';
 import 'package:figma_squircle/figma_squircle.dart';
@@ -923,94 +922,90 @@ class _RegisterDetailsScreenState extends State<RegisterDetailsScreen> {
                 ),
                 const SizedBox(height: 32),
 
-                ...healthComponents
-                    .map(
-                      (component) => Column(
-                        children: [
-                          Container(
-                            width: double.infinity,
-                            decoration: ShapeDecoration(
-                              color:
-                                  Theme.of(context).brightness ==
-                                      Brightness.dark
-                                  ? const Color(0xFF2A2A2A)
-                                  : const Color(0xFFF0F1F7),
-                              shape: SmoothRectangleBorder(
-                                borderRadius: SmoothBorderRadius(
-                                  cornerRadius: 14,
-                                  cornerSmoothing: 0.6,
-                                ),
+                ...healthComponents.map(
+                  (component) => Column(
+                    children: [
+                      Container(
+                        width: double.infinity,
+                        decoration: ShapeDecoration(
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? const Color(0xFF2A2A2A)
+                              : const Color(0xFFF0F1F7),
+                          shape: SmoothRectangleBorder(
+                            borderRadius: SmoothBorderRadius(
+                              cornerRadius: 14,
+                              cornerSmoothing: 0.6,
+                            ),
+                          ),
+                        ),
+                        child: Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            onTap: () {
+                              setState(() {
+                                _selectedHealthComponent = component;
+                              });
+                              Navigator.pop(context);
+                            },
+                            customBorder: SmoothRectangleBorder(
+                              borderRadius: SmoothBorderRadius(
+                                cornerRadius: 14,
+                                cornerSmoothing: 0.6,
                               ),
                             ),
-                            child: Material(
-                              color: Colors.transparent,
-                              child: InkWell(
-                                onTap: () {
-                                  setState(() {
-                                    _selectedHealthComponent = component;
-                                  });
-                                  Navigator.pop(context);
-                                },
-                                customBorder: SmoothRectangleBorder(
-                                  borderRadius: SmoothBorderRadius(
-                                    cornerRadius: 14,
-                                    cornerSmoothing: 0.6,
-                                  ),
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(16),
-                                  child: Row(
-                                    children: [
-                                      Container(
-                                        height: 44,
-                                        width: 44,
-                                        decoration: ShapeDecoration(
-                                          color:
-                                              Theme.of(context).brightness ==
-                                                  Brightness.dark
-                                              ? const Color(0xFF3A3A3A)
-                                              : Colors.white,
-                                          shape: SmoothRectangleBorder(
-                                            borderRadius: SmoothBorderRadius(
-                                              cornerRadius: 12,
-                                              cornerSmoothing: 0.6,
-                                            ),
-                                          ),
-                                        ),
-                                        child: Center(
-                                          child: FaIcon(
-                                            _getIconForHealthFocus(component),
-                                            color: Theme.of(
-                                              context,
-                                            ).colorScheme.primary,
-                                            size: 18,
-                                          ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    height: 44,
+                                    width: 44,
+                                    decoration: ShapeDecoration(
+                                      color:
+                                          Theme.of(context).brightness ==
+                                              Brightness.dark
+                                          ? const Color(0xFF3A3A3A)
+                                          : Colors.white,
+                                      shape: SmoothRectangleBorder(
+                                        borderRadius: SmoothBorderRadius(
+                                          cornerRadius: 12,
+                                          cornerSmoothing: 0.6,
                                         ),
                                       ),
-                                      const SizedBox(width: 16),
-                                      Expanded(
-                                        child: Text(
-                                          component,
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w500,
-                                            color: Theme.of(
-                                              context,
-                                            ).textTheme.bodyLarge?.color,
-                                          ),
-                                        ),
+                                    ),
+                                    child: Center(
+                                      child: FaIcon(
+                                        _getIconForHealthFocus(component),
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.primary,
+                                        size: 18,
                                       ),
-                                    ],
+                                    ),
                                   ),
-                                ),
+                                  const SizedBox(width: 16),
+                                  Expanded(
+                                    child: Text(
+                                      component,
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500,
+                                        color: Theme.of(
+                                          context,
+                                        ).textTheme.bodyLarge?.color,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ),
-                          const SizedBox(height: 12),
-                        ],
+                        ),
                       ),
-                    )
-                    .toList(),
+                      const SizedBox(height: 12),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),

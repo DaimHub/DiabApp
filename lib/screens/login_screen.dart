@@ -806,6 +806,8 @@ class _LoginScreenState extends State<LoginScreen>
 }
 
 class ForgotPasswordDialog extends StatefulWidget {
+  const ForgotPasswordDialog({super.key});
+
   @override
   State<ForgotPasswordDialog> createState() => _ForgotPasswordDialogState();
 }

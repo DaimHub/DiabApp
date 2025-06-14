@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:figma_squircle/figma_squircle.dart';
 
 class CommunityScreenContent extends StatelessWidget {
@@ -110,8 +109,8 @@ class CommunityScreenContent extends StatelessWidget {
         shadows: [
           BoxShadow(
             color: theme.brightness == Brightness.dark
-                ? Colors.black.withOpacity(0.2)
-                : Colors.black.withOpacity(0.05),
+                ? Colors.black.withValues(alpha: 0.2)
+                : Colors.black.withValues(alpha: 0.05),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -149,7 +148,7 @@ class CommunityScreenContent extends StatelessWidget {
                     ),
                     shadows: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
+                        color: Colors.black.withValues(alpha: 0.05),
                         blurRadius: 6,
                         offset: const Offset(0, 2),
                       ),
@@ -192,7 +191,9 @@ class CommunityScreenContent extends StatelessWidget {
                 // Arrow icon
                 Icon(
                   Icons.arrow_forward_ios,
-                  color: theme.textTheme.bodyMedium?.color?.withOpacity(0.5),
+                  color: theme.textTheme.bodyMedium?.color?.withValues(
+                    alpha: 0.5,
+                  ),
                   size: 16,
                 ),
               ],

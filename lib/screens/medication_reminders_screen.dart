@@ -944,7 +944,7 @@ class _MedicationRemindersScreenState extends State<MedicationRemindersScreen> {
                                   Text(
                                     selectedDays.length == 7
                                         ? 'Every day'
-                                        : selectedDays.length == 0
+                                        : selectedDays.isEmpty
                                         ? 'No days selected'
                                         : '${selectedDays.length} day${selectedDays.length == 1 ? '' : 's'} selected',
                                     style: TextStyle(

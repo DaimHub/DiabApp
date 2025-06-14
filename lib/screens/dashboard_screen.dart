@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:toastification/toastification.dart';
 import 'package:figma_squircle/figma_squircle.dart';
 import 'overview_screen.dart';
 import 'log_screen.dart';
@@ -28,11 +27,6 @@ class _DashboardScreenState extends State<DashboardScreen>
   @override
   void initState() {
     super.initState();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
   }
 
   void _showLogBottomSheet() {
@@ -117,7 +111,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                 ),
                 shadows: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: Colors.black.withValues(alpha: 0.05),
                     blurRadius: 4,
                     offset: const Offset(0, 1),
                   ),
@@ -178,7 +172,7 @@ class _DashboardScreenState extends State<DashboardScreen>
               ),
               shadows: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color: Colors.black.withValues(alpha: 0.05),
                   blurRadius: 4,
                   offset: const Offset(0, 1),
                 ),
@@ -224,7 +218,7 @@ class _DashboardScreenState extends State<DashboardScreen>
             end: Alignment.bottomRight,
             colors: [
               theme.colorScheme.primary,
-              theme.colorScheme.primary.withOpacity(0.8),
+              theme.colorScheme.primary.withValues(alpha: 0.8),
             ],
           ),
           shape: SmoothRectangleBorder(
@@ -235,7 +229,7 @@ class _DashboardScreenState extends State<DashboardScreen>
           ),
           shadows: [
             BoxShadow(
-              color: theme.colorScheme.primary.withOpacity(0.3),
+              color: theme.colorScheme.primary.withValues(alpha: 0.3),
               blurRadius: 12,
               offset: const Offset(0, 4),
             ),

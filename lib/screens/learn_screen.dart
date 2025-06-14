@@ -130,8 +130,8 @@ class _LearnScreenContentState extends State<LearnScreenContent> {
                                   ),
                                   side: BorderSide(
                                     color: isFocused
-                                        ? theme.colorScheme.primary.withOpacity(
-                                            0.8,
+                                        ? theme.colorScheme.primary.withValues(
+                                            alpha: 0.8,
                                           )
                                         : theme.brightness == Brightness.dark
                                         ? const Color(0xFF3A3A3A)
@@ -143,14 +143,16 @@ class _LearnScreenContentState extends State<LearnScreenContent> {
                                     ? [
                                         BoxShadow(
                                           color: theme.colorScheme.primary
-                                              .withOpacity(0.1),
+                                              .withValues(alpha: 0.1),
                                           blurRadius: 12,
                                           offset: const Offset(0, 2),
                                         ),
                                       ]
                                     : [
                                         BoxShadow(
-                                          color: Colors.black.withOpacity(0.03),
+                                          color: Colors.black.withValues(
+                                            alpha: 0.03,
+                                          ),
                                           blurRadius: 8,
                                           offset: const Offset(0, 2),
                                         ),
@@ -171,7 +173,7 @@ class _LearnScreenContentState extends State<LearnScreenContent> {
                                     hintText: 'Search for articles...',
                                     hintStyle: TextStyle(
                                       color: theme.colorScheme.primary
-                                          .withOpacity(0.7),
+                                          .withValues(alpha: 0.7),
                                       fontSize: 16,
                                     ),
                                     prefixIcon: Icon(
@@ -187,7 +189,7 @@ class _LearnScreenContentState extends State<LearnScreenContent> {
                                                   .textTheme
                                                   .bodyMedium
                                                   ?.color
-                                                  ?.withOpacity(0.6),
+                                                  ?.withValues(alpha: 0.6),
                                               size: 20,
                                             ),
                                             onPressed: () {
@@ -250,7 +252,7 @@ class _LearnScreenContentState extends State<LearnScreenContent> {
                                 style: TextStyle(
                                   fontSize: 14,
                                   color: theme.textTheme.bodyMedium?.color
-                                      ?.withOpacity(0.7),
+                                      ?.withValues(alpha: 0.7),
                                   fontWeight: FontWeight.w500,
                                 ),
                               );
@@ -444,8 +446,8 @@ class _LearnScreenContentState extends State<LearnScreenContent> {
         shadows: [
           BoxShadow(
             color: theme.brightness == Brightness.dark
-                ? Colors.black.withOpacity(0.2)
-                : Colors.black.withOpacity(0.05),
+                ? Colors.black.withValues(alpha: 0.2)
+                : Colors.black.withValues(alpha: 0.05),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -483,7 +485,7 @@ class _LearnScreenContentState extends State<LearnScreenContent> {
                     ),
                     shadows: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
+                        color: Colors.black.withValues(alpha: 0.05),
                         blurRadius: 6,
                         offset: const Offset(0, 2),
                       ),
@@ -532,8 +534,8 @@ class _LearnScreenContentState extends State<LearnScreenContent> {
                                 vertical: 4,
                               ),
                               decoration: BoxDecoration(
-                                color: theme.colorScheme.primary.withOpacity(
-                                  0.1,
+                                color: theme.colorScheme.primary.withValues(
+                                  alpha: 0.1,
                                 ),
                                 borderRadius: BorderRadius.circular(8),
                               ),
@@ -578,7 +580,9 @@ class _LearnScreenContentState extends State<LearnScreenContent> {
                 // Arrow icon
                 Icon(
                   Icons.arrow_forward_ios,
-                  color: theme.textTheme.bodyMedium?.color?.withOpacity(0.5),
+                  color: theme.textTheme.bodyMedium?.color?.withValues(
+                    alpha: 0.5,
+                  ),
                   size: 16,
                 ),
               ],
@@ -619,124 +623,6 @@ class _LearnScreenContentState extends State<LearnScreenContent> {
         ),
       ),
       builder: (context) => ArticleBottomSheet(article: article),
-    );
-  }
-
-  Widget _buildCategoryCard(
-    BuildContext context,
-    String title,
-    String description,
-    IconData icon,
-  ) {
-    final theme = Theme.of(context);
-    return Container(
-      decoration: ShapeDecoration(
-        color: theme.scaffoldBackgroundColor,
-        shape: SmoothRectangleBorder(
-          borderRadius: SmoothBorderRadius(
-            cornerRadius: 16,
-            cornerSmoothing: 0.6,
-          ),
-          side: BorderSide(
-            color: theme.brightness == Brightness.dark
-                ? const Color(0xFF3A3A3A)
-                : Colors.grey[200]!,
-            width: 1,
-          ),
-        ),
-        shadows: [
-          BoxShadow(
-            color: theme.brightness == Brightness.dark
-                ? Colors.black.withOpacity(0.2)
-                : Colors.black.withOpacity(0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () {
-            // Handle category tap
-          },
-          customBorder: SmoothRectangleBorder(
-            borderRadius: SmoothBorderRadius(
-              cornerRadius: 16,
-              cornerSmoothing: 0.6,
-            ),
-          ),
-          child: Container(
-            padding: const EdgeInsets.all(20),
-            child: Row(
-              children: [
-                // Icon container
-                Container(
-                  height: 44,
-                  width: 44,
-                  decoration: ShapeDecoration(
-                    color: theme.brightness == Brightness.dark
-                        ? const Color(0xFF3A3A3A)
-                        : Colors.white,
-                    shape: SmoothRectangleBorder(
-                      borderRadius: SmoothBorderRadius(
-                        cornerRadius: 12,
-                        cornerSmoothing: 0.6,
-                      ),
-                    ),
-                    shadows: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 6,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Center(
-                    child: FaIcon(
-                      icon,
-                      color: theme.colorScheme.primary,
-                      size: 20,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                // Content
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: theme.textTheme.titleMedium?.color,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        description,
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: theme.textTheme.bodyMedium?.color,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 16),
-                // Arrow icon
-                Icon(
-                  Icons.arrow_forward_ios,
-                  color: theme.textTheme.bodyMedium?.color?.withOpacity(0.5),
-                  size: 16,
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
     );
   }
 
@@ -824,11 +710,11 @@ class _LearnScreenContentState extends State<LearnScreenContent> {
 
     switch (difficulty.toLowerCase()) {
       case 'beginner':
-        return baseColor.withOpacity(0.85); // 85% opacity
+        return baseColor.withValues(alpha: 0.85); // 85% opacity
       case 'intermediate':
-        return baseColor.withOpacity(0.75); // 75% opacity
+        return baseColor.withValues(alpha: 0.75); // 75% opacity
       case 'advanced':
-        return baseColor.withOpacity(0.65); // 65% opacity
+        return baseColor.withValues(alpha: 0.65); // 65% opacity
       default:
         return baseColor;
     }
@@ -923,7 +809,7 @@ class ArticleBottomSheet extends StatelessWidget {
                         cornerRadius: 12,
                         cornerSmoothing: 0.6,
                       ),
-                      child: Container(
+                      child: SizedBox(
                         height: 200,
                         width: double.infinity,
                         child: Image.network(
@@ -1056,7 +942,7 @@ class ArticleBottomSheet extends StatelessWidget {
                       ),
                       blockquotePadding: const EdgeInsets.all(16),
                       blockquoteDecoration: BoxDecoration(
-                        color: theme.colorScheme.primary.withOpacity(0.1),
+                        color: theme.colorScheme.primary.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
                         border: Border(
                           left: BorderSide(

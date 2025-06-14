@@ -430,23 +430,16 @@ class FirestoreService {
   // Get all published articles
   static Future<List<Map<String, dynamic>>> getLearnArticles() async {
     try {
-      print('🔍 Fetching learn articles from Firestore...');
-
       final snapshot = await _firestore
           .collection('learn')
           .where('published', isEqualTo: true)
           .orderBy('order')
           .get();
 
-      print('📊 Found ${snapshot.docs.length} documents in learn collection');
-
       final articles = <Map<String, dynamic>>[];
 
       for (final doc in snapshot.docs) {
-        print('📄 Processing document: ${doc.id}');
         final data = doc.data();
-        print('📋 Document data: $data');
-
         data['id'] = doc.id;
 
         // Convert timestamps to DateTime if needed
@@ -460,10 +453,8 @@ class FirestoreService {
         articles.add(data);
       }
 
-      print('✅ Successfully processed ${articles.length} articles');
       return articles;
     } catch (e) {
-      print('❌ Error fetching learn articles: $e');
       return [];
     }
   }
@@ -500,35 +491,13 @@ class FirestoreService {
   // One-time article population (REMOVE AFTER USE)
   static Future<void> populateArticlesOnce() async {
     try {
-      print('🔍 Checking existing articles...');
-
       // Check how many articles currently exist
       final existingArticles = await _firestore.collection('learn').get();
 
-      print(
-        '📊 Found ${existingArticles.docs.length} existing articles in the collection',
-      );
-
-      // List existing article titles
-      if (existingArticles.docs.isNotEmpty) {
-        print('📋 Existing articles:');
-        for (final doc in existingArticles.docs) {
-          final data = doc.data();
-          final title = data['title'] ?? 'No title';
-          final order = data['order'] ?? 'N/A';
-          print('  - "$title" (Order: $order)');
-        }
-      }
-
       // If we already have 5 or more articles, skip
       if (existingArticles.docs.length >= 5) {
-        print(
-          '📚 Already have ${existingArticles.docs.length} articles, skipping population',
-        );
         return;
       }
-
-      print('📝 Starting article population for missing articles...');
 
       final sampleArticles = [
         {
@@ -947,8 +916,6 @@ Remember, insulin management is highly individual. Work closely with your health
           .toSet();
 
       final now = DateTime.now();
-      int successCount = 0;
-      int skippedCount = 0;
 
       for (int i = 0; i < sampleArticles.length; i++) {
         try {
@@ -957,8 +924,6 @@ Remember, insulin management is highly individual. Work closely with your health
 
           // Skip if article already exists
           if (existingTitles.contains(articleTitle)) {
-            print('⏭️ Skipping "${articleTitle}" - already exists');
-            skippedCount++;
             continue;
           }
 
@@ -966,29 +931,16 @@ Remember, insulin management is highly individual. Work closely with your health
           article['publishedAt'] = Timestamp.fromDate(now);
           article['updatedAt'] = Timestamp.fromDate(now);
 
-          print('📄 Adding new article: "${articleTitle}"');
-
           await _firestore.collection('learn').add(article);
-          successCount++;
-
-          print('✅ Successfully added: "${articleTitle}"');
 
           // Small delay to avoid overwhelming Firestore
           await Future.delayed(const Duration(milliseconds: 100));
         } catch (e) {
-          print('❌ Failed to add article ${i + 1}: $e');
+          // Failed to add article
         }
       }
-
-      print('🎉 Article population completed!');
-      print(
-        '📊 Results: $successCount new articles added, $skippedCount existing articles skipped',
-      );
-      print(
-        '📚 Total articles in collection: ${existingArticles.docs.length + successCount}',
-      );
     } catch (e) {
-      print('❌ Error during article population: $e');
+      // Error during article population
     }
   }
 }
