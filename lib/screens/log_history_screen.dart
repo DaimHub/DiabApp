@@ -592,7 +592,7 @@ class _LogHistoryScreenState extends State<LogHistoryScreen> {
                         ? ListView.separated(
                             itemCount: filteredDayEvents.length,
                             separatorBuilder: (context, index) =>
-                                const SizedBox(height: 12),
+                                const SizedBox(height: 8),
                             itemBuilder: (context, index) {
                               return _buildLogEntryCard(
                                 filteredDayEvents[index],
@@ -754,7 +754,7 @@ class _LogHistoryScreenState extends State<LogHistoryScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 20.0),
       child: ListView.separated(
         itemCount: searchFilteredEvents.length,
-        separatorBuilder: (context, index) => const SizedBox(height: 12),
+        separatorBuilder: (context, index) => const SizedBox(height: 8),
         itemBuilder: (context, index) {
           return _buildLogEntryCard(searchFilteredEvents[index]);
         },
@@ -765,143 +765,117 @@ class _LogHistoryScreenState extends State<LogHistoryScreen> {
   Widget _buildLogEntryCard(LogEntry entry) {
     final theme = Theme.of(context);
 
-    return Container(
-      decoration: ShapeDecoration(
-        color: theme.scaffoldBackgroundColor,
-        shape: SmoothRectangleBorder(
-          borderRadius: SmoothBorderRadius(
-            cornerRadius: 16,
-            cornerSmoothing: 0.6,
-          ),
-          side: BorderSide(
-            color: theme.brightness == Brightness.dark
-                ? const Color(0xFF3A3A3A)
-                : Colors.grey[200]!,
-            width: 1,
-          ),
-        ),
-        shadows: [
-          BoxShadow(
-            color: theme.brightness == Brightness.dark
-                ? Colors.black.withOpacity(0.2)
-                : Colors.black.withOpacity(0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(16),
-          splashColor: _getEventColor(
-            context,
-            entry.title.toLowerCase(),
-          ).withOpacity(0.2),
-          highlightColor: _getEventColor(
-            context,
-            entry.title.toLowerCase(),
-          ).withOpacity(0.1),
-          onTap: () => _showEventDetailsBottomSheet(entry),
-          child: Container(
-            padding: const EdgeInsets.all(20),
-            child: Row(
-              children: [
-                Container(
-                  height: 50,
-                  width: 50,
-                  decoration: _getIconContainerDecoration(
-                    context,
-                    entry.title.toLowerCase(),
-                  ),
-                  child: Center(
-                    child: FaIcon(
-                      entry.icon,
-                      color: _getEventColor(context, entry.title.toLowerCase()),
-                      size: 20,
-                    ),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        splashColor: _getEventColor(
+          context,
+          entry.title.toLowerCase(),
+        ).withOpacity(0.1),
+        highlightColor: _getEventColor(
+          context,
+          entry.title.toLowerCase(),
+        ).withOpacity(0.05),
+        onTap: () => _showEventDetailsBottomSheet(entry),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+          child: Row(
+            children: [
+              Container(
+                height: 50,
+                width: 50,
+                decoration: _getIconContainerDecoration(
+                  context,
+                  entry.title.toLowerCase(),
+                ),
+                child: Center(
+                  child: FaIcon(
+                    entry.icon,
+                    color: _getEventColor(context, entry.title.toLowerCase()),
+                    size: 20,
                   ),
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        entry.title,
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: theme.textTheme.titleMedium?.color,
-                        ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      entry.title,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 18,
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        entry.value,
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: _getEventColor(context, entry.title),
-                          fontWeight: FontWeight.w500,
-                        ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      entry.value,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.brightness == Brightness.dark
+                            ? Colors.white70
+                            : Colors.grey[600],
                       ),
-                      // Show notes if available
-                      if (entry.note != null && entry.note!.isNotEmpty) ...[
-                        const SizedBox(height: 6),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
-                          decoration: ShapeDecoration(
-                            color: theme.brightness == Brightness.dark
-                                ? const Color(0xFF3A3A3A)
-                                : Colors.grey[100],
-                            shape: SmoothRectangleBorder(
-                              borderRadius: SmoothBorderRadius(
-                                cornerRadius: 6,
-                                cornerSmoothing: 0.6,
-                              ),
+                    ),
+                    // Show notes if available
+                    if (entry.note != null && entry.note!.isNotEmpty) ...[
+                      const SizedBox(height: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: ShapeDecoration(
+                          color: theme.brightness == Brightness.dark
+                              ? const Color(0xFF3A3A3A)
+                              : Colors.grey[100],
+                          shape: SmoothRectangleBorder(
+                            borderRadius: SmoothBorderRadius(
+                              cornerRadius: 6,
+                              cornerSmoothing: 0.6,
                             ),
                           ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.attach_file,
-                                size: 12,
-                                color: theme.textTheme.bodySmall?.color
-                                    ?.withOpacity(0.7),
-                              ),
-                              const SizedBox(width: 4),
-                              Flexible(
-                                child: Text(
-                                  entry.note!,
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: theme.textTheme.bodySmall?.color
-                                        ?.withOpacity(0.8),
-                                    fontStyle: FontStyle.italic,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ],
-                          ),
                         ),
-                      ],
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.attach_file,
+                              size: 12,
+                              color: theme.textTheme.bodySmall?.color
+                                  ?.withOpacity(0.7),
+                            ),
+                            const SizedBox(width: 4),
+                            Flexible(
+                              child: Text(
+                                entry.note!,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: theme.textTheme.bodySmall?.color
+                                      ?.withOpacity(0.8),
+                                  fontStyle: FontStyle.italic,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ],
-                  ),
+                  ],
                 ),
-                Text(
-                  entry.time,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: theme.textTheme.bodySmall?.color,
-                  ),
+              ),
+              Text(
+                entry.time,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.brightness == Brightness.dark
+                      ? Colors.white60
+                      : Colors.grey[500],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
@@ -1229,6 +1203,151 @@ class EventDetailsBottomSheet extends StatelessWidget {
     }
   }
 
+  // Helper function to get icon container decoration for each event type
+  Decoration _getIconContainerDecoration(
+    BuildContext context,
+    String eventType,
+  ) {
+    final theme = Theme.of(context);
+
+    switch (eventType.toLowerCase()) {
+      case 'glucose':
+        return ShapeDecoration(
+          color: theme.brightness == Brightness.dark
+              ? const Color(0xFF3A3A3A)
+              : Colors.white,
+          shape: SmoothRectangleBorder(
+            borderRadius: SmoothBorderRadius(
+              cornerRadius: 18,
+              cornerSmoothing: 0.6,
+            ),
+            side: BorderSide(
+              color: Colors.red[400]!.withOpacity(0.3),
+              width: 1.5,
+            ),
+          ),
+          shadows: [
+            BoxShadow(
+              color: Colors.red.withOpacity(0.08),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        );
+      case 'meal':
+        return ShapeDecoration(
+          color: theme.brightness == Brightness.dark
+              ? const Color(0xFF3A3A3A)
+              : Colors.white,
+          shape: SmoothRectangleBorder(
+            borderRadius: SmoothBorderRadius(
+              cornerRadius: 18,
+              cornerSmoothing: 0.6,
+            ),
+            side: BorderSide(
+              color: Colors.orange[400]!.withOpacity(0.3),
+              width: 1.5,
+            ),
+          ),
+          shadows: [
+            BoxShadow(
+              color: Colors.orange.withOpacity(0.08),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        );
+      case 'activity':
+        return ShapeDecoration(
+          color: theme.brightness == Brightness.dark
+              ? const Color(0xFF3A3A3A)
+              : Colors.white,
+          shape: SmoothRectangleBorder(
+            borderRadius: SmoothBorderRadius(
+              cornerRadius: 18,
+              cornerSmoothing: 0.6,
+            ),
+            side: BorderSide(
+              color: Colors.green[400]!.withOpacity(0.3),
+              width: 1.5,
+            ),
+          ),
+          shadows: [
+            BoxShadow(
+              color: Colors.green.withOpacity(0.08),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        );
+      case 'medication':
+        return ShapeDecoration(
+          color: theme.brightness == Brightness.dark
+              ? const Color(0xFF3A3A3A)
+              : Colors.white,
+          shape: SmoothRectangleBorder(
+            borderRadius: SmoothBorderRadius(
+              cornerRadius: 18,
+              cornerSmoothing: 0.6,
+            ),
+            side: BorderSide(
+              color: Colors.blue[400]!.withOpacity(0.3),
+              width: 1.5,
+            ),
+          ),
+          shadows: [
+            BoxShadow(
+              color: Colors.blue.withOpacity(0.08),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        );
+      case 'other':
+        return ShapeDecoration(
+          color: theme.brightness == Brightness.dark
+              ? const Color(0xFF3A3A3A)
+              : Colors.white,
+          shape: SmoothRectangleBorder(
+            borderRadius: SmoothBorderRadius(
+              cornerRadius: 18,
+              cornerSmoothing: 0.6,
+            ),
+            side: BorderSide(
+              color: Colors.purple[400]!.withOpacity(0.3),
+              width: 1.5,
+            ),
+          ),
+          shadows: [
+            BoxShadow(
+              color: Colors.purple.withOpacity(0.08),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        );
+      default:
+        return ShapeDecoration(
+          color: theme.brightness == Brightness.dark
+              ? const Color(0xFF3A3A3A)
+              : Colors.white,
+          shape: SmoothRectangleBorder(
+            borderRadius: SmoothBorderRadius(
+              cornerRadius: 18,
+              cornerSmoothing: 0.6,
+            ),
+          ),
+          shadows: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        );
+    }
+  }
+
   // Helper function for detail sheet with larger corner radius
   Decoration _getIconContainerDecorationForDetail(
     BuildContext context,
@@ -1501,85 +1620,66 @@ class EventDetailsBottomSheet extends StatelessWidget {
             ),
             const SizedBox(height: 20),
 
-            // Event details card - clean without any buttons
+            // Event details card - clean layout
             Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(20),
-              decoration: ShapeDecoration(
-                color: theme.brightness == Brightness.dark
-                    ? const Color(0xFF2A2A2A)
-                    : const Color(0xFFF0F1F7),
-                shape: SmoothRectangleBorder(
-                  borderRadius: SmoothBorderRadius(
-                    cornerRadius: 16,
-                    cornerSmoothing: 0.6,
-                  ),
-                ),
-                shadows: [
-                  BoxShadow(
-                    color: theme.brightness == Brightness.dark
-                        ? Colors.black.withOpacity(0.3)
-                        : Colors.black.withOpacity(0.08),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
+              padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
               child: Column(
                 children: [
-                  // Icon
-                  Container(
-                    height: 60,
-                    width: 60,
-                    decoration: _getIconContainerDecorationForDetail(
-                      context,
-                      entry.title.toLowerCase(),
-                    ),
-                    child: Center(
-                      child: FaIcon(
-                        entry.icon,
-                        color: _getEventColor(
+                  // Icon and main content in row layout
+                  Row(
+                    children: [
+                      Container(
+                        height: 60,
+                        width: 60,
+                        decoration: _getIconContainerDecoration(
                           context,
                           entry.title.toLowerCase(),
                         ),
-                        size: 28,
+                        child: Center(
+                          child: FaIcon(
+                            entry.icon,
+                            color: _getEventColor(
+                              context,
+                              entry.title.toLowerCase(),
+                            ),
+                            size: 24,
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Title
-                  Text(
-                    entry.title,
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: theme.textTheme.titleLarge?.color,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 8),
-
-                  // Value
-                  Text(
-                    entry.value,
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: _getEventColor(context, entry.title),
-                      fontWeight: FontWeight.w500,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 8),
-
-                  // Time
-                  Text(
-                    entry.time,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: theme.textTheme.bodyMedium?.color,
-                    ),
-                    textAlign: TextAlign.center,
+                      const SizedBox(width: 20),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              entry.title,
+                              style: theme.textTheme.titleLarge?.copyWith(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 22,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              entry.value,
+                              style: theme.textTheme.bodyLarge?.copyWith(
+                                color: theme.brightness == Brightness.dark
+                                    ? Colors.white70
+                                    : Colors.grey[600],
+                                fontSize: 16,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Text(
+                        entry.time,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: theme.brightness == Brightness.dark
+                              ? Colors.white60
+                              : Colors.grey[500],
+                        ),
+                      ),
+                    ],
                   ),
 
                   // Note section if available

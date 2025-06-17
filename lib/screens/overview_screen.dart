@@ -106,64 +106,36 @@ class _OverviewScreenContentState extends State<OverviewScreenContent> {
 
                   // Icon Testing Section
 
-                  // Blood Glucose Card
+                  // Blood Glucose Section
                   Consumer<GlucoseDataProvider>(
                     builder: (context, glucoseProvider, child) {
                       return Container(
                         margin: const EdgeInsets.only(top: 20),
-                        padding: const EdgeInsets.all(20),
-                        decoration: ShapeDecoration(
-                          color: theme.scaffoldBackgroundColor,
-                          shape: SmoothRectangleBorder(
-                            borderRadius: SmoothBorderRadius(
-                              cornerRadius: 16,
-                              cornerSmoothing: 0.6,
-                            ),
-                            side: BorderSide(
-                              color: theme.brightness == Brightness.dark
-                                  ? const Color(0xFF3A3A3A)
-                                  : Colors.grey[200]!,
-                              width: 1,
-                            ),
-                          ),
-                          shadows: [
-                            BoxShadow(
-                              color: theme.brightness == Brightness.dark
-                                  ? Colors.black.withOpacity(0.2)
-                                  : Colors.black.withOpacity(0.05),
-                              blurRadius: 8,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 16,
+                          horizontal: 4,
                         ),
                         child: Row(
                           children: [
                             Container(
-                              height: 60,
-                              width: 60,
+                              height: 50,
+                              width: 50,
                               decoration: ShapeDecoration(
                                 color: theme.brightness == Brightness.dark
                                     ? const Color(0xFF3A3A3A)
-                                    : Colors.white,
+                                    : const Color(0xFFF0F1F7),
                                 shape: SmoothRectangleBorder(
                                   borderRadius: SmoothBorderRadius(
-                                    cornerRadius: 16,
+                                    cornerRadius: 12,
                                     cornerSmoothing: 0.6,
                                   ),
                                 ),
-                                shadows: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.05),
-                                    blurRadius: 6,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
                               ),
                               child: Center(
                                 child: FaIcon(
                                   FontAwesomeIcons.droplet,
                                   color: theme.colorScheme.primary,
-                                  size: 28,
+                                  size: 24,
                                 ),
                               ),
                             ),
@@ -173,38 +145,40 @@ class _OverviewScreenContentState extends State<OverviewScreenContent> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'Blood Glucose',
+                                    'Blood',
                                     style: theme.textTheme.titleMedium
-                                        ?.copyWith(fontWeight: FontWeight.bold),
+                                        ?.copyWith(
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 18,
+                                        ),
                                   ),
-                                  const SizedBox(height: 4),
+                                  const SizedBox(height: 2),
                                   glucoseProvider.isLoading &&
                                           !glucoseProvider.hasData
                                       ? Container(
                                           width: 80,
-                                          height: 20,
-                                          decoration: ShapeDecoration(
+                                          height: 18,
+                                          decoration: BoxDecoration(
                                             color:
                                                 theme.brightness ==
                                                     Brightness.dark
                                                 ? const Color(0xFF3A3A3A)
                                                 : const Color(0xFFF0F1F7),
-                                            shape: SmoothRectangleBorder(
-                                              borderRadius: SmoothBorderRadius(
-                                                cornerRadius: 6,
-                                                cornerSmoothing: 0.6,
-                                              ),
+                                            borderRadius: BorderRadius.circular(
+                                              4,
                                             ),
                                           ),
                                         )
                                       : Text(
                                           glucoseProvider
                                               .getGlucoseValueString(),
-                                          style: theme.textTheme.titleMedium
+                                          style: theme.textTheme.bodyMedium
                                               ?.copyWith(
                                                 color:
-                                                    theme.colorScheme.primary,
-                                                fontWeight: FontWeight.w600,
+                                                    theme.brightness ==
+                                                        Brightness.dark
+                                                    ? Colors.white70
+                                                    : Colors.grey[600],
                                               ),
                                         ),
                                 ],
@@ -215,21 +189,20 @@ class _OverviewScreenContentState extends State<OverviewScreenContent> {
                                 ? Container(
                                     width: 120,
                                     height: 16,
-                                    decoration: ShapeDecoration(
+                                    decoration: BoxDecoration(
                                       color: theme.brightness == Brightness.dark
                                           ? const Color(0xFF3A3A3A)
                                           : const Color(0xFFF0F1F7),
-                                      shape: SmoothRectangleBorder(
-                                        borderRadius: SmoothBorderRadius(
-                                          cornerRadius: 6,
-                                          cornerSmoothing: 0.6,
-                                        ),
-                                      ),
+                                      borderRadius: BorderRadius.circular(4),
                                     ),
                                   )
                                 : Text(
                                     glucoseProvider.getTimeSinceLastReading(),
-                                    style: theme.textTheme.bodySmall,
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: theme.brightness == Brightness.dark
+                                          ? Colors.white60
+                                          : Colors.grey[500],
+                                    ),
                                   ),
                           ],
                         ),
@@ -237,148 +210,118 @@ class _OverviewScreenContentState extends State<OverviewScreenContent> {
                     },
                   ),
 
-                  const SizedBox(height: 30),
+                  const SizedBox(height: 20),
 
-                  // Upcoming Section
-                  Text(
-                    'Upcoming',
-                    style: theme.textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Medication Reminder Card
+                  // Medication Reminder Section
                   Consumer<MedicationDataProvider>(
                     builder: (context, medicationProvider, child) {
                       if (medicationProvider.isLoading &&
                           !medicationProvider.hasData) {
                         // Skeleton loading for medication reminder
-                        return Skeletonizer(
-                          enabled: true,
-                          child: Container(
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: Colors.transparent,
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            child: Row(
-                              children: [
-                                Container(
-                                  height: 60,
-                                  width: 60,
-                                  decoration: BoxDecoration(
-                                    color: theme.brightness == Brightness.dark
-                                        ? const Color(0xFF2A2A2A)
-                                        : const Color(0xFFF0F1F7),
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Center(
-                                    child: FaIcon(
-                                      FontAwesomeIcons.pills,
-                                      color: theme.colorScheme.primary
-                                          .withOpacity(0.3),
-                                      size: 24,
+                        return Container(
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 16,
+                            horizontal: 4,
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                height: 50,
+                                width: 50,
+                                decoration: ShapeDecoration(
+                                  color: theme.brightness == Brightness.dark
+                                      ? const Color(0xFF3A3A3A)
+                                      : const Color(0xFFF0F1F7),
+                                  shape: SmoothRectangleBorder(
+                                    borderRadius: SmoothBorderRadius(
+                                      cornerRadius: 12,
+                                      cornerSmoothing: 0.6,
                                     ),
                                   ),
                                 ),
-                                const SizedBox(width: 16),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Container(
-                                        width: 140,
-                                        height: 18,
-                                        decoration: BoxDecoration(
-                                          color:
-                                              theme.brightness ==
-                                                  Brightness.dark
-                                              ? const Color(0xFF3A3A3A)
-                                              : const Color(0xFFF0F1F7),
-                                          borderRadius: BorderRadius.circular(
-                                            4,
-                                          ),
-                                        ),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Container(
-                                        width: 80,
-                                        height: 16,
-                                        decoration: BoxDecoration(
-                                          color:
-                                              theme.brightness ==
-                                                  Brightness.dark
-                                              ? const Color(0xFF3A3A3A)
-                                              : const Color(0xFFF0F1F7),
-                                          borderRadius: BorderRadius.circular(
-                                            4,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
+                                child: Center(
+                                  child: FaIcon(
+                                    FontAwesomeIcons.pills,
+                                    color: theme.colorScheme.primary
+                                        .withOpacity(0.3),
+                                    size: 24,
                                   ),
                                 ),
-                                Container(
-                                  width: 80,
-                                  height: 18,
-                                  decoration: BoxDecoration(
-                                    color: theme.brightness == Brightness.dark
-                                        ? const Color(0xFF3A3A3A)
-                                        : const Color(0xFFF0F1F7),
-                                    borderRadius: BorderRadius.circular(4),
-                                  ),
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Container(
+                                      width: 140,
+                                      height: 18,
+                                      decoration: BoxDecoration(
+                                        color:
+                                            theme.brightness == Brightness.dark
+                                            ? const Color(0xFF3A3A3A)
+                                            : const Color(0xFFF0F1F7),
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Container(
+                                      width: 80,
+                                      height: 16,
+                                      decoration: BoxDecoration(
+                                        color:
+                                            theme.brightness == Brightness.dark
+                                            ? const Color(0xFF3A3A3A)
+                                            : const Color(0xFFF0F1F7),
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            ),
+                              ),
+                              Container(
+                                width: 80,
+                                height: 18,
+                                decoration: BoxDecoration(
+                                  color: theme.brightness == Brightness.dark
+                                      ? const Color(0xFF3A3A3A)
+                                      : const Color(0xFFF0F1F7),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                              ),
+                            ],
                           ),
                         );
                       } else if (medicationProvider
                           .todaysMedications
                           .isNotEmpty) {
-                        // Today's medications list
+                        // Show all today's medications with clean row layout
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // Build medication list
+                            // Add back the "Upcoming" section header
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 4,
+                              ),
+                              child: Text(
+                                'Upcoming',
+                                style: theme.textTheme.headlineSmall?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            // Show all medications in clean row style
                             ...medicationProvider.todaysMedications.map((
                               medication,
                             ) {
                               final isPastDue = medication['isPastDue'] as bool;
                               return Container(
-                                margin: const EdgeInsets.only(bottom: 12),
-                                padding: const EdgeInsets.all(20),
-                                decoration: ShapeDecoration(
-                                  color: isPastDue
-                                      ? theme.scaffoldBackgroundColor
-                                            .withOpacity(0.5)
-                                      : theme.scaffoldBackgroundColor,
-                                  shape: SmoothRectangleBorder(
-                                    borderRadius: SmoothBorderRadius(
-                                      cornerRadius: 16,
-                                      cornerSmoothing: 0.6,
-                                    ),
-                                    side: BorderSide(
-                                      color: isPastDue
-                                          ? (theme.brightness == Brightness.dark
-                                                ? const Color(0xFF3A3A3A)
-                                                : Colors.grey[300]!)
-                                          : (theme.brightness == Brightness.dark
-                                                ? const Color(0xFF3A3A3A)
-                                                : Colors.grey[200]!),
-                                      width: 1,
-                                    ),
-                                  ),
-                                  shadows: [
-                                    BoxShadow(
-                                      color: theme.brightness == Brightness.dark
-                                          ? Colors.black.withOpacity(0.2)
-                                          : Colors.black.withOpacity(0.05),
-                                      blurRadius: 8,
-                                      offset: const Offset(0, 2),
-                                    ),
-                                  ],
+                                margin: const EdgeInsets.only(bottom: 8),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 12,
+                                  horizontal: 4,
                                 ),
                                 child: Row(
                                   children: [
@@ -389,36 +332,31 @@ class _OverviewScreenContentState extends State<OverviewScreenContent> {
                                         color: isPastDue
                                             ? (theme.brightness ==
                                                       Brightness.dark
-                                                  ? const Color(0xFF3A3A3A)
-                                                  : Colors.grey[200])
+                                                  ? const Color(
+                                                      0xFF3A3A3A,
+                                                    ).withOpacity(0.7)
+                                                  : const Color(
+                                                      0xFFF0F1F7,
+                                                    ).withOpacity(0.7))
                                             : (theme.brightness ==
                                                       Brightness.dark
                                                   ? const Color(0xFF3A3A3A)
-                                                  : Colors.white),
+                                                  : const Color(0xFFF0F1F7)),
                                         shape: SmoothRectangleBorder(
                                           borderRadius: SmoothBorderRadius(
-                                            cornerRadius: 14,
+                                            cornerRadius: 12,
                                             cornerSmoothing: 0.6,
                                           ),
                                         ),
-                                        shadows: [
-                                          BoxShadow(
-                                            color: Colors.black.withOpacity(
-                                              0.05,
-                                            ),
-                                            blurRadius: 6,
-                                            offset: const Offset(0, 2),
-                                          ),
-                                        ],
                                       ),
                                       child: Center(
                                         child: FaIcon(
                                           FontAwesomeIcons.pills,
                                           color: isPastDue
                                               ? theme.colorScheme.primary
-                                                    .withOpacity(0.4)
+                                                    .withOpacity(0.5)
                                               : theme.colorScheme.primary,
-                                          size: 20,
+                                          size: 24,
                                         ),
                                       ),
                                     ),
@@ -432,69 +370,41 @@ class _OverviewScreenContentState extends State<OverviewScreenContent> {
                                             medication['name'],
                                             style: theme.textTheme.titleMedium
                                                 ?.copyWith(
-                                                  fontWeight: FontWeight.bold,
+                                                  fontWeight: FontWeight.w600,
+                                                  fontSize: 18,
                                                   color: isPastDue
-                                                      ? theme
-                                                            .textTheme
-                                                            .titleMedium
-                                                            ?.color
-                                                            ?.withOpacity(0.6)
-                                                      : theme
-                                                            .textTheme
-                                                            .titleMedium
-                                                            ?.color,
+                                                      ? (theme.brightness ==
+                                                                Brightness.dark
+                                                            ? Colors.white
+                                                                  .withOpacity(
+                                                                    0.6,
+                                                                  )
+                                                            : Colors.black
+                                                                  .withOpacity(
+                                                                    0.6,
+                                                                  ))
+                                                      : null,
+                                                  decoration: isPastDue
+                                                      ? TextDecoration
+                                                            .lineThrough
+                                                      : null,
                                                 ),
                                           ),
-                                          const SizedBox(height: 4),
-                                          // Show dosage if available
-                                          if (medication['dosage'] != null &&
-                                              medication['dosage']
-                                                  .toString()
-                                                  .isNotEmpty)
-                                            Padding(
-                                              padding: const EdgeInsets.only(
-                                                bottom: 4,
-                                              ),
-                                              child: Text(
-                                                medication['dosage'],
-                                                style: theme.textTheme.bodySmall
-                                                    ?.copyWith(
-                                                      color: isPastDue
-                                                          ? theme
-                                                                .textTheme
-                                                                .bodySmall
-                                                                ?.color
-                                                                ?.withOpacity(
-                                                                  0.5,
-                                                                )
-                                                          : theme
-                                                                .textTheme
-                                                                .bodySmall
-                                                                ?.color,
-                                                      fontWeight:
-                                                          FontWeight.w500,
-                                                      decoration: isPastDue
-                                                          ? TextDecoration
-                                                                .lineThrough
-                                                          : null,
-                                                    ),
-                                              ),
-                                            ),
+                                          const SizedBox(height: 2),
                                           Text(
                                             (medication['time'] as TimeOfDay)
                                                 .format(context),
                                             style: theme.textTheme.bodyMedium
                                                 ?.copyWith(
                                                   color: isPastDue
-                                                      ? theme
-                                                            .textTheme
-                                                            .bodyMedium
-                                                            ?.color
-                                                            ?.withOpacity(0.5)
-                                                      : theme
-                                                            .colorScheme
-                                                            .primary,
-                                                  fontWeight: FontWeight.w500,
+                                                      ? (theme.brightness ==
+                                                                Brightness.dark
+                                                            ? Colors.white54
+                                                            : Colors.grey[500])
+                                                      : (theme.brightness ==
+                                                                Brightness.dark
+                                                            ? Colors.white70
+                                                            : Colors.grey[600]),
                                                   decoration: isPastDue
                                                       ? TextDecoration
                                                             .lineThrough
@@ -504,122 +414,105 @@ class _OverviewScreenContentState extends State<OverviewScreenContent> {
                                         ],
                                       ),
                                     ),
-                                    if (isPastDue)
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 12,
-                                          vertical: 6,
-                                        ),
-                                        decoration: ShapeDecoration(
-                                          color: Colors.orange.withOpacity(0.1),
-                                          shape: SmoothRectangleBorder(
-                                            borderRadius: SmoothBorderRadius(
-                                              cornerRadius: 8,
-                                              cornerSmoothing: 0.6,
+                                    Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        if (isPastDue)
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 8,
+                                              vertical: 4,
                                             ),
-                                            side: BorderSide(
+                                            decoration: ShapeDecoration(
                                               color: Colors.orange.withOpacity(
-                                                0.3,
+                                                0.15,
                                               ),
-                                              width: 1,
+                                              shape: SmoothRectangleBorder(
+                                                borderRadius:
+                                                    SmoothBorderRadius(
+                                                      cornerRadius: 8,
+                                                      cornerSmoothing: 0.6,
+                                                    ),
+                                                side: BorderSide(
+                                                  color: Colors.orange
+                                                      .withOpacity(0.3),
+                                                  width: 1,
+                                                ),
+                                              ),
                                             ),
-                                          ),
-                                        ),
-                                        child: Text(
-                                          'Past',
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.w600,
-                                            color: Colors.orange[700],
-                                          ),
-                                        ),
-                                      )
-                                    else
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 12,
-                                          vertical: 6,
-                                        ),
-                                        decoration: ShapeDecoration(
-                                          color: theme.colorScheme.primary
-                                              .withOpacity(0.1),
-                                          shape: SmoothRectangleBorder(
-                                            borderRadius: SmoothBorderRadius(
-                                              cornerRadius: 8,
-                                              cornerSmoothing: 0.6,
+                                            child: Text(
+                                              'Past',
+                                              style: TextStyle(
+                                                fontSize: 10,
+                                                fontWeight: FontWeight.w600,
+                                                color: Colors.orange[700],
+                                              ),
                                             ),
-                                            side: BorderSide(
+                                          )
+                                        else
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 8,
+                                              vertical: 4,
+                                            ),
+                                            decoration: ShapeDecoration(
                                               color: theme.colorScheme.primary
-                                                  .withOpacity(0.3),
-                                              width: 1,
+                                                  .withOpacity(0.15),
+                                              shape: SmoothRectangleBorder(
+                                                borderRadius:
+                                                    SmoothBorderRadius(
+                                                      cornerRadius: 8,
+                                                      cornerSmoothing: 0.6,
+                                                    ),
+                                                side: BorderSide(
+                                                  color: theme
+                                                      .colorScheme
+                                                      .primary
+                                                      .withOpacity(0.3),
+                                                  width: 1,
+                                                ),
+                                              ),
+                                            ),
+                                            child: Text(
+                                              'Upcoming',
+                                              style: TextStyle(
+                                                fontSize: 10,
+                                                fontWeight: FontWeight.w600,
+                                                color:
+                                                    theme.colorScheme.primary,
+                                              ),
                                             ),
                                           ),
-                                        ),
-                                        child: Text(
-                                          'Incoming',
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.w600,
-                                            color: theme.colorScheme.primary,
-                                          ),
-                                        ),
-                                      ),
+                                      ],
+                                    ),
                                   ],
                                 ),
                               );
-                            }),
+                            }).toList(),
                           ],
                         );
                       } else {
                         // No medication reminders set up
                         return Container(
-                          padding: const EdgeInsets.all(20),
-                          decoration: ShapeDecoration(
-                            color: theme.scaffoldBackgroundColor,
-                            shape: SmoothRectangleBorder(
-                              borderRadius: SmoothBorderRadius(
-                                cornerRadius: 16,
-                                cornerSmoothing: 0.6,
-                              ),
-                              side: BorderSide(
-                                color: theme.brightness == Brightness.dark
-                                    ? const Color(0xFF3A3A3A)
-                                    : Colors.grey[200]!,
-                                width: 1,
-                              ),
-                            ),
-                            shadows: [
-                              BoxShadow(
-                                color: theme.brightness == Brightness.dark
-                                    ? Colors.black.withOpacity(0.2)
-                                    : Colors.black.withOpacity(0.05),
-                                blurRadius: 8,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 16,
+                            horizontal: 4,
                           ),
                           child: Row(
                             children: [
                               Container(
-                                height: 60,
-                                width: 60,
+                                height: 50,
+                                width: 50,
                                 decoration: ShapeDecoration(
                                   color: theme.brightness == Brightness.dark
                                       ? const Color(0xFF3A3A3A)
-                                      : Colors.white,
+                                      : const Color(0xFFF0F1F7),
                                   shape: SmoothRectangleBorder(
                                     borderRadius: SmoothBorderRadius(
-                                      cornerRadius: 16,
+                                      cornerRadius: 12,
                                       cornerSmoothing: 0.6,
                                     ),
                                   ),
-                                  shadows: [
-                                    BoxShadow(
-                                      color: Colors.black.withOpacity(0.05),
-                                      blurRadius: 6,
-                                      offset: const Offset(0, 2),
-                                    ),
-                                  ],
                                 ),
                                 child: Center(
                                   child: FaIcon(
@@ -636,18 +529,32 @@ class _OverviewScreenContentState extends State<OverviewScreenContent> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      'No Medication Reminders',
+                                      'Medication Reminder',
                                       style: theme.textTheme.titleMedium
                                           ?.copyWith(
-                                            fontWeight: FontWeight.bold,
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 18,
                                           ),
                                     ),
-                                    const SizedBox(height: 4),
+                                    const SizedBox(height: 2),
                                     Text(
-                                      'Set up medication reminders in settings',
-                                      style: theme.textTheme.bodyMedium,
+                                      'No reminders set up',
+                                      style: theme.textTheme.bodyMedium
+                                          ?.copyWith(
+                                            color:
+                                                theme.brightness ==
+                                                    Brightness.dark
+                                                ? Colors.white70
+                                                : Colors.grey[600],
+                                          ),
                                     ),
                                   ],
+                                ),
+                              ),
+                              Text(
+                                'Set up',
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: theme.colorScheme.primary,
                                 ),
                               ),
                             ],
