@@ -460,15 +460,14 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
         999,
       );
 
-      // Fetch glucose readings within the date range
-      final glucoseReadings = await FirestoreService.getEvents(
+      // Fetch all events within the date range
+      final allEvents = await FirestoreService.getEvents(
         startDate: startDate,
         endDate: endDate,
-        type: 'glucose',
         limit: 1000, // Increase limit for export
       );
 
-      if (glucoseReadings.isEmpty) {
+      if (allEvents.isEmpty) {
         if (mounted) {
           final theme = Theme.of(context);
           toastification.show(
@@ -486,7 +485,7 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
               ),
             ),
             description: Text(
-              'No glucose readings found in the selected date range',
+              'No data found in the selected date range',
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
@@ -526,10 +525,10 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
 
       // Generate export based on selected format
       if (_selectedFormat == 'CSV') {
-        await _generateAndShareCSV(glucoseReadings);
+        await _generateAndShareCSV(allEvents);
       } else {
         // PDF functionality
-        await _generateAndSharePDF(glucoseReadings);
+        await _generateAndSharePDF(allEvents);
       }
     } catch (e) {
       if (mounted) {
@@ -593,10 +592,15 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
     }
   }
 
-  Future<void> _generateAndShareCSV(List<Map<String, dynamic>> readings) async {
+  Future<void> _generateAndShareCSV(List<Map<String, dynamic>> events) async {
     try {
       // Get patient information
       final userData = await FirestoreService.getUserData();
+
+      // Get glucose events only
+      final glucoseEvents = events
+          .where((e) => e['type'] == 'glucose')
+          .toList();
 
       // Create CSV data with patient info header
       List<List<dynamic>> csvData = [];
@@ -616,29 +620,31 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
         'Date Range',
         '${DateFormat('yyyy-MM-dd').format(_selectedDateRange.start)} to ${DateFormat('yyyy-MM-dd').format(_selectedDateRange.end)}',
       ]);
-      csvData.add(['Total Readings', readings.length.toString()]);
+      csvData.add(['Glucose Readings', glucoseEvents.length.toString()]);
 
       // Add empty row for separation
       csvData.add([]);
 
-      // Glucose Readings Header
-      csvData.add(['Glucose Readings']);
-      csvData.add(['Date', 'Time', 'Glucose (mg/dL)', 'Notes']);
+      // Glucose Readings Section
+      if (glucoseEvents.isNotEmpty) {
+        csvData.add(['Glucose Readings']);
+        csvData.add(['Date', 'Time', 'Glucose (mg/dL)', 'Notes']);
 
-      // Add data rows
-      for (final reading in readings) {
-        final date = reading['date'] as DateTime?;
-        final measure = reading['measure'] as num?;
-        final notes = reading['notes'] as String? ?? '';
+        for (final event in glucoseEvents) {
+          final date = event['date'] as DateTime?;
+          final measure = event['measure'] as num?;
+          final note = event['note'] as String? ?? '';
 
-        if (date != null && measure != null) {
-          csvData.add([
-            DateFormat('yyyy-MM-dd').format(date),
-            DateFormat('HH:mm:ss').format(date),
-            measure.toInt(),
-            notes,
-          ]);
+          if (date != null && measure != null) {
+            csvData.add([
+              DateFormat('yyyy-MM-dd').format(date),
+              DateFormat('HH:mm:ss').format(date),
+              measure.toInt(),
+              note,
+            ]);
+          }
         }
+        csvData.add([]);
       }
 
       // Convert to CSV string
@@ -687,7 +693,7 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
             ),
           ),
           description: Text(
-            'CSV file exported successfully! (${readings.length} readings)',
+            'CSV file exported successfully! (${glucoseEvents.length} glucose readings)',
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w500,
@@ -782,7 +788,7 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
     }
   }
 
-  Future<void> _generateAndSharePDF(List<Map<String, dynamic>> readings) async {
+  Future<void> _generateAndSharePDF(List<Map<String, dynamic>> events) async {
     try {
       // Get patient information
       final userData = await FirestoreService.getUserData();
@@ -794,10 +800,13 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
       final fontRegular = await PdfGoogleFonts.notoSansRegular();
       final fontBold = await PdfGoogleFonts.notoSansBold();
 
-      // Generate chart image if we have readings
+      // Generate chart image if we have glucose events
       pw.ImageProvider? chartImage;
-      if (readings.isNotEmpty) {
-        chartImage = await _generateChartImage(readings);
+      final glucoseEvents = events
+          .where((e) => e['type'] == 'glucose')
+          .toList();
+      if (glucoseEvents.isNotEmpty) {
+        chartImage = await _generateChartImage(glucoseEvents);
       }
 
       // Add page with content
@@ -905,8 +914,8 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
                         ),
                         pw.Expanded(
                           child: _buildInfoRow(
-                            'Total Readings',
-                            '${readings.length}',
+                            'Glucose Readings',
+                            '${glucoseEvents.length}',
                             fontRegular,
                             fontBold,
                           ),
@@ -920,7 +929,7 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
               pw.SizedBox(height: 20),
 
               // Summary Statistics with app-style card
-              if (readings.isNotEmpty) ...[
+              if (glucoseEvents.isNotEmpty) ...[
                 pw.Container(
                   padding: const pw.EdgeInsets.all(20),
                   decoration: pw.BoxDecoration(
@@ -962,7 +971,7 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
                           pw.Expanded(
                             child: _buildStatRow(
                               'Average',
-                              '${_calculateAverage(readings).toStringAsFixed(0)} mg/dL',
+                              '${_calculateAverage(glucoseEvents).toStringAsFixed(0)} mg/dL',
                               fontRegular,
                               fontBold,
                             ),
@@ -970,7 +979,7 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
                           pw.Expanded(
                             child: _buildStatRow(
                               'Minimum',
-                              '${_findMinimum(readings)} mg/dL',
+                              '${_findMinimum(glucoseEvents)} mg/dL',
                               fontRegular,
                               fontBold,
                             ),
@@ -978,7 +987,7 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
                           pw.Expanded(
                             child: _buildStatRow(
                               'Maximum',
-                              '${_findMaximum(readings)} mg/dL',
+                              '${_findMaximum(glucoseEvents)} mg/dL',
                               fontRegular,
                               fontBold,
                             ),
@@ -1044,7 +1053,7 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
               ),
               pw.SizedBox(height: 12),
 
-              if (readings.isEmpty)
+              if (glucoseEvents.isEmpty)
                 pw.Container(
                   padding: const pw.EdgeInsets.all(20),
                   decoration: pw.BoxDecoration(
@@ -1105,10 +1114,10 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
                       ],
                     ),
                     // Data rows
-                    ...readings.map((reading) {
-                      final date = reading['date'] as DateTime?;
-                      final measure = reading['measure'] as num?;
-                      final notes = reading['notes'] as String? ?? '';
+                    ...glucoseEvents.map((event) {
+                      final date = event['date'] as DateTime?;
+                      final measure = event['measure'] as num?;
+                      final note = event['note'] as String? ?? '';
 
                       return pw.TableRow(
                         children: [
@@ -1132,7 +1141,7 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
                             fontBold,
                           ),
                           _buildTableCell(
-                            notes.isEmpty ? '-' : notes,
+                            note.isEmpty ? '-' : note,
                             fontRegular,
                             fontBold,
                           ),
@@ -1183,7 +1192,7 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
             ),
           ),
           description: Text(
-            'PDF report printed with ${readings.length} readings',
+            'PDF report printed with ${glucoseEvents.length} glucose readings',
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w500,

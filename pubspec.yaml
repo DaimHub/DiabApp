@@ -45,6 +45,9 @@ dependencies:
   cloud_firestore: ^5.4.3
   google_sign_in: ^6.2.1
   google_sign_in_ios: ^5.9.0
+  firebase_messaging: ^15.1.5
+  flutter_local_notifications: ^18.0.1
+  timezone: ^0.9.4
   skeletonizer: ^2.0.1
   figma_squircle: ^0.6.3
   liquid_pull_to_refresh: ^3.0.1

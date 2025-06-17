@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:toastification/toastification.dart';
 import 'package:figma_squircle/figma_squircle.dart';
 import '../services/firestore_service.dart';
+import '../providers/settings_data_provider.dart';
 
 class ProfileEditScreen extends StatefulWidget {
   const ProfileEditScreen({super.key});
@@ -83,6 +84,13 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
       }
 
       if (mounted) {
+        // Invalidate and refresh the settings cache since profile data has changed
+        try {
+          await SettingsDataProvider.invalidateAndRefreshGlobally(context);
+        } catch (e) {
+          // Failed to refresh settings cache - this is non-critical
+        }
+
         _showToast('Profile updated successfully!', ToastificationType.success);
         Navigator.pop(context);
       }

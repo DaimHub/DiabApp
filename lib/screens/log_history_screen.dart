@@ -36,6 +36,7 @@ class _LogHistoryScreenState extends State<LogHistoryScreen> {
     'Meal',
     'Activity',
     'Medication',
+    'Other',
   };
 
   // Search functionality
@@ -227,6 +228,8 @@ class _LogHistoryScreenState extends State<LogHistoryScreen> {
                                 _buildMaterialFilterChip('Activity'),
                                 const SizedBox(width: 12),
                                 _buildMaterialFilterChip('Medication'),
+                                const SizedBox(width: 12),
+                                _buildMaterialFilterChip('Other'),
                               ],
                             ),
                           ),
@@ -841,6 +844,52 @@ class _LogHistoryScreenState extends State<LogHistoryScreen> {
                           fontWeight: FontWeight.w500,
                         ),
                       ),
+                      // Show notes if available
+                      if (entry.note != null && entry.note!.isNotEmpty) ...[
+                        const SizedBox(height: 6),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: ShapeDecoration(
+                            color: theme.brightness == Brightness.dark
+                                ? const Color(0xFF3A3A3A)
+                                : Colors.grey[100],
+                            shape: SmoothRectangleBorder(
+                              borderRadius: SmoothBorderRadius(
+                                cornerRadius: 6,
+                                cornerSmoothing: 0.6,
+                              ),
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.attach_file,
+                                size: 12,
+                                color: theme.textTheme.bodySmall?.color
+                                    ?.withOpacity(0.7),
+                              ),
+                              const SizedBox(width: 4),
+                              Flexible(
+                                child: Text(
+                                  entry.note!,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: theme.textTheme.bodySmall?.color
+                                        ?.withOpacity(0.8),
+                                    fontStyle: FontStyle.italic,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -907,6 +956,7 @@ class _LogHistoryScreenState extends State<LogHistoryScreen> {
                 'Meal',
                 'Activity',
                 'Medication',
+                'Other',
               };
             }
           } else {
@@ -922,7 +972,8 @@ class _LogHistoryScreenState extends State<LogHistoryScreen> {
               if (_selectedFilters.contains('Glucose') &&
                   _selectedFilters.contains('Meal') &&
                   _selectedFilters.contains('Activity') &&
-                  _selectedFilters.contains('Medication')) {
+                  _selectedFilters.contains('Medication') &&
+                  _selectedFilters.contains('Other')) {
                 _selectedFilters.add('All');
               }
             }
@@ -970,6 +1021,8 @@ class _LogHistoryScreenState extends State<LogHistoryScreen> {
         return baseColor.withOpacity(0.75); // 75% opacity
       case 'medication':
         return baseColor.withOpacity(0.65); // 65% opacity
+      case 'other':
+        return baseColor.withOpacity(0.55); // 55% opacity
       default:
         return baseColor;
     }
@@ -986,6 +1039,8 @@ class _LogHistoryScreenState extends State<LogHistoryScreen> {
         return Colors.green[400]!.withOpacity(0.3); // Green for activity
       case 'medication':
         return Colors.blue[400]!.withOpacity(0.3); // Blue for medication
+      case 'other':
+        return Colors.purple[400]!.withOpacity(0.3); // Purple for other
       default:
         return Colors.grey[400]!.withOpacity(0.3);
     }
@@ -1095,6 +1150,30 @@ class _LogHistoryScreenState extends State<LogHistoryScreen> {
             ),
           ],
         );
+      case 'other':
+        // Purple border for other - more subtle
+        return ShapeDecoration(
+          color: theme.brightness == Brightness.dark
+              ? const Color(0xFF3A3A3A)
+              : Colors.white,
+          shape: SmoothRectangleBorder(
+            borderRadius: SmoothBorderRadius(
+              cornerRadius: 14,
+              cornerSmoothing: 0.6,
+            ),
+            side: BorderSide(
+              color: Colors.purple[400]!.withOpacity(0.3),
+              width: 1.5,
+            ),
+          ),
+          shadows: [
+            BoxShadow(
+              color: Colors.purple.withOpacity(0.08),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        );
       default:
         return ShapeDecoration(
           color: theme.brightness == Brightness.dark
@@ -1143,6 +1222,8 @@ class EventDetailsBottomSheet extends StatelessWidget {
         return baseColor.withOpacity(0.75); // 75% opacity
       case 'medication':
         return baseColor.withOpacity(0.65); // 65% opacity
+      case 'other':
+        return baseColor.withOpacity(0.55); // 55% opacity
       default:
         return baseColor;
     }
@@ -1247,6 +1328,30 @@ class EventDetailsBottomSheet extends StatelessWidget {
           shadows: [
             BoxShadow(
               color: Colors.blue.withOpacity(0.08),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        );
+      case 'other':
+        // Purple border for other - more subtle
+        return ShapeDecoration(
+          color: theme.brightness == Brightness.dark
+              ? const Color(0xFF3A3A3A)
+              : Colors.white,
+          shape: SmoothRectangleBorder(
+            borderRadius: SmoothBorderRadius(
+              cornerRadius: 18,
+              cornerSmoothing: 0.6,
+            ),
+            side: BorderSide(
+              color: Colors.purple[400]!.withOpacity(0.25),
+              width: 1.5,
+            ),
+          ),
+          shadows: [
+            BoxShadow(
+              color: Colors.purple.withOpacity(0.08),
               blurRadius: 6,
               offset: const Offset(0, 2),
             ),
@@ -1476,6 +1581,60 @@ class EventDetailsBottomSheet extends StatelessWidget {
                     ),
                     textAlign: TextAlign.center,
                   ),
+
+                  // Note section if available
+                  if (entry.note != null && entry.note!.isNotEmpty) ...[
+                    const SizedBox(height: 16),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(12),
+                      decoration: ShapeDecoration(
+                        color: theme.brightness == Brightness.dark
+                            ? const Color(0xFF3A3A3A)
+                            : Colors.grey[100],
+                        shape: SmoothRectangleBorder(
+                          borderRadius: SmoothBorderRadius(
+                            cornerRadius: 8,
+                            cornerSmoothing: 0.6,
+                          ),
+                        ),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.attach_file,
+                                size: 16,
+                                color: theme.textTheme.bodyMedium?.color
+                                    ?.withOpacity(0.7),
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                'Note',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: theme.textTheme.bodyMedium?.color
+                                      ?.withOpacity(0.8),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            entry.note!,
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: theme.textTheme.bodyMedium?.color,
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),

@@ -446,6 +446,40 @@ class _OverviewScreenContentState extends State<OverviewScreenContent> {
                                                 ),
                                           ),
                                           const SizedBox(height: 4),
+                                          // Show dosage if available
+                                          if (medication['dosage'] != null &&
+                                              medication['dosage']
+                                                  .toString()
+                                                  .isNotEmpty)
+                                            Padding(
+                                              padding: const EdgeInsets.only(
+                                                bottom: 4,
+                                              ),
+                                              child: Text(
+                                                medication['dosage'],
+                                                style: theme.textTheme.bodySmall
+                                                    ?.copyWith(
+                                                      color: isPastDue
+                                                          ? theme
+                                                                .textTheme
+                                                                .bodySmall
+                                                                ?.color
+                                                                ?.withOpacity(
+                                                                  0.5,
+                                                                )
+                                                          : theme
+                                                                .textTheme
+                                                                .bodySmall
+                                                                ?.color,
+                                                      fontWeight:
+                                                          FontWeight.w500,
+                                                      decoration: isPastDue
+                                                          ? TextDecoration
+                                                                .lineThrough
+                                                          : null,
+                                                    ),
+                                              ),
+                                            ),
                                           Text(
                                             (medication['time'] as TimeOfDay)
                                                 .format(context),

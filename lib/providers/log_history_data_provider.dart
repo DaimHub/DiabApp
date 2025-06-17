@@ -219,6 +219,17 @@ class LogHistoryDataProvider with ChangeNotifier {
         }
         icon = FontAwesomeIcons.pills;
         break;
+      case 'other':
+        title = eventData['name'] as String? ?? 'Other';
+        final note = eventData['note'] as String?;
+        if (note != null && note.isNotEmpty) {
+          // Show first 30 characters of the note as the value
+          value = note.length > 30 ? '${note.substring(0, 30)}...' : note;
+        } else {
+          value = 'No additional notes';
+        }
+        icon = FontAwesomeIcons.question;
+        break;
       default:
         return null;
     }
@@ -258,7 +269,10 @@ class LogHistoryDataProvider with ChangeNotifier {
           '${months[date.month - 1]} ${date.day}, ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
     }
 
-    return LogEntry(title, value, dateTimeString, icon, id, date);
+    // Get note if available
+    final note = eventData['note'] as String?;
+
+    return LogEntry(title, value, dateTimeString, icon, id, date, note: note);
   }
 
   /// Check if the new data is different from cached data

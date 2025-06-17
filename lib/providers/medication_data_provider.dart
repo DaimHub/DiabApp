@@ -226,6 +226,7 @@ class MedicationDataProvider with ChangeNotifier {
         // Add to today's medications list
         todaysMedications.add({
           'name': medication['name'],
+          'dosage': medication['dosage'], // Include dosage field
           'time': medicationTime,
           'reminderDateTime': todayReminder,
           'isPastDue': todayReminder.isBefore(now),

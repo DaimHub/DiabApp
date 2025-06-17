@@ -3,7 +3,8 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:toastification/toastification.dart';
 import 'package:figma_squircle/figma_squircle.dart';
-import '../services/google_sign_in_service.dart';
+import 'package:provider/provider.dart';
+import '../providers/auth_provider.dart' as auth;
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -90,52 +91,55 @@ class _LoginScreenState extends State<LoginScreen>
     });
 
     try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: _emailController.text.trim(),
-        password: _passwordController.text,
+      final authProvider = Provider.of<auth.AuthProvider>(
+        context,
+        listen: false,
+      );
+      final success = await authProvider.signInWithEmailAndPassword(
+        _emailController.text.trim(),
+        _passwordController.text,
       );
 
-      // Dismiss keyboard
-      FocusScope.of(context).unfocus();
+      if (success) {
+        // Dismiss keyboard
+        FocusScope.of(context).unfocus();
 
-      // Show success message
-      _showToast('Welcome back!', ToastificationType.success);
+        // Show success message
+        _showToast('Welcome back!', ToastificationType.success);
 
-      // Navigate to dashboard
-      if (mounted) {
-        Navigator.pushNamedAndRemoveUntil(
-          context,
-          '/dashboard',
-          (route) => false,
-        );
+        // Navigate back to let the home screen show the Dashboard
+        if (mounted) {
+          Navigator.pop(context);
+        }
+      } else {
+        _showToast('Login failed. Please try again.', ToastificationType.error);
       }
-    } on FirebaseAuthException catch (e) {
-      String errorMessage;
-      switch (e.code) {
-        case 'user-not-found':
-          errorMessage = 'No user found for that email.';
-          break;
-        case 'wrong-password':
-          errorMessage = 'Wrong password provided.';
-          break;
-        case 'invalid-email':
-          errorMessage = 'The email address is not valid.';
-          break;
-        case 'user-disabled':
-          errorMessage = 'This user account has been disabled.';
-          break;
-        case 'too-many-requests':
-          errorMessage = 'Too many requests. Try again later.';
-          break;
-        default:
-          errorMessage = 'An error occurred. Please try again.';
-      }
-      _showToast(errorMessage, ToastificationType.error);
     } catch (e) {
-      _showToast(
-        'An unexpected error occurred. Please try again.',
-        ToastificationType.error,
-      );
+      String errorMessage = 'An error occurred. Please try again.';
+
+      if (e is FirebaseAuthException) {
+        switch (e.code) {
+          case 'user-not-found':
+            errorMessage = 'No user found for that email.';
+            break;
+          case 'wrong-password':
+            errorMessage = 'Wrong password provided.';
+            break;
+          case 'invalid-email':
+            errorMessage = 'The email address is not valid.';
+            break;
+          case 'user-disabled':
+            errorMessage = 'This user account has been disabled.';
+            break;
+          case 'too-many-requests':
+            errorMessage = 'Too many requests. Try again later.';
+            break;
+          default:
+            errorMessage = 'An error occurred. Please try again.';
+        }
+      }
+
+      _showToast(errorMessage, ToastificationType.error);
     } finally {
       setState(() {
         _isLoading = false;
@@ -152,27 +156,26 @@ class _LoginScreenState extends State<LoginScreen>
     });
 
     try {
-      final userCredential = await GoogleSignInService.signInWithGoogle();
+      final authProvider = Provider.of<auth.AuthProvider>(
+        context,
+        listen: false,
+      );
+      final success = await authProvider.signInWithGoogle();
 
-      if (userCredential != null) {
+      if (success) {
         // Successfully signed in
-        // Dismiss keyboard
-        FocusScope.of(context).unfocus();
-
         _showToast(
           'Successfully signed in with Google',
           ToastificationType.success,
         );
-
-        Navigator.pushNamedAndRemoveUntil(
-          context,
-          '/dashboard',
-          (route) => false,
-        );
+        // Navigate back to let the home screen show the Dashboard
+        if (mounted) {
+          Navigator.pop(context);
+        }
+      } else {
+        _showToast('Google sign-in was cancelled', ToastificationType.error);
       }
     } catch (e) {
-      // Add detailed error logging
-
       String errorMessage = 'Failed to sign in with Google';
 
       if (e is FirebaseAuthException) {

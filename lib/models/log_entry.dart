@@ -8,6 +8,15 @@ class LogEntry {
   final IconData icon;
   final String id;
   final DateTime date;
+  final String? note;
 
-  LogEntry(this.title, this.value, this.time, this.icon, this.id, this.date);
+  LogEntry(
+    this.title,
+    this.value,
+    this.time,
+    this.icon,
+    this.id,
+    this.date, {
+    this.note,
+  });
 }

@@ -18,7 +18,7 @@ class DashboardScreen extends StatefulWidget {
 class _DashboardScreenState extends State<DashboardScreen>
     with TickerProviderStateMixin {
   int _selectedIndex = 0;
-  bool _isCalendarView = false;
+  bool _isCalendarView = true;
   GlobalKey _logHistoryKey = GlobalKey();
   GlobalKey _overviewKey = GlobalKey();
 
@@ -132,9 +132,11 @@ class _DashboardScreenState extends State<DashboardScreen>
                     ),
                   ),
                   child: Container(
-                    padding: const EdgeInsets.all(10),
+                    height: 40, // Fixed height to match settings button
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(
                           _isCalendarView ? Icons.list : Icons.calendar_today,
@@ -196,7 +198,8 @@ class _DashboardScreenState extends State<DashboardScreen>
                   ),
                 ),
                 child: Container(
-                  padding: const EdgeInsets.all(10),
+                  height: 40, // Fixed height to match toggle button
+                  width: 40, // Fixed width for symmetry
                   child: Icon(
                     Icons.settings,
                     color: theme.colorScheme.primary,
@@ -281,8 +284,8 @@ class _DashboardScreenState extends State<DashboardScreen>
             label: 'Overview',
           ),
           BottomNavigationBarItem(
-            icon: Icon(FontAwesomeIcons.clock, size: 22),
-            activeIcon: FaIcon(FontAwesomeIcons.clock, size: 22),
+            icon: Icon(FontAwesomeIcons.calendar, size: 22),
+            activeIcon: FaIcon(FontAwesomeIcons.calendar, size: 22),
             label: 'Log',
           ),
           BottomNavigationBarItem(

@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:figma_squircle/figma_squircle.dart';
-import '../services/google_sign_in_service.dart';
+
+import '../providers/auth_provider.dart' as auth;
 import '../providers/glucose_data_provider.dart';
 import '../providers/medication_data_provider.dart';
 import '../providers/glucose_trend_data_provider.dart';
@@ -10,7 +11,9 @@ import '../providers/log_history_data_provider.dart';
 import '../providers/settings_data_provider.dart';
 import '../services/overview_cache_service.dart';
 import '../services/events_cache_service.dart';
+import '../services/blood_sugar_reminder_service.dart';
 import 'export_data_screen.dart';
+import 'profile_edit_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -196,6 +199,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                           ? hasEnabledMedications
                                           : false,
                                     );
+
+                                    // Update blood sugar reminder service
+                                    await BloodSugarReminderService.updateReminderSettings(
+                                      enabled:
+                                          value &&
+                                          settingsProvider
+                                              .bloodSugarCheckEnabled,
+                                    );
                                   },
                                 ),
 
@@ -206,7 +217,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                   icon: Icons.access_time,
                                   title: 'Blood Sugar Check',
                                   description:
-                                      'Get reminders for checking your blood sugar levels.',
+                                      'Get reminders for checking your blood sugar levels every 6 hours.',
                                   value:
                                       settingsProvider.bloodSugarCheckEnabled,
                                   onChanged:
@@ -217,6 +228,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                                 bloodSugarCheckNotifications:
                                                     value,
                                               );
+
+                                          // Update blood sugar reminder service
+                                          await BloodSugarReminderService.updateReminderSettings(
+                                            enabled: value,
+                                          );
                                         }
                                       : null,
                                   isDisabled:
@@ -294,95 +310,116 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
         ],
       ),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(24),
-        child: Row(
-          children: [
-            // Large profile avatar
-            Container(
-              height: 80,
-              width: 80,
-              decoration: ShapeDecoration(
-                color: theme.colorScheme.primary,
-                shape: SmoothRectangleBorder(
-                  borderRadius: SmoothBorderRadius(
-                    cornerRadius: 24,
-                    cornerSmoothing: 0.6,
-                  ),
-                ),
-                shadows: [
-                  BoxShadow(
-                    color: theme.colorScheme.primary.withOpacity(0.3),
-                    blurRadius: 20,
-                    offset: const Offset(0, 8),
-                  ),
-                ],
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const ProfileEditScreen(),
               ),
-              child: Center(
-                child: FaIcon(
-                  FontAwesomeIcons.user,
-                  color: Colors.white,
-                  size: 32,
-                ),
-              ),
+            );
+          },
+          customBorder: SmoothRectangleBorder(
+            borderRadius: SmoothBorderRadius(
+              cornerRadius: 20,
+              cornerSmoothing: 0.6,
             ),
-            const SizedBox(width: 20),
-
-            // User info section
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // User name
-                  Text(
-                    settingsProvider.getUserDisplayName(),
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: theme.textTheme.headlineMedium?.color,
+          ),
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(24),
+            child: Row(
+              children: [
+                // Large profile avatar
+                Container(
+                  height: 80,
+                  width: 80,
+                  decoration: ShapeDecoration(
+                    color: theme.colorScheme.primary,
+                    shape: SmoothRectangleBorder(
+                      borderRadius: SmoothBorderRadius(
+                        cornerRadius: 24,
+                        cornerSmoothing: 0.6,
+                      ),
+                    ),
+                    shadows: [
+                      BoxShadow(
+                        color: theme.colorScheme.primary.withOpacity(0.3),
+                        blurRadius: 20,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
+                  ),
+                  child: Center(
+                    child: FaIcon(
+                      FontAwesomeIcons.user,
+                      color: Colors.white,
+                      size: 32,
                     ),
                   ),
-                  const SizedBox(height: 6),
+                ),
+                const SizedBox(width: 20),
 
-                  // User email
-                  Text(
-                    settingsProvider.getUserEmail(),
-                    style: TextStyle(
-                      fontSize: 15,
-                      color: theme.textTheme.bodyMedium?.color,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-
-                  // Diabetes type badge
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
-                    decoration: ShapeDecoration(
-                      color: theme.colorScheme.primary.withOpacity(0.1),
-                      shape: SmoothRectangleBorder(
-                        borderRadius: SmoothBorderRadius(
-                          cornerRadius: 10,
-                          cornerSmoothing: 0.6,
+                // User info section
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // User name
+                      Text(
+                        settingsProvider.getUserDisplayName(),
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: theme.textTheme.headlineMedium?.color,
                         ),
                       ),
-                    ),
-                    child: Text(
-                      settingsProvider.userDiabetesType,
-                      style: TextStyle(
-                        color: theme.colorScheme.primary,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
+                      const SizedBox(height: 6),
+
+                      // User email
+                      Text(
+                        settingsProvider.getUserEmail(),
+                        style: TextStyle(
+                          fontSize: 15,
+                          color: theme.textTheme.bodyMedium?.color,
+                        ),
                       ),
-                    ),
+                      const SizedBox(height: 12),
+
+                      // Diabetes type badge
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: ShapeDecoration(
+                          color: theme.colorScheme.primary.withValues(
+                            alpha: 0.1,
+                          ),
+                          shape: SmoothRectangleBorder(
+                            borderRadius: SmoothBorderRadius(
+                              cornerRadius: 10,
+                              cornerSmoothing: 0.6,
+                            ),
+                          ),
+                        ),
+                        child: Text(
+                          settingsProvider.userDiabetesType,
+                          style: TextStyle(
+                            color: theme.colorScheme.primary,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
@@ -845,12 +882,17 @@ class _LogoutDialogState extends State<_LogoutDialog> {
       OverviewCacheService().clearCache();
       EventsCacheService().clearCache();
 
-      // Sign out
-      await GoogleSignInService.signOut();
+      // Sign out using AuthProvider
+      final authProvider = Provider.of<auth.AuthProvider>(
+        context,
+        listen: false,
+      );
+      await authProvider.signOut();
 
-      // Navigate to welcome screen
+      // Navigate back to welcome screen after logout
       if (mounted) {
-        Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
+        // Close the dialog and navigate back to main app (which will now show welcome screen)
+        Navigator.of(context).popUntil((route) => route.isFirst);
       }
     } catch (e) {
       if (mounted) {

@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../services/firestore_service.dart';
 import '../providers/medication_data_provider.dart';
 import '../providers/settings_data_provider.dart';
+import '../services/medication_notification_manager.dart';
 
 class MedicationRemindersScreen extends StatefulWidget {
   const MedicationRemindersScreen({super.key});
@@ -16,6 +17,9 @@ class MedicationRemindersScreen extends StatefulWidget {
 }
 
 class _MedicationRemindersScreenState extends State<MedicationRemindersScreen> {
+  // Loading states for different operations
+  bool _isDeleting = false;
+  bool _isAddingMedication = false;
   @override
   void initState() {
     super.initState();
@@ -32,26 +36,38 @@ class _MedicationRemindersScreenState extends State<MedicationRemindersScreen> {
 
   Future<void> _saveMedications(List<Map<String, dynamic>> medications) async {
     try {
-      await FirestoreService.saveUserData({'medications': medications});
       final hasActiveMedications = medications.any(
         (med) => med['enabled'] == true,
       );
-      await FirestoreService.updateNotificationSettings(
-        medicationReminders: hasActiveMedications,
-      );
-      await MedicationDataProvider.invalidateAndRefreshGlobally(context);
 
-      // Also invalidate settings provider cache since medication status affects settings
+      // Run Firestore operations in parallel
+      await Future.wait([
+        FirestoreService.saveUserData({'medications': medications}),
+        FirestoreService.updateNotificationSettings(
+          medicationReminders: hasActiveMedications,
+        ),
+      ]);
+
+      // Update local caches
+      await MedicationDataProvider.invalidateAndRefreshGlobally(context);
       final settingsProvider = Provider.of<SettingsDataProvider>(
         context,
         listen: false,
       );
       settingsProvider.invalidateCache();
 
+      // Show success immediately, schedule notifications in background
       _showToast(
         'Medications updated successfully!',
         ToastificationType.success,
       );
+
+      // Schedule notifications in background (don't block UI)
+      MedicationNotificationManager.scheduleAllMedications(context).catchError((
+        e,
+      ) {
+        // Silently handle notification errors
+      });
     } catch (e) {
       _showToast('Failed to save medications', ToastificationType.error);
     }
@@ -61,21 +77,33 @@ class _MedicationRemindersScreenState extends State<MedicationRemindersScreen> {
     List<Map<String, dynamic>> medications,
   ) async {
     try {
-      await FirestoreService.saveUserData({'medications': medications});
       final hasActiveMedications = medications.any(
         (med) => med['enabled'] == true,
       );
-      await FirestoreService.updateNotificationSettings(
-        medicationReminders: hasActiveMedications,
-      );
-      await MedicationDataProvider.invalidateAndRefreshGlobally(context);
 
-      // Also invalidate settings provider cache since medication status affects settings
+      // Run Firestore operations in parallel
+      await Future.wait([
+        FirestoreService.saveUserData({'medications': medications}),
+        FirestoreService.updateNotificationSettings(
+          medicationReminders: hasActiveMedications,
+        ),
+      ]);
+
+      // Update local caches
+      await MedicationDataProvider.invalidateAndRefreshGlobally(context);
       final settingsProvider = Provider.of<SettingsDataProvider>(
         context,
         listen: false,
       );
       settingsProvider.invalidateCache();
+
+      // Schedule notifications in background (don't await)
+      MedicationNotificationManager.scheduleAllMedications(
+        context,
+        silent: true,
+      ).catchError((e) {
+        // Silently handle notification errors
+      });
     } catch (e) {}
   }
 
@@ -503,6 +531,22 @@ class _MedicationRemindersScreenState extends State<MedicationRemindersScreen> {
                         ),
                       ),
                       const SizedBox(height: 4),
+                      // Show dosage if available
+                      if (medication['dosage'] != null &&
+                          medication['dosage'].toString().isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 4),
+                          child: Text(
+                            medication['dosage'],
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: medication['enabled']
+                                  ? theme.textTheme.bodySmall?.color
+                                  : theme.textTheme.bodySmall?.color
+                                        ?.withOpacity(0.5),
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
                       Text(
                         daysText,
                         style: theme.textTheme.bodyMedium?.copyWith(
@@ -517,6 +561,44 @@ class _MedicationRemindersScreenState extends State<MedicationRemindersScreen> {
                   ),
                 ),
                 const SizedBox(width: 16),
+                // Delete button
+                Container(
+                  decoration: ShapeDecoration(
+                    color: Colors.red.withOpacity(0.1),
+                    shape: SmoothRectangleBorder(
+                      borderRadius: SmoothBorderRadius(
+                        cornerRadius: 10,
+                        cornerSmoothing: 0.6,
+                      ),
+                    ),
+                  ),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: () => _showDeleteMedicationDialog(
+                        context,
+                        medication,
+                        medications,
+                        index,
+                      ),
+                      customBorder: SmoothRectangleBorder(
+                        borderRadius: SmoothBorderRadius(
+                          cornerRadius: 10,
+                          cornerSmoothing: 0.6,
+                        ),
+                      ),
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        child: Icon(
+                          Icons.delete_outline,
+                          color: Colors.red[600],
+                          size: 18,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
                 Switch(
                   value: medication['enabled'] ?? false,
                   onChanged: (value) async {
@@ -542,8 +624,205 @@ class _MedicationRemindersScreenState extends State<MedicationRemindersScreen> {
     );
   }
 
+  void _showDeleteMedicationDialog(
+    BuildContext context,
+    Map<String, dynamic> medication,
+    List<Map<String, dynamic>> medications,
+    int index,
+  ) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          decoration: ShapeDecoration(
+            color: Theme.of(context).scaffoldBackgroundColor,
+            shape: SmoothRectangleBorder(
+              borderRadius: SmoothBorderRadius(
+                cornerRadius: 20,
+                cornerSmoothing: 0.6,
+              ),
+            ),
+            shadows: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.15),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Delete icon
+              Container(
+                height: 60,
+                width: 60,
+                decoration: ShapeDecoration(
+                  color: Colors.red.withOpacity(0.1),
+                  shape: SmoothRectangleBorder(
+                    borderRadius: SmoothBorderRadius(
+                      cornerRadius: 16,
+                      cornerSmoothing: 0.6,
+                    ),
+                  ),
+                ),
+                child: Center(
+                  child: Icon(
+                    Icons.delete_outline,
+                    color: Colors.red[600],
+                    size: 28,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Title
+              Text(
+                'Delete Medication',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).textTheme.headlineSmall?.color,
+                ),
+              ),
+              const SizedBox(height: 8),
+
+              // Description
+              Text(
+                'Are you sure you want to delete "${medication['name']}"?\n\nThis will also cancel all scheduled notifications for this medication.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Theme.of(context).textTheme.bodyMedium?.color,
+                  height: 1.4,
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              // Buttons
+              Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      height: 48,
+                      decoration: ShapeDecoration(
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? const Color(0xFF2A2A2A)
+                            : const Color(0xFFF0F1F7),
+                        shape: SmoothRectangleBorder(
+                          borderRadius: SmoothBorderRadius(
+                            cornerRadius: 12,
+                            cornerSmoothing: 0.6,
+                          ),
+                        ),
+                      ),
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: () => Navigator.pop(context),
+                          customBorder: SmoothRectangleBorder(
+                            borderRadius: SmoothBorderRadius(
+                              cornerRadius: 12,
+                              cornerSmoothing: 0.6,
+                            ),
+                          ),
+                          child: const Center(
+                            child: Text(
+                              'Cancel',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Container(
+                      height: 48,
+                      decoration: ShapeDecoration(
+                        color: Colors.red[600],
+                        shape: SmoothRectangleBorder(
+                          borderRadius: SmoothBorderRadius(
+                            cornerRadius: 12,
+                            cornerSmoothing: 0.6,
+                          ),
+                        ),
+                      ),
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: _isDeleting
+                              ? null
+                              : () async {
+                                  setState(() {
+                                    _isDeleting = true;
+                                  });
+
+                                  try {
+                                    final updatedMedications =
+                                        List<Map<String, dynamic>>.from(
+                                          medications,
+                                        );
+                                    updatedMedications.removeAt(index);
+                                    await _saveMedications(updatedMedications);
+                                    Navigator.pop(context);
+                                  } finally {
+                                    if (mounted) {
+                                      setState(() {
+                                        _isDeleting = false;
+                                      });
+                                    }
+                                  }
+                                },
+                          customBorder: SmoothRectangleBorder(
+                            borderRadius: SmoothBorderRadius(
+                              cornerRadius: 12,
+                              cornerSmoothing: 0.6,
+                            ),
+                          ),
+                          child: Center(
+                            child: _isDeleting
+                                ? const SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                        Colors.white,
+                                      ),
+                                    ),
+                                  )
+                                : const Text(
+                                    'Delete',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   void _showAddMedicationDialog() {
     final nameController = TextEditingController();
+    final dosageController = TextEditingController();
     TimeOfDay selectedTime = TimeOfDay.now();
     List<String> selectedDays = [
       'Monday',
@@ -555,781 +834,934 @@ class _MedicationRemindersScreenState extends State<MedicationRemindersScreen> {
       'Sunday',
     ]; // Default: all days
 
-    showDialog(
+    showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
       builder: (context) => StatefulBuilder(
-        builder: (context, setDialogState) => Dialog(
-          backgroundColor: Colors.transparent,
-          child: Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(24),
-            decoration: ShapeDecoration(
-              color: Theme.of(context).scaffoldBackgroundColor,
-              shape: SmoothRectangleBorder(
-                borderRadius: SmoothBorderRadius(
-                  cornerRadius: 20,
-                  cornerSmoothing: 0.6,
+        builder: (context, setDialogState) => Container(
+          height: MediaQuery.of(context).size.height * 0.9,
+          decoration: ShapeDecoration(
+            color: Theme.of(context).scaffoldBackgroundColor,
+            shape: const SmoothRectangleBorder(
+              borderRadius: SmoothBorderRadius.only(
+                topLeft: SmoothRadius(cornerRadius: 24, cornerSmoothing: 0.6),
+                topRight: SmoothRadius(cornerRadius: 24, cornerSmoothing: 0.6),
+              ),
+            ),
+          ),
+          child: Column(
+            children: [
+              // Handle bar
+              Container(
+                margin: const EdgeInsets.only(top: 8),
+                height: 4,
+                width: 40,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.grey[600]
+                      : Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2),
                 ),
               ),
-              shadows: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.15),
-                  blurRadius: 20,
-                  offset: const Offset(0, 10),
-                ),
-              ],
-            ),
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Header with close button
-                  Row(
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Spacer(),
+                      // Header with close button
+                      Row(
+                        children: [
+                          const Spacer(),
+                          Container(
+                            width: 36,
+                            height: 36,
+                            decoration: ShapeDecoration(
+                              color:
+                                  Theme.of(context).brightness ==
+                                      Brightness.dark
+                                  ? const Color(0xFF2A2A2A)
+                                  : const Color(0xFFF0F1F7),
+                              shape: SmoothRectangleBorder(
+                                borderRadius: SmoothBorderRadius(
+                                  cornerRadius: 10,
+                                  cornerSmoothing: 0.6,
+                                ),
+                              ),
+                            ),
+                            child: Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                onTap: () => Navigator.pop(context),
+                                customBorder: SmoothRectangleBorder(
+                                  borderRadius: SmoothBorderRadius(
+                                    cornerRadius: 10,
+                                    cornerSmoothing: 0.6,
+                                  ),
+                                ),
+                                child: const Center(
+                                  child: Icon(Icons.close, size: 18),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+
+                      // Compact header with icon and title in a row
+                      Row(
+                        children: [
+                          Container(
+                            height: 48,
+                            width: 48,
+                            decoration: ShapeDecoration(
+                              color: Theme.of(context).colorScheme.primary,
+                              shape: SmoothRectangleBorder(
+                                borderRadius: SmoothBorderRadius(
+                                  cornerRadius: 16,
+                                  cornerSmoothing: 0.6,
+                                ),
+                              ),
+                            ),
+                            child: const Center(
+                              child: FaIcon(
+                                FontAwesomeIcons.pills,
+                                color: Colors.white,
+                                size: 24,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Add Medication',
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: Theme.of(
+                                      context,
+                                    ).textTheme.headlineMedium?.color,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  'Set up a reminder for your medication',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium
+                                        ?.color
+                                        ?.withOpacity(0.7),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 24),
+
+                      // Medication name input
+                      Focus(
+                        child: Builder(
+                          builder: (context) {
+                            final isFocused = Focus.of(context).hasFocus;
+
+                            return Container(
+                              decoration: ShapeDecoration(
+                                color:
+                                    Theme.of(context).brightness ==
+                                        Brightness.dark
+                                    ? const Color(0xFF2A2A2A)
+                                    : const Color(0xFFF0F1F7),
+                                shape: SmoothRectangleBorder(
+                                  borderRadius: SmoothBorderRadius(
+                                    cornerRadius: 16,
+                                    cornerSmoothing: 0.6,
+                                  ),
+                                  side: BorderSide(
+                                    color: isFocused
+                                        ? Theme.of(
+                                            context,
+                                          ).colorScheme.primary.withOpacity(0.8)
+                                        : Theme.of(context).brightness ==
+                                              Brightness.dark
+                                        ? const Color(0xFF3A3A3A)
+                                        : Colors.grey[200]!,
+                                    width: isFocused ? 2 : 1,
+                                  ),
+                                ),
+                                shadows: isFocused
+                                    ? [
+                                        BoxShadow(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .primary
+                                              .withOpacity(0.1),
+                                          blurRadius: 10,
+                                          offset: const Offset(0, 2),
+                                        ),
+                                      ]
+                                    : [
+                                        BoxShadow(
+                                          color: Colors.black.withOpacity(0.02),
+                                          blurRadius: 6,
+                                          offset: const Offset(0, 1),
+                                        ),
+                                      ],
+                              ),
+                              child: ClipSmoothRect(
+                                radius: SmoothBorderRadius(
+                                  cornerRadius: 16,
+                                  cornerSmoothing: 0.6,
+                                ),
+                                child: TextField(
+                                  controller: nameController,
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Theme.of(
+                                      context,
+                                    ).textTheme.bodyLarge?.color,
+                                  ),
+                                  decoration: InputDecoration(
+                                    labelText: 'Medication Name',
+                                    hintText: 'Enter medication name',
+                                    hintStyle: TextStyle(
+                                      color: const Color(
+                                        0xFF5C5FC1,
+                                      ).withOpacity(0.7),
+                                      fontSize: 16,
+                                    ),
+                                    border: InputBorder.none,
+                                    focusedBorder: InputBorder.none,
+                                    enabledBorder: InputBorder.none,
+                                    errorBorder: InputBorder.none,
+                                    focusedErrorBorder: InputBorder.none,
+                                    contentPadding: const EdgeInsets.all(16),
+                                    filled: false,
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+
+                      // Dosage input
+                      Focus(
+                        child: Builder(
+                          builder: (context) {
+                            final isFocused = Focus.of(context).hasFocus;
+
+                            return Container(
+                              decoration: ShapeDecoration(
+                                color:
+                                    Theme.of(context).brightness ==
+                                        Brightness.dark
+                                    ? const Color(0xFF2A2A2A)
+                                    : const Color(0xFFF0F1F7),
+                                shape: SmoothRectangleBorder(
+                                  borderRadius: SmoothBorderRadius(
+                                    cornerRadius: 16,
+                                    cornerSmoothing: 0.6,
+                                  ),
+                                  side: BorderSide(
+                                    color: isFocused
+                                        ? Theme.of(
+                                            context,
+                                          ).colorScheme.primary.withOpacity(0.8)
+                                        : Theme.of(context).brightness ==
+                                              Brightness.dark
+                                        ? const Color(0xFF3A3A3A)
+                                        : Colors.grey[200]!,
+                                    width: isFocused ? 2 : 1,
+                                  ),
+                                ),
+                                shadows: isFocused
+                                    ? [
+                                        BoxShadow(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .primary
+                                              .withOpacity(0.1),
+                                          blurRadius: 10,
+                                          offset: const Offset(0, 2),
+                                        ),
+                                      ]
+                                    : [
+                                        BoxShadow(
+                                          color: Colors.black.withOpacity(0.02),
+                                          blurRadius: 6,
+                                          offset: const Offset(0, 1),
+                                        ),
+                                      ],
+                              ),
+                              child: ClipSmoothRect(
+                                radius: SmoothBorderRadius(
+                                  cornerRadius: 16,
+                                  cornerSmoothing: 0.6,
+                                ),
+                                child: TextField(
+                                  controller: dosageController,
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Theme.of(
+                                      context,
+                                    ).textTheme.bodyLarge?.color,
+                                  ),
+                                  decoration: InputDecoration(
+                                    labelText: 'Dosage (Optional)',
+                                    hintText: 'e.g., 10mg, 2 tablets, 5ml',
+                                    hintStyle: TextStyle(
+                                      color: const Color(
+                                        0xFF5C5FC1,
+                                      ).withOpacity(0.7),
+                                      fontSize: 16,
+                                    ),
+                                    border: InputBorder.none,
+                                    focusedBorder: InputBorder.none,
+                                    enabledBorder: InputBorder.none,
+                                    errorBorder: InputBorder.none,
+                                    focusedErrorBorder: InputBorder.none,
+                                    contentPadding: const EdgeInsets.all(16),
+                                    filled: false,
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+
+                      // Time selector
                       Container(
-                        width: 36,
-                        height: 36,
                         decoration: ShapeDecoration(
                           color: Theme.of(context).brightness == Brightness.dark
                               ? const Color(0xFF2A2A2A)
                               : const Color(0xFFF0F1F7),
                           shape: SmoothRectangleBorder(
                             borderRadius: SmoothBorderRadius(
-                              cornerRadius: 10,
+                              cornerRadius: 16,
                               cornerSmoothing: 0.6,
+                            ),
+                            side: BorderSide(
+                              color:
+                                  Theme.of(context).brightness ==
+                                      Brightness.dark
+                                  ? const Color(0xFF3A3A3A)
+                                  : Colors.grey[200]!,
+                              width: 1,
                             ),
                           ),
                         ),
                         child: Material(
                           color: Colors.transparent,
                           child: InkWell(
-                            onTap: () => Navigator.pop(context),
+                            onTap: () async {
+                              final time = await showDialog<TimeOfDay>(
+                                context: context,
+                                builder: (context) => _TimePickerDialog(
+                                  initialTime: selectedTime,
+                                ),
+                              );
+                              if (time != null) {
+                                setDialogState(() {
+                                  selectedTime = time;
+                                });
+                              }
+                            },
                             customBorder: SmoothRectangleBorder(
-                              borderRadius: SmoothBorderRadius(
-                                cornerRadius: 10,
-                                cornerSmoothing: 0.6,
-                              ),
-                            ),
-                            child: const Center(
-                              child: Icon(Icons.close, size: 18),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-
-                  // Large medication icon
-                  Container(
-                    height: 80,
-                    width: 80,
-                    decoration: ShapeDecoration(
-                      color: Theme.of(context).colorScheme.primary,
-                      shape: SmoothRectangleBorder(
-                        borderRadius: SmoothBorderRadius(
-                          cornerRadius: 24,
-                          cornerSmoothing: 0.6,
-                        ),
-                      ),
-                      shadows: [
-                        BoxShadow(
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.primary.withOpacity(0.3),
-                          blurRadius: 20,
-                          offset: const Offset(0, 8),
-                        ),
-                      ],
-                    ),
-                    child: const Center(
-                      child: FaIcon(
-                        FontAwesomeIcons.pills,
-                        color: Colors.white,
-                        size: 36,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-
-                  // Title
-                  Text(
-                    'Add Medication',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).textTheme.headlineMedium?.color,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-
-                  // Description
-                  Text(
-                    'Set up a reminder for your medication',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Theme.of(context).textTheme.bodyMedium?.color,
-                      height: 1.4,
-                    ),
-                  ),
-                  const SizedBox(height: 32),
-
-                  // Medication name input
-                  Focus(
-                    child: Builder(
-                      builder: (context) {
-                        final isFocused = Focus.of(context).hasFocus;
-
-                        return Container(
-                          decoration: ShapeDecoration(
-                            color:
-                                Theme.of(context).brightness == Brightness.dark
-                                ? const Color(0xFF2A2A2A)
-                                : const Color(0xFFF0F1F7),
-                            shape: SmoothRectangleBorder(
                               borderRadius: SmoothBorderRadius(
                                 cornerRadius: 16,
                                 cornerSmoothing: 0.6,
                               ),
-                              side: BorderSide(
-                                color: isFocused
-                                    ? Theme.of(
-                                        context,
-                                      ).colorScheme.primary.withOpacity(0.8)
-                                    : Theme.of(context).brightness ==
-                                          Brightness.dark
-                                    ? const Color(0xFF3A3A3A)
-                                    : Colors.grey[200]!,
-                                width: isFocused ? 2 : 1,
-                              ),
                             ),
-                            shadows: isFocused
-                                ? [
-                                    BoxShadow(
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.primary.withOpacity(0.1),
-                                      blurRadius: 10,
-                                      offset: const Offset(0, 2),
-                                    ),
-                                  ]
-                                : [
-                                    BoxShadow(
-                                      color: Colors.black.withOpacity(0.02),
-                                      blurRadius: 6,
-                                      offset: const Offset(0, 1),
-                                    ),
-                                  ],
-                          ),
-                          child: ClipSmoothRect(
-                            radius: SmoothBorderRadius(
-                              cornerRadius: 16,
-                              cornerSmoothing: 0.6,
-                            ),
-                            child: TextField(
-                              controller: nameController,
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Theme.of(
-                                  context,
-                                ).textTheme.bodyLarge?.color,
-                              ),
-                              decoration: InputDecoration(
-                                labelText: 'Medication Name',
-                                hintText: 'Enter medication name',
-                                hintStyle: TextStyle(
-                                  color: const Color(
-                                    0xFF5C5FC1,
-                                  ).withOpacity(0.7),
-                                  fontSize: 16,
-                                ),
-                                border: InputBorder.none,
-                                focusedBorder: InputBorder.none,
-                                enabledBorder: InputBorder.none,
-                                errorBorder: InputBorder.none,
-                                focusedErrorBorder: InputBorder.none,
-                                contentPadding: const EdgeInsets.all(16),
-                                filled: false,
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-
-                  // Time selector
-                  Container(
-                    decoration: ShapeDecoration(
-                      color: Theme.of(context).brightness == Brightness.dark
-                          ? const Color(0xFF2A2A2A)
-                          : const Color(0xFFF0F1F7),
-                      shape: SmoothRectangleBorder(
-                        borderRadius: SmoothBorderRadius(
-                          cornerRadius: 16,
-                          cornerSmoothing: 0.6,
-                        ),
-                        side: BorderSide(
-                          color: Theme.of(context).brightness == Brightness.dark
-                              ? const Color(0xFF3A3A3A)
-                              : Colors.grey[200]!,
-                          width: 1,
-                        ),
-                      ),
-                    ),
-                    child: Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        onTap: () async {
-                          final time = await showDialog<TimeOfDay>(
-                            context: context,
-                            builder: (context) =>
-                                _TimePickerDialog(initialTime: selectedTime),
-                          );
-                          if (time != null) {
-                            setDialogState(() {
-                              selectedTime = time;
-                            });
-                          }
-                        },
-                        customBorder: SmoothRectangleBorder(
-                          borderRadius: SmoothBorderRadius(
-                            cornerRadius: 16,
-                            cornerSmoothing: 0.6,
-                          ),
-                        ),
-                        child: Container(
-                          padding: const EdgeInsets.all(16),
-                          child: Row(
-                            children: [
-                              Container(
-                                height: 40,
-                                width: 40,
-                                decoration: ShapeDecoration(
-                                  color:
-                                      Theme.of(context).brightness ==
-                                          Brightness.dark
-                                      ? const Color(0xFF3A3A3A)
-                                      : Colors.white,
-                                  shape: SmoothRectangleBorder(
-                                    borderRadius: SmoothBorderRadius(
-                                      cornerRadius: 10,
-                                      cornerSmoothing: 0.6,
-                                    ),
-                                  ),
-                                ),
-                                child: Center(
-                                  child: Icon(
-                                    Icons.access_time,
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.primary,
-                                    size: 20,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Reminder Time',
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        color: Theme.of(
-                                          context,
-                                        ).textTheme.bodyMedium?.color,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      '${selectedTime.hour.toString().padLeft(2, '0')}:${selectedTime.minute.toString().padLeft(2, '0')}',
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        color: Theme.of(
-                                          context,
-                                        ).textTheme.bodyLarge?.color,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(width: 16),
-                              Icon(
-                                Icons.arrow_forward_ios,
-                                color: Theme.of(
-                                  context,
-                                ).textTheme.bodyMedium?.color?.withOpacity(0.5),
-                                size: 14,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-
-                  // Days of the week selector
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(16),
-                    decoration: ShapeDecoration(
-                      color: Theme.of(context).brightness == Brightness.dark
-                          ? const Color(0xFF2A2A2A)
-                          : const Color(0xFFF0F1F7),
-                      shape: SmoothRectangleBorder(
-                        borderRadius: SmoothBorderRadius(
-                          cornerRadius: 16,
-                          cornerSmoothing: 0.6,
-                        ),
-                        side: BorderSide(
-                          color: Theme.of(context).brightness == Brightness.dark
-                              ? const Color(0xFF3A3A3A)
-                              : Colors.grey[200]!,
-                          width: 1,
-                        ),
-                      ),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Container(
-                              height: 40,
-                              width: 40,
-                              decoration: ShapeDecoration(
-                                color:
-                                    Theme.of(context).brightness ==
-                                        Brightness.dark
-                                    ? const Color(0xFF3A3A3A)
-                                    : Colors.white,
-                                shape: SmoothRectangleBorder(
-                                  borderRadius: SmoothBorderRadius(
-                                    cornerRadius: 10,
-                                    cornerSmoothing: 0.6,
-                                  ),
-                                ),
-                              ),
-                              child: Center(
-                                child: Icon(
-                                  Icons.calendar_today,
-                                  color: Theme.of(context).colorScheme.primary,
-                                  size: 20,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                            child: Container(
+                              padding: const EdgeInsets.all(16),
+                              child: Row(
                                 children: [
-                                  Text(
-                                    'Days of the Week',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      color: Theme.of(
-                                        context,
-                                      ).textTheme.bodyMedium?.color,
+                                  Container(
+                                    height: 40,
+                                    width: 40,
+                                    decoration: ShapeDecoration(
+                                      color:
+                                          Theme.of(context).brightness ==
+                                              Brightness.dark
+                                          ? const Color(0xFF3A3A3A)
+                                          : Colors.white,
+                                      shape: SmoothRectangleBorder(
+                                        borderRadius: SmoothBorderRadius(
+                                          cornerRadius: 10,
+                                          cornerSmoothing: 0.6,
+                                        ),
+                                      ),
+                                    ),
+                                    child: Center(
+                                      child: Icon(
+                                        Icons.access_time,
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.primary,
+                                        size: 20,
+                                      ),
                                     ),
                                   ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    selectedDays.length == 7
-                                        ? 'Every day'
-                                        : selectedDays.isEmpty
-                                        ? 'No days selected'
-                                        : '${selectedDays.length} day${selectedDays.length == 1 ? '' : 's'} selected',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      color: Theme.of(
-                                        context,
-                                      ).textTheme.bodyLarge?.color,
-                                      fontWeight: FontWeight.w500,
+                                  const SizedBox(width: 16),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          'Reminder Time',
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            color: Theme.of(
+                                              context,
+                                            ).textTheme.bodyMedium?.color,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          '${selectedTime.hour.toString().padLeft(2, '0')}:${selectedTime.minute.toString().padLeft(2, '0')}',
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            color: Theme.of(
+                                              context,
+                                            ).textTheme.bodyLarge?.color,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ],
                                     ),
+                                  ),
+                                  const SizedBox(width: 16),
+                                  Icon(
+                                    Icons.arrow_forward_ios,
+                                    color: Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium
+                                        ?.color
+                                        ?.withOpacity(0.5),
+                                    size: 14,
                                   ),
                                 ],
                               ),
                             ),
-                          ],
+                          ),
                         ),
-                        const SizedBox(height: 16),
+                      ),
+                      const SizedBox(height: 20),
 
-                        // Quick select buttons
-                        Row(
+                      // Days of the week selector
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(16),
+                        decoration: ShapeDecoration(
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? const Color(0xFF2A2A2A)
+                              : const Color(0xFFF0F1F7),
+                          shape: SmoothRectangleBorder(
+                            borderRadius: SmoothBorderRadius(
+                              cornerRadius: 16,
+                              cornerSmoothing: 0.6,
+                            ),
+                            side: BorderSide(
+                              color:
+                                  Theme.of(context).brightness ==
+                                      Brightness.dark
+                                  ? const Color(0xFF3A3A3A)
+                                  : Colors.grey[200]!,
+                              width: 1,
+                            ),
+                          ),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Container(
-                              decoration: ShapeDecoration(
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.primary.withOpacity(0.1),
-                                shape: SmoothRectangleBorder(
-                                  borderRadius: SmoothBorderRadius(
-                                    cornerRadius: 10,
-                                    cornerSmoothing: 0.6,
-                                  ),
-                                ),
-                              ),
-                              child: Material(
-                                color: Colors.transparent,
-                                child: InkWell(
-                                  onTap: () {
-                                    setDialogState(() {
-                                      selectedDays = [
-                                        'Monday',
-                                        'Tuesday',
-                                        'Wednesday',
-                                        'Thursday',
-                                        'Friday',
-                                        'Saturday',
-                                        'Sunday',
-                                      ];
-                                    });
-                                  },
-                                  customBorder: SmoothRectangleBorder(
-                                    borderRadius: SmoothBorderRadius(
-                                      cornerRadius: 10,
-                                      cornerSmoothing: 0.6,
-                                    ),
-                                  ),
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 12,
-                                      vertical: 8,
-                                    ),
-                                    child: Text(
-                                      'All',
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w600,
-                                        color: Theme.of(
-                                          context,
-                                        ).colorScheme.primary,
+                            Row(
+                              children: [
+                                Container(
+                                  height: 40,
+                                  width: 40,
+                                  decoration: ShapeDecoration(
+                                    color:
+                                        Theme.of(context).brightness ==
+                                            Brightness.dark
+                                        ? const Color(0xFF3A3A3A)
+                                        : Colors.white,
+                                    shape: SmoothRectangleBorder(
+                                      borderRadius: SmoothBorderRadius(
+                                        cornerRadius: 10,
+                                        cornerSmoothing: 0.6,
                                       ),
                                     ),
                                   ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Container(
-                              decoration: ShapeDecoration(
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.primary.withOpacity(0.1),
-                                shape: SmoothRectangleBorder(
-                                  borderRadius: SmoothBorderRadius(
-                                    cornerRadius: 10,
-                                    cornerSmoothing: 0.6,
-                                  ),
-                                ),
-                              ),
-                              child: Material(
-                                color: Colors.transparent,
-                                child: InkWell(
-                                  onTap: () {
-                                    setDialogState(() {
-                                      selectedDays = [
-                                        'Monday',
-                                        'Tuesday',
-                                        'Wednesday',
-                                        'Thursday',
-                                        'Friday',
-                                      ];
-                                    });
-                                  },
-                                  customBorder: SmoothRectangleBorder(
-                                    borderRadius: SmoothBorderRadius(
-                                      cornerRadius: 10,
-                                      cornerSmoothing: 0.6,
+                                  child: Center(
+                                    child: Icon(
+                                      Icons.calendar_today,
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.primary,
+                                      size: 20,
                                     ),
                                   ),
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 12,
-                                      vertical: 8,
-                                    ),
-                                    child: Text(
-                                      'Weekdays',
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w600,
-                                        color: Theme.of(
-                                          context,
-                                        ).colorScheme.primary,
+                                ),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Days of the Week',
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          color: Theme.of(
+                                            context,
+                                          ).textTheme.bodyMedium?.color,
+                                        ),
                                       ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Container(
-                              decoration: ShapeDecoration(
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.primary.withOpacity(0.1),
-                                shape: SmoothRectangleBorder(
-                                  borderRadius: SmoothBorderRadius(
-                                    cornerRadius: 10,
-                                    cornerSmoothing: 0.6,
-                                  ),
-                                ),
-                              ),
-                              child: Material(
-                                color: Colors.transparent,
-                                child: InkWell(
-                                  onTap: () {
-                                    setDialogState(() {
-                                      selectedDays = [];
-                                    });
-                                  },
-                                  customBorder: SmoothRectangleBorder(
-                                    borderRadius: SmoothBorderRadius(
-                                      cornerRadius: 10,
-                                      cornerSmoothing: 0.6,
-                                    ),
-                                  ),
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 12,
-                                      vertical: 8,
-                                    ),
-                                    child: Text(
-                                      'None',
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w600,
-                                        color: Theme.of(
-                                          context,
-                                        ).colorScheme.primary,
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        selectedDays.length == 7
+                                            ? 'Every day'
+                                            : selectedDays.isEmpty
+                                            ? 'No days selected'
+                                            : '${selectedDays.length} day${selectedDays.length == 1 ? '' : 's'} selected',
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          color: Theme.of(
+                                            context,
+                                          ).textTheme.bodyLarge?.color,
+                                          fontWeight: FontWeight.w500,
+                                        ),
                                       ),
-                                    ),
+                                    ],
                                   ),
                                 ),
-                              ),
+                              ],
                             ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
+                            const SizedBox(height: 16),
 
-                        // Days checkboxes
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children:
-                              [
-                                'Monday',
-                                'Tuesday',
-                                'Wednesday',
-                                'Thursday',
-                                'Friday',
-                                'Saturday',
-                                'Sunday',
-                              ].map((day) {
-                                final isSelected = selectedDays.contains(day);
-                                final dayAbbrev = day.substring(0, 3);
-
-                                return FilterChip(
-                                  selected: isSelected,
-                                  onSelected: (selected) {
-                                    setDialogState(() {
-                                      if (selected) {
-                                        selectedDays.add(day);
-                                      } else {
-                                        selectedDays.remove(day);
-                                      }
-                                    });
-                                  },
-                                  label: Text(
-                                    dayAbbrev,
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600,
-                                      color: isSelected
-                                          ? Colors.white
-                                          : Theme.of(
+                            // Quick select buttons
+                            Row(
+                              children: [
+                                Container(
+                                  decoration: ShapeDecoration(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.primary.withOpacity(0.1),
+                                    shape: SmoothRectangleBorder(
+                                      borderRadius: SmoothBorderRadius(
+                                        cornerRadius: 10,
+                                        cornerSmoothing: 0.6,
+                                      ),
+                                    ),
+                                  ),
+                                  child: Material(
+                                    color: Colors.transparent,
+                                    child: InkWell(
+                                      onTap: () {
+                                        setDialogState(() {
+                                          selectedDays = [
+                                            'Monday',
+                                            'Tuesday',
+                                            'Wednesday',
+                                            'Thursday',
+                                            'Friday',
+                                            'Saturday',
+                                            'Sunday',
+                                          ];
+                                        });
+                                      },
+                                      customBorder: SmoothRectangleBorder(
+                                        borderRadius: SmoothBorderRadius(
+                                          cornerRadius: 10,
+                                          cornerSmoothing: 0.6,
+                                        ),
+                                      ),
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 12,
+                                          vertical: 8,
+                                        ),
+                                        child: Text(
+                                          'All',
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w600,
+                                            color: Theme.of(
                                               context,
-                                            ).textTheme.bodyLarge?.color,
+                                            ).colorScheme.primary,
+                                          ),
+                                        ),
+                                      ),
                                     ),
                                   ),
-                                  shape: SmoothRectangleBorder(
-                                    borderRadius: SmoothBorderRadius(
-                                      cornerRadius: 10,
-                                      cornerSmoothing: 0.6,
+                                ),
+                                const SizedBox(width: 8),
+                                Container(
+                                  decoration: ShapeDecoration(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.primary.withOpacity(0.1),
+                                    shape: SmoothRectangleBorder(
+                                      borderRadius: SmoothBorderRadius(
+                                        cornerRadius: 10,
+                                        cornerSmoothing: 0.6,
+                                      ),
                                     ),
-                                    side: BorderSide(
-                                      color: isSelected
+                                  ),
+                                  child: Material(
+                                    color: Colors.transparent,
+                                    child: InkWell(
+                                      onTap: () {
+                                        setDialogState(() {
+                                          selectedDays = [
+                                            'Monday',
+                                            'Tuesday',
+                                            'Wednesday',
+                                            'Thursday',
+                                            'Friday',
+                                          ];
+                                        });
+                                      },
+                                      customBorder: SmoothRectangleBorder(
+                                        borderRadius: SmoothBorderRadius(
+                                          cornerRadius: 10,
+                                          cornerSmoothing: 0.6,
+                                        ),
+                                      ),
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 12,
+                                          vertical: 8,
+                                        ),
+                                        child: Text(
+                                          'Weekdays',
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w600,
+                                            color: Theme.of(
+                                              context,
+                                            ).colorScheme.primary,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Container(
+                                  decoration: ShapeDecoration(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.primary.withOpacity(0.1),
+                                    shape: SmoothRectangleBorder(
+                                      borderRadius: SmoothBorderRadius(
+                                        cornerRadius: 10,
+                                        cornerSmoothing: 0.6,
+                                      ),
+                                    ),
+                                  ),
+                                  child: Material(
+                                    color: Colors.transparent,
+                                    child: InkWell(
+                                      onTap: () {
+                                        setDialogState(() {
+                                          selectedDays = [];
+                                        });
+                                      },
+                                      customBorder: SmoothRectangleBorder(
+                                        borderRadius: SmoothBorderRadius(
+                                          cornerRadius: 10,
+                                          cornerSmoothing: 0.6,
+                                        ),
+                                      ),
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 12,
+                                          vertical: 8,
+                                        ),
+                                        child: Text(
+                                          'None',
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w600,
+                                            color: Theme.of(
+                                              context,
+                                            ).colorScheme.primary,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+
+                            // Days checkboxes
+                            Wrap(
+                              spacing: 8,
+                              runSpacing: 8,
+                              children:
+                                  [
+                                    'Monday',
+                                    'Tuesday',
+                                    'Wednesday',
+                                    'Thursday',
+                                    'Friday',
+                                    'Saturday',
+                                    'Sunday',
+                                  ].map((day) {
+                                    final isSelected = selectedDays.contains(
+                                      day,
+                                    );
+                                    final dayAbbrev = day.substring(0, 3);
+
+                                    return FilterChip(
+                                      selected: isSelected,
+                                      onSelected: (selected) {
+                                        setDialogState(() {
+                                          if (selected) {
+                                            selectedDays.add(day);
+                                          } else {
+                                            selectedDays.remove(day);
+                                          }
+                                        });
+                                      },
+                                      label: Text(
+                                        dayAbbrev,
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w600,
+                                          color: isSelected
+                                              ? Colors.white
+                                              : Theme.of(
+                                                  context,
+                                                ).textTheme.bodyLarge?.color,
+                                        ),
+                                      ),
+                                      shape: SmoothRectangleBorder(
+                                        borderRadius: SmoothBorderRadius(
+                                          cornerRadius: 10,
+                                          cornerSmoothing: 0.6,
+                                        ),
+                                        side: BorderSide(
+                                          color: isSelected
+                                              ? Theme.of(
+                                                  context,
+                                                ).colorScheme.primary
+                                              : Theme.of(context).brightness ==
+                                                    Brightness.dark
+                                              ? const Color(0xFF4A4A4A)
+                                              : Colors.grey[300]!,
+                                          width: 1,
+                                        ),
+                                      ),
+                                      backgroundColor: isSelected
                                           ? Theme.of(
                                               context,
                                             ).colorScheme.primary
                                           : Theme.of(context).brightness ==
                                                 Brightness.dark
-                                          ? const Color(0xFF4A4A4A)
-                                          : Colors.grey[300]!,
-                                      width: 1,
-                                    ),
-                                  ),
-                                  backgroundColor: isSelected
-                                      ? Theme.of(context).colorScheme.primary
-                                      : Theme.of(context).brightness ==
-                                            Brightness.dark
-                                      ? const Color(0xFF2A2A2A)
-                                      : Colors.white,
-                                  selectedColor: Theme.of(
-                                    context,
-                                  ).colorScheme.primary,
-                                  checkmarkColor: Colors.white,
-                                  showCheckmark: false,
-                                  materialTapTargetSize:
-                                      MaterialTapTargetSize.shrinkWrap,
-                                  visualDensity: VisualDensity.compact,
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                    vertical: 8,
-                                  ),
-                                );
-                              }).toList(),
+                                          ? const Color(0xFF2A2A2A)
+                                          : Colors.white,
+                                      selectedColor: Theme.of(
+                                        context,
+                                      ).colorScheme.primary,
+                                      checkmarkColor: Colors.white,
+                                      showCheckmark: false,
+                                      materialTapTargetSize:
+                                          MaterialTapTargetSize.shrinkWrap,
+                                      visualDensity: VisualDensity.compact,
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 12,
+                                        vertical: 8,
+                                      ),
+                                    );
+                                  }).toList(),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 24),
+                      ),
+                      const SizedBox(height: 24),
 
-                  // Buttons
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Container(
-                          height: 48,
-                          decoration: ShapeDecoration(
-                            color:
-                                Theme.of(context).brightness == Brightness.dark
-                                ? const Color(0xFF2A2A2A)
-                                : const Color(0xFFF0F1F7),
-                            shape: SmoothRectangleBorder(
-                              borderRadius: SmoothBorderRadius(
-                                cornerRadius: 14,
-                                cornerSmoothing: 0.6,
-                              ),
-                              side: BorderSide(
+                      // Buttons
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Container(
+                              height: 48,
+                              decoration: ShapeDecoration(
                                 color:
                                     Theme.of(context).brightness ==
                                         Brightness.dark
-                                    ? const Color(0xFF3A3A3A)
-                                    : Colors.grey[200]!,
-                                width: 1,
-                              ),
-                            ),
-                          ),
-                          child: Material(
-                            color: Colors.transparent,
-                            child: InkWell(
-                              onTap: () => Navigator.pop(context),
-                              customBorder: SmoothRectangleBorder(
-                                borderRadius: SmoothBorderRadius(
-                                  cornerRadius: 14,
-                                  cornerSmoothing: 0.6,
+                                    ? const Color(0xFF2A2A2A)
+                                    : const Color(0xFFF0F1F7),
+                                shape: SmoothRectangleBorder(
+                                  borderRadius: SmoothBorderRadius(
+                                    cornerRadius: 14,
+                                    cornerSmoothing: 0.6,
+                                  ),
+                                  side: BorderSide(
+                                    color:
+                                        Theme.of(context).brightness ==
+                                            Brightness.dark
+                                        ? const Color(0xFF3A3A3A)
+                                        : Colors.grey[200]!,
+                                    width: 1,
+                                  ),
                                 ),
                               ),
-                              child: const Center(
-                                child: Text(
-                                  'Cancel',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
+                              child: Material(
+                                color: Colors.transparent,
+                                child: InkWell(
+                                  onTap: () => Navigator.pop(context),
+                                  customBorder: SmoothRectangleBorder(
+                                    borderRadius: SmoothBorderRadius(
+                                      cornerRadius: 14,
+                                      cornerSmoothing: 0.6,
+                                    ),
+                                  ),
+                                  child: const Center(
+                                    child: Text(
+                                      'Cancel',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
                           ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Container(
-                          height: 48,
-                          decoration: ShapeDecoration(
-                            color: Theme.of(context).colorScheme.primary,
-                            shape: SmoothRectangleBorder(
-                              borderRadius: SmoothBorderRadius(
-                                cornerRadius: 14,
-                                cornerSmoothing: 0.6,
-                              ),
-                            ),
-                            shadows: [
-                              BoxShadow(
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.primary.withOpacity(0.3),
-                                blurRadius: 12,
-                                offset: const Offset(0, 4),
-                              ),
-                            ],
-                          ),
-                          child: Material(
-                            color: Colors.transparent,
-                            child: InkWell(
-                              onTap: () async {
-                                if (nameController.text.trim().isNotEmpty &&
-                                    selectedDays.isNotEmpty) {
-                                  final medicationProvider =
-                                      Provider.of<MedicationDataProvider>(
-                                        context,
-                                        listen: false,
-                                      );
-
-                                  final currentMedications =
-                                      List<Map<String, dynamic>>.from(
-                                        medicationProvider.allMedications,
-                                      );
-
-                                  currentMedications.add({
-                                    'name': nameController.text.trim(),
-                                    'time': {
-                                      'hour': selectedTime.hour,
-                                      'minute': selectedTime.minute,
-                                    },
-                                    'days': selectedDays,
-                                    'enabled': true,
-                                  });
-
-                                  await _saveMedications(currentMedications);
-                                  Navigator.pop(context);
-                                }
-                              },
-                              customBorder: SmoothRectangleBorder(
-                                borderRadius: SmoothBorderRadius(
-                                  cornerRadius: 14,
-                                  cornerSmoothing: 0.6,
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Container(
+                              height: 48,
+                              decoration: ShapeDecoration(
+                                color: Theme.of(context).colorScheme.primary,
+                                shape: SmoothRectangleBorder(
+                                  borderRadius: SmoothBorderRadius(
+                                    cornerRadius: 14,
+                                    cornerSmoothing: 0.6,
+                                  ),
                                 ),
+                                shadows: [
+                                  BoxShadow(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.primary.withOpacity(0.3),
+                                    blurRadius: 12,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
                               ),
-                              child: const Center(
-                                child: Text(
-                                  'Add',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.white,
+                              child: Material(
+                                color: Colors.transparent,
+                                child: InkWell(
+                                  onTap: _isAddingMedication
+                                      ? null
+                                      : () async {
+                                          if (nameController.text
+                                                  .trim()
+                                                  .isNotEmpty &&
+                                              selectedDays.isNotEmpty) {
+                                            setDialogState(() {
+                                              _isAddingMedication = true;
+                                            });
+
+                                            try {
+                                              final medicationProvider =
+                                                  Provider.of<
+                                                    MedicationDataProvider
+                                                  >(context, listen: false);
+
+                                              final currentMedications =
+                                                  List<
+                                                    Map<String, dynamic>
+                                                  >.from(
+                                                    medicationProvider
+                                                        .allMedications,
+                                                  );
+
+                                              currentMedications.add({
+                                                'name': nameController.text
+                                                    .trim(),
+                                                'dosage': dosageController.text
+                                                    .trim(),
+                                                'time': {
+                                                  'hour': selectedTime.hour,
+                                                  'minute': selectedTime.minute,
+                                                },
+                                                'days': selectedDays,
+                                                'enabled': true,
+                                              });
+
+                                              await _saveMedications(
+                                                currentMedications,
+                                              );
+                                              Navigator.pop(context);
+                                            } finally {
+                                              if (mounted) {
+                                                setDialogState(() {
+                                                  _isAddingMedication = false;
+                                                });
+                                              }
+                                            }
+                                          }
+                                        },
+                                  customBorder: SmoothRectangleBorder(
+                                    borderRadius: SmoothBorderRadius(
+                                      cornerRadius: 14,
+                                      cornerSmoothing: 0.6,
+                                    ),
+                                  ),
+                                  child: Center(
+                                    child: _isAddingMedication
+                                        ? const SizedBox(
+                                            width: 20,
+                                            height: 20,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                              valueColor:
+                                                  AlwaysStoppedAnimation<Color>(
+                                                    Colors.white,
+                                                  ),
+                                            ),
+                                          )
+                                        : const Text(
+                                            'Add',
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w600,
+                                              color: Colors.white,
+                                            ),
+                                          ),
                                   ),
                                 ),
                               ),
                             ),
                           ),
-                        ),
+                        ],
                       ),
                     ],
                   ),
-                ],
+                ),
               ),
-            ),
+            ],
           ),
         ),
       ),

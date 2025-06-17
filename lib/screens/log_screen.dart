@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:toastification/toastification.dart';
 import 'package:figma_squircle/figma_squircle.dart';
 import '../services/firestore_service.dart';
+import '../services/blood_sugar_reminder_service.dart';
 import '../providers/glucose_data_provider.dart';
 import '../providers/glucose_trend_data_provider.dart';
 import '../providers/log_history_data_provider.dart';
@@ -25,6 +26,7 @@ class _LogScreenState extends State<LogScreen> {
   final TextEditingController _durationController = TextEditingController();
   final TextEditingController _medicationController = TextEditingController();
   final TextEditingController _doseController = TextEditingController();
+  final TextEditingController _noteController = TextEditingController();
 
   @override
   void dispose() {
@@ -35,6 +37,7 @@ class _LogScreenState extends State<LogScreen> {
     _durationController.dispose();
     _medicationController.dispose();
     _doseController.dispose();
+    _noteController.dispose();
     super.dispose();
   }
 
@@ -65,6 +68,7 @@ class _LogBottomSheetState extends State<LogBottomSheet> {
   final TextEditingController _durationController = TextEditingController();
   final TextEditingController _medicationController = TextEditingController();
   final TextEditingController _doseController = TextEditingController();
+  final TextEditingController _noteController = TextEditingController();
 
   @override
   void dispose() {
@@ -75,6 +79,7 @@ class _LogBottomSheetState extends State<LogBottomSheet> {
     _durationController.dispose();
     _medicationController.dispose();
     _doseController.dispose();
+    _noteController.dispose();
     super.dispose();
   }
 
@@ -160,7 +165,8 @@ class _LogBottomSheetState extends State<LogBottomSheet> {
               ButtonSegment<int>(value: 0, label: Text('Glucose')),
               ButtonSegment<int>(value: 1, label: Text('Meal')),
               ButtonSegment<int>(value: 2, label: Text('Activity')),
-              ButtonSegment<int>(value: 3, label: Text('Medication')),
+              ButtonSegment<int>(value: 3, label: Text('Meds')),
+              ButtonSegment<int>(value: 4, label: Text('Other')),
             ],
             selected: {_selectedSegment},
             onSelectionChanged: (Set<int> newSelection) {
@@ -341,6 +347,27 @@ class _LogBottomSheetState extends State<LogBottomSheet> {
                       entryType = 'Medication';
                       break;
 
+                    case 4: // Other
+                      if (_activityController.text.trim().isEmpty) {
+                        _showErrorToast(
+                          'Please enter a title for the other entry',
+                        );
+                        return;
+                      }
+                      if (_noteController.text.trim().isEmpty) {
+                        _showErrorToast(
+                          'Please enter a note for the other entry',
+                        );
+                        return;
+                      }
+
+                      eventData = {
+                        'type': 'other',
+                        'name': _activityController.text.trim(),
+                      };
+                      entryType = 'Other';
+                      break;
+
                     default:
                       _showErrorToast('Please select an entry type');
                       return;
@@ -348,6 +375,11 @@ class _LogBottomSheetState extends State<LogBottomSheet> {
 
                   // Add the selected date/time to the event data
                   eventData['date'] = Timestamp.fromDate(_selectedDateTime);
+
+                  // Add note if provided
+                  if (_noteController.text.trim().isNotEmpty) {
+                    eventData['note'] = _noteController.text.trim();
+                  }
 
                   // Save to Firestore
                   final eventId = await FirestoreService.addEvent(eventData);
@@ -364,6 +396,9 @@ class _LogBottomSheetState extends State<LogBottomSheet> {
                         await GlucoseTrendDataProvider.invalidateAndRefreshGlobally(
                           context,
                         );
+
+                        // Reschedule blood sugar reminder after new reading
+                        BloodSugarReminderService.onGlucoseReadingLogged();
                       } catch (e) {
                         // Failed to refresh glucose data - this is non-critical
                       }
@@ -421,6 +456,8 @@ class _LogBottomSheetState extends State<LogBottomSheet> {
         return _buildActivityForm();
       case 3: // Medication
         return _buildMedicationForm();
+      case 4: // Other
+        return _buildOtherForm();
       default:
         return _buildGlucoseForm();
     }
@@ -445,6 +482,8 @@ class _LogBottomSheetState extends State<LogBottomSheet> {
           hintText: 'mg/dL',
           keyboardType: TextInputType.number,
         ),
+        const SizedBox(height: 20),
+        _buildNoteField(),
       ],
     );
   }
@@ -470,6 +509,8 @@ class _LogBottomSheetState extends State<LogBottomSheet> {
         ),
         const SizedBox(height: 16),
         _buildTextField(controller: _foodController, hintText: 'Food'),
+        const SizedBox(height: 20),
+        _buildNoteField(),
       ],
     );
   }
@@ -495,6 +536,8 @@ class _LogBottomSheetState extends State<LogBottomSheet> {
           hintText: 'Duration (minutes)',
           keyboardType: TextInputType.number,
         ),
+        const SizedBox(height: 20),
+        _buildNoteField(),
       ],
     );
   }
@@ -519,6 +562,63 @@ class _LogBottomSheetState extends State<LogBottomSheet> {
         ),
         const SizedBox(height: 16),
         _buildTextField(controller: _doseController, hintText: 'Dosage'),
+        const SizedBox(height: 20),
+        _buildNoteField(),
+      ],
+    );
+  }
+
+  Widget _buildOtherForm() {
+    final theme = Theme.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Other',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: theme.textTheme.titleLarge?.color,
+          ),
+        ),
+        const SizedBox(height: 16),
+        Text(
+          'Add any other health-related information.',
+          style: TextStyle(
+            fontSize: 14,
+            color: theme.textTheme.bodyMedium?.color,
+          ),
+        ),
+        const SizedBox(height: 20),
+        _buildTextField(
+          controller: _activityController,
+          hintText: 'Title (e.g., Sleep, Stress, Symptoms)',
+        ),
+        const SizedBox(height: 16),
+        _buildNoteField(),
+      ],
+    );
+  }
+
+  Widget _buildNoteField() {
+    final theme = Theme.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Note (Optional)',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: theme.textTheme.titleMedium?.color,
+          ),
+        ),
+        const SizedBox(height: 8),
+        _buildTextField(
+          controller: _noteController,
+          hintText: 'Add any additional notes...',
+          maxLines: 3,
+        ),
       ],
     );
   }
@@ -1005,6 +1105,7 @@ class _LogBottomSheetState extends State<LogBottomSheet> {
     _durationController.clear();
     _medicationController.clear();
     _doseController.clear();
+    _noteController.clear();
   }
 }
 
