@@ -310,7 +310,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                         label: 'First Name',
                         icon: FontAwesomeIcons.user,
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 16),
 
                       _buildTextField(
                         controller: _lastNameController,
@@ -341,91 +341,91 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
   }) {
     final theme = Theme.of(context);
 
-    return Focus(
-      child: Builder(
-        builder: (context) {
-          final isFocused = Focus.of(context).hasFocus;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w600,
+            fontSize: 18,
+            color: theme.textTheme.headlineMedium?.color,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Focus(
+          child: Builder(
+            builder: (context) {
+              final isFocused = Focus.of(context).hasFocus;
 
-          return Container(
-            decoration: ShapeDecoration(
-              color: theme.brightness == Brightness.dark
-                  ? const Color(0xFF2A2A2A)
-                  : const Color(0xFFF0F1F7),
-              shape: SmoothRectangleBorder(
-                borderRadius: SmoothBorderRadius(
-                  cornerRadius: 16,
-                  cornerSmoothing: 0.6,
-                ),
-                side: BorderSide(
-                  color: isFocused
-                      ? theme.colorScheme.primary.withOpacity(0.8)
-                      : theme.brightness == Brightness.dark
-                      ? const Color(0xFF3A3A3A)
-                      : Colors.grey[200]!,
-                  width: isFocused ? 2 : 1,
-                ),
-              ),
-              shadows: isFocused
-                  ? [
-                      BoxShadow(
-                        color: theme.colorScheme.primary.withOpacity(0.1),
-                        blurRadius: 12,
-                        offset: const Offset(0, 2),
-                      ),
-                    ]
-                  : [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.02),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-            ),
-            child: ClipSmoothRect(
-              radius: SmoothBorderRadius(
-                cornerRadius: 16,
-                cornerSmoothing: 0.6,
-              ),
-              child: TextFormField(
-                controller: controller,
-                keyboardType: keyboardType,
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                  color: theme.textTheme.bodyLarge?.color,
-                ),
-                decoration: InputDecoration(
-                  labelText: label,
-                  labelStyle: TextStyle(
-                    color: theme.colorScheme.primary.withOpacity(0.7),
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                  ),
-                  prefixIcon: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Icon(
-                      icon,
-                      color: theme.colorScheme.primary,
-                      size: 20,
+              return Container(
+                decoration: ShapeDecoration(
+                  color: theme.brightness == Brightness.dark
+                      ? const Color(0xFF2A2A2A)
+                      : const Color(0xFFF0F1F7),
+                  shape: SmoothRectangleBorder(
+                    borderRadius: SmoothBorderRadius(
+                      cornerRadius: 18,
+                      cornerSmoothing: 0.6,
+                    ),
+                    side: BorderSide(
+                      color: isFocused
+                          ? theme.colorScheme.primary.withOpacity(0.8)
+                          : theme.brightness == Brightness.dark
+                          ? const Color(0xFF3A3A3A)
+                          : Colors.grey[200]!,
+                      width: isFocused ? 2 : 1,
                     ),
                   ),
-                  border: InputBorder.none,
-                  focusedBorder: InputBorder.none,
-                  enabledBorder: InputBorder.none,
-                  errorBorder: InputBorder.none,
-                  focusedErrorBorder: InputBorder.none,
-                  contentPadding: const EdgeInsets.all(20),
-                  filled: false,
-                  hintStyle: TextStyle(
-                    color: theme.colorScheme.primary.withOpacity(0.7),
-                    fontSize: 16,
+                  shadows: isFocused
+                      ? [
+                          BoxShadow(
+                            color: theme.colorScheme.primary.withOpacity(0.1),
+                            blurRadius: 12,
+                            offset: const Offset(0, 2),
+                          ),
+                        ]
+                      : [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.02),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                ),
+                child: ClipSmoothRect(
+                  radius: SmoothBorderRadius(
+                    cornerRadius: 18,
+                    cornerSmoothing: 0.6,
+                  ),
+                  child: TextFormField(
+                    controller: controller,
+                    keyboardType: keyboardType,
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: theme.textTheme.bodyLarge?.color,
+                    ),
+                    decoration: InputDecoration(
+                      hintText: 'Enter ${label.toLowerCase()}',
+                      hintStyle: TextStyle(
+                        color: theme.colorScheme.primary.withOpacity(0.7),
+                        fontSize: 16,
+                      ),
+                      border: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      errorBorder: InputBorder.none,
+                      focusedErrorBorder: InputBorder.none,
+                      contentPadding: const EdgeInsets.all(20),
+                      filled: false,
+                    ),
                   ),
                 ),
-              ),
-            ),
-          );
-        },
-      ),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 
@@ -433,30 +433,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
     final theme = Theme.of(context);
 
     return Container(
-      decoration: ShapeDecoration(
-        color: theme.brightness == Brightness.dark
-            ? const Color(0xFF2A2A2A)
-            : const Color(0xFFF0F1F7),
-        shape: SmoothRectangleBorder(
-          borderRadius: SmoothBorderRadius(
-            cornerRadius: 16,
-            cornerSmoothing: 0.6,
-          ),
-          side: BorderSide(
-            color: theme.brightness == Brightness.dark
-                ? const Color(0xFF3A3A3A)
-                : Colors.grey[200]!,
-            width: 1,
-          ),
-        ),
-        shadows: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.02),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
+      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 4),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
@@ -467,47 +444,68 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
               cornerSmoothing: 0.6,
             ),
           ),
-          child: Container(
-            padding: const EdgeInsets.all(20),
-            child: Row(
-              children: [
-                Icon(
-                  FontAwesomeIcons.heartbeat,
-                  color: theme.colorScheme.primary,
-                  size: 20,
+          child: Row(
+            children: [
+              Container(
+                height: 50,
+                width: 50,
+                decoration: ShapeDecoration(
+                  color: theme.brightness == Brightness.dark
+                      ? const Color(0xFF3A3A3A)
+                      : const Color(0xFFF0F1F7),
+                  shape: SmoothRectangleBorder(
+                    borderRadius: SmoothBorderRadius(
+                      cornerRadius: 12,
+                      cornerSmoothing: 0.6,
+                    ),
+                  ),
                 ),
-                const SizedBox(width: 16),
-                Expanded(
+                child: Center(
+                  child: Icon(
+                    FontAwesomeIcons.heartbeat,
+                    color: theme.colorScheme.primary,
+                    size: 24,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Container(
+                  height: 50,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
                         'Diabetes Type',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                          color: theme.colorScheme.primary.withOpacity(0.7),
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 18,
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 2),
                       Text(
                         _selectedDiabetesType,
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                          color: theme.textTheme.bodyLarge?.color,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: theme.brightness == Brightness.dark
+                              ? Colors.white70
+                              : Colors.grey[600],
                         ),
                       ),
                     ],
                   ),
                 ),
-                Icon(
+              ),
+              Container(
+                height: 50,
+                alignment: Alignment.center,
+                child: Icon(
                   Icons.arrow_forward_ios,
                   color: theme.textTheme.bodyMedium?.color?.withOpacity(0.5),
                   size: 16,
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
@@ -653,27 +651,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
     final isSelected = _selectedDiabetesType == type;
 
     return Container(
-      decoration: ShapeDecoration(
-        color: isSelected
-            ? theme.colorScheme.primary.withOpacity(0.1)
-            : theme.brightness == Brightness.dark
-            ? const Color(0xFF2A2A2A)
-            : const Color(0xFFF0F1F7),
-        shape: SmoothRectangleBorder(
-          borderRadius: SmoothBorderRadius(
-            cornerRadius: 14,
-            cornerSmoothing: 0.6,
-          ),
-          side: BorderSide(
-            color: isSelected
-                ? theme.colorScheme.primary
-                : theme.brightness == Brightness.dark
-                ? const Color(0xFF3A3A3A)
-                : Colors.grey[200]!,
-            width: isSelected ? 2 : 1,
-          ),
-        ),
-      ),
+      margin: const EdgeInsets.symmetric(vertical: 4),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
@@ -685,38 +663,64 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
           },
           customBorder: SmoothRectangleBorder(
             borderRadius: SmoothBorderRadius(
-              cornerRadius: 14,
+              cornerRadius: 16,
               cornerSmoothing: 0.6,
             ),
           ),
           child: Container(
             padding: const EdgeInsets.all(16),
+            decoration: ShapeDecoration(
+              color: isSelected
+                  ? theme.colorScheme.primary.withOpacity(0.1)
+                  : Colors.transparent,
+              shape: SmoothRectangleBorder(
+                borderRadius: SmoothBorderRadius(
+                  cornerRadius: 16,
+                  cornerSmoothing: 0.6,
+                ),
+              ),
+            ),
             child: Row(
               children: [
-                Expanded(
-                  child: Text(
-                    type,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
+                Container(
+                  height: 40,
+                  width: 40,
+                  decoration: ShapeDecoration(
+                    color: isSelected
+                        ? theme.colorScheme.primary
+                        : (theme.brightness == Brightness.dark
+                              ? const Color(0xFF3A3A3A)
+                              : const Color(0xFFF0F1F7)),
+                    shape: SmoothRectangleBorder(
+                      borderRadius: SmoothBorderRadius(
+                        cornerRadius: 10,
+                        cornerSmoothing: 0.6,
+                      ),
+                    ),
+                  ),
+                  child: Center(
+                    child: Icon(
+                      isSelected ? Icons.check : Icons.medical_information,
                       color: isSelected
-                          ? theme.colorScheme.primary
-                          : theme.textTheme.bodyLarge?.color,
+                          ? Colors.white
+                          : theme.colorScheme.primary,
+                      size: 20,
                     ),
                   ),
                 ),
-                if (isSelected)
-                  Container(
-                    height: 20,
-                    width: 20,
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.primary,
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Center(
-                      child: Icon(Icons.check, color: Colors.white, size: 14),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Text(
+                    type,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 16,
+                      color: isSelected
+                          ? theme.colorScheme.primary
+                          : theme.textTheme.titleMedium?.color,
                     ),
                   ),
+                ),
               ],
             ),
           ),

@@ -355,17 +355,10 @@ class _MedicationRemindersScreenState extends State<MedicationRemindersScreen> {
                 color: theme.colorScheme.primary,
                 shape: SmoothRectangleBorder(
                   borderRadius: SmoothBorderRadius(
-                    cornerRadius: 16,
+                    cornerRadius: 12,
                     cornerSmoothing: 0.6,
                   ),
                 ),
-                shadows: [
-                  BoxShadow(
-                    color: theme.colorScheme.primary.withOpacity(0.3),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
               ),
               child: Material(
                 color: Colors.transparent,
@@ -451,172 +444,155 @@ class _MedicationRemindersScreenState extends State<MedicationRemindersScreen> {
           daysText = '$dayAbbreviations at $timeString';
         }
 
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 12),
-          child: Container(
-            padding: const EdgeInsets.all(20),
-            decoration: ShapeDecoration(
-              color: theme.scaffoldBackgroundColor,
-              shape: SmoothRectangleBorder(
+        return Container(
+          margin: const EdgeInsets.only(bottom: 8),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () {}, // Empty onTap to enable ripple without action
+              customBorder: SmoothRectangleBorder(
                 borderRadius: SmoothBorderRadius(
                   cornerRadius: 16,
                   cornerSmoothing: 0.6,
                 ),
-                side: BorderSide(
-                  color: theme.brightness == Brightness.dark
-                      ? const Color(0xFF3A3A3A)
-                      : Colors.grey[200]!,
-                  width: 1,
-                ),
               ),
-              shadows: [
-                BoxShadow(
-                  color: theme.brightness == Brightness.dark
-                      ? Colors.black.withOpacity(0.2)
-                      : Colors.black.withOpacity(0.05),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Row(
-              children: [
-                Container(
-                  height: 50,
-                  width: 50,
-                  decoration: ShapeDecoration(
-                    color: medication['enabled']
-                        ? theme.colorScheme.primary.withOpacity(0.1)
-                        : theme.brightness == Brightness.dark
-                        ? const Color(0xFF3A3A3A)
-                        : Colors.white,
-                    shape: SmoothRectangleBorder(
-                      borderRadius: SmoothBorderRadius(
-                        cornerRadius: 14,
-                        cornerSmoothing: 0.6,
-                      ),
-                    ),
-                    shadows: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 6,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Center(
-                    child: FaIcon(
-                      FontAwesomeIcons.pills,
-                      color: medication['enabled']
-                          ? theme.colorScheme.primary
-                          : theme.iconTheme.color?.withOpacity(0.5),
-                      size: 22,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        medication['name'],
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: medication['enabled']
-                              ? theme.textTheme.titleMedium?.color
-                              : theme.textTheme.titleMedium?.color?.withOpacity(
-                                  0.6,
-                                ),
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    Container(
+                      height: 50,
+                      width: 50,
+                      decoration: ShapeDecoration(
+                        color: medication['enabled']
+                            ? theme.colorScheme.primary.withOpacity(0.1)
+                            : (theme.brightness == Brightness.dark
+                                  ? const Color(0xFF3A3A3A)
+                                  : const Color(0xFFF0F1F7)),
+                        shape: SmoothRectangleBorder(
+                          borderRadius: SmoothBorderRadius(
+                            cornerRadius: 12,
+                            cornerSmoothing: 0.6,
+                          ),
                         ),
                       ),
-                      const SizedBox(height: 4),
-                      // Show dosage if available
-                      if (medication['dosage'] != null &&
-                          medication['dosage'].toString().isNotEmpty)
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 4),
-                          child: Text(
-                            medication['dosage'],
-                            style: theme.textTheme.bodySmall?.copyWith(
+                      child: Center(
+                        child: FaIcon(
+                          FontAwesomeIcons.pills,
+                          color: medication['enabled']
+                              ? theme.colorScheme.primary
+                              : theme.iconTheme.color?.withOpacity(0.5),
+                          size: 24,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            medication['name'],
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 18,
                               color: medication['enabled']
-                                  ? theme.textTheme.bodySmall?.color
-                                  : theme.textTheme.bodySmall?.color
+                                  ? theme.textTheme.titleMedium?.color
+                                  : theme.textTheme.titleMedium?.color
+                                        ?.withOpacity(0.6),
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          // Show dosage if available
+                          if (medication['dosage'] != null &&
+                              medication['dosage'].toString().isNotEmpty)
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 2),
+                              child: Text(
+                                medication['dosage'],
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: medication['enabled']
+                                      ? (theme.brightness == Brightness.dark
+                                            ? Colors.white70
+                                            : Colors.grey[600])
+                                      : theme.textTheme.bodyMedium?.color
+                                            ?.withOpacity(0.5),
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          Text(
+                            daysText,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: medication['enabled']
+                                  ? (theme.brightness == Brightness.dark
+                                        ? Colors.white70
+                                        : Colors.grey[600])
+                                  : theme.textTheme.bodyMedium?.color
                                         ?.withOpacity(0.5),
-                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    // Delete button
+                    Container(
+                      decoration: ShapeDecoration(
+                        color: Colors.red.withOpacity(0.1),
+                        shape: SmoothRectangleBorder(
+                          borderRadius: SmoothBorderRadius(
+                            cornerRadius: 10,
+                            cornerSmoothing: 0.6,
+                          ),
+                        ),
+                      ),
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: () => _showDeleteMedicationDialog(
+                            context,
+                            medication,
+                            medications,
+                            index,
+                          ),
+                          customBorder: SmoothRectangleBorder(
+                            borderRadius: SmoothBorderRadius(
+                              cornerRadius: 10,
+                              cornerSmoothing: 0.6,
+                            ),
+                          ),
+                          child: Container(
+                            padding: const EdgeInsets.all(8),
+                            child: Icon(
+                              Icons.delete_outline,
+                              color: Colors.red[600],
+                              size: 18,
                             ),
                           ),
                         ),
-                      Text(
-                        daysText,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: medication['enabled']
-                              ? theme.colorScheme.primary
-                              : theme.textTheme.bodyMedium?.color?.withOpacity(
-                                  0.5,
-                                ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 16),
-                // Delete button
-                Container(
-                  decoration: ShapeDecoration(
-                    color: Colors.red.withOpacity(0.1),
-                    shape: SmoothRectangleBorder(
-                      borderRadius: SmoothBorderRadius(
-                        cornerRadius: 10,
-                        cornerSmoothing: 0.6,
                       ),
                     ),
-                  ),
-                  child: Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      onTap: () => _showDeleteMedicationDialog(
-                        context,
-                        medication,
-                        medications,
-                        index,
-                      ),
-                      customBorder: SmoothRectangleBorder(
-                        borderRadius: SmoothBorderRadius(
-                          cornerRadius: 10,
-                          cornerSmoothing: 0.6,
-                        ),
-                      ),
-                      child: Container(
-                        padding: const EdgeInsets.all(8),
-                        child: Icon(
-                          Icons.delete_outline,
-                          color: Colors.red[600],
-                          size: 18,
-                        ),
-                      ),
+                    const SizedBox(width: 12),
+                    Switch(
+                      value: medication['enabled'] ?? false,
+                      onChanged: (value) async {
+                        final updatedMedications =
+                            List<Map<String, dynamic>>.from(medications);
+                        updatedMedications[index] = {
+                          ...medication,
+                          'enabled': value,
+                        };
+                        await _saveMedicationsSilently(updatedMedications);
+                      },
+                      activeColor: Colors.white,
+                      activeTrackColor: theme.colorScheme.primary,
+                      inactiveThumbColor: Colors.white,
+                      inactiveTrackColor: Colors.grey[300],
                     ),
-                  ),
+                  ],
                 ),
-                const SizedBox(width: 12),
-                Switch(
-                  value: medication['enabled'] ?? false,
-                  onChanged: (value) async {
-                    final updatedMedications = List<Map<String, dynamic>>.from(
-                      medications,
-                    );
-                    updatedMedications[index] = {
-                      ...medication,
-                      'enabled': value,
-                    };
-                    await _saveMedicationsSilently(updatedMedications);
-                  },
-                  activeColor: Colors.white,
-                  activeTrackColor: theme.colorScheme.primary,
-                  inactiveThumbColor: Colors.white,
-                  inactiveTrackColor: Colors.grey[300],
-                ),
-              ],
+              ),
             ),
           ),
         );
@@ -640,17 +616,10 @@ class _MedicationRemindersScreenState extends State<MedicationRemindersScreen> {
             color: Theme.of(context).scaffoldBackgroundColor,
             shape: SmoothRectangleBorder(
               borderRadius: SmoothBorderRadius(
-                cornerRadius: 20,
+                cornerRadius: 16,
                 cornerSmoothing: 0.6,
               ),
             ),
-            shadows: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.15),
-                blurRadius: 20,
-                offset: const Offset(0, 10),
-              ),
-            ],
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -663,7 +632,7 @@ class _MedicationRemindersScreenState extends State<MedicationRemindersScreen> {
                   color: Colors.red.withOpacity(0.1),
                   shape: SmoothRectangleBorder(
                     borderRadius: SmoothBorderRadius(
-                      cornerRadius: 16,
+                      cornerRadius: 12,
                       cornerSmoothing: 0.6,
                     ),
                   ),
@@ -968,296 +937,326 @@ class _MedicationRemindersScreenState extends State<MedicationRemindersScreen> {
                       const SizedBox(height: 24),
 
                       // Medication name input
-                      Focus(
-                        child: Builder(
-                          builder: (context) {
-                            final isFocused = Focus.of(context).hasFocus;
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Medication Name',
+                            style: Theme.of(context).textTheme.titleMedium
+                                ?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 16,
+                                ),
+                          ),
+                          const SizedBox(height: 8),
+                          Focus(
+                            child: Builder(
+                              builder: (context) {
+                                final isFocused = Focus.of(context).hasFocus;
 
-                            return Container(
-                              decoration: ShapeDecoration(
-                                color:
-                                    Theme.of(context).brightness ==
-                                        Brightness.dark
-                                    ? const Color(0xFF2A2A2A)
-                                    : const Color(0xFFF0F1F7),
-                                shape: SmoothRectangleBorder(
-                                  borderRadius: SmoothBorderRadius(
-                                    cornerRadius: 16,
-                                    cornerSmoothing: 0.6,
-                                  ),
-                                  side: BorderSide(
-                                    color: isFocused
-                                        ? Theme.of(
-                                            context,
-                                          ).colorScheme.primary.withOpacity(0.8)
-                                        : Theme.of(context).brightness ==
-                                              Brightness.dark
-                                        ? const Color(0xFF3A3A3A)
-                                        : Colors.grey[200]!,
-                                    width: isFocused ? 2 : 1,
-                                  ),
-                                ),
-                                shadows: isFocused
-                                    ? [
-                                        BoxShadow(
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .primary
-                                              .withOpacity(0.1),
-                                          blurRadius: 10,
-                                          offset: const Offset(0, 2),
-                                        ),
-                                      ]
-                                    : [
-                                        BoxShadow(
-                                          color: Colors.black.withOpacity(0.02),
-                                          blurRadius: 6,
-                                          offset: const Offset(0, 1),
-                                        ),
-                                      ],
-                              ),
-                              child: ClipSmoothRect(
-                                radius: SmoothBorderRadius(
-                                  cornerRadius: 16,
-                                  cornerSmoothing: 0.6,
-                                ),
-                                child: TextField(
-                                  controller: nameController,
-                                  style: TextStyle(
-                                    fontSize: 16,
+                                return Container(
+                                  decoration: ShapeDecoration(
                                     color: Theme.of(
                                       context,
-                                    ).textTheme.bodyLarge?.color,
-                                  ),
-                                  decoration: InputDecoration(
-                                    labelText: 'Medication Name',
-                                    hintText: 'Enter medication name',
-                                    hintStyle: TextStyle(
-                                      color: const Color(
-                                        0xFF5C5FC1,
-                                      ).withOpacity(0.7),
-                                      fontSize: 16,
+                                    ).scaffoldBackgroundColor,
+                                    shape: SmoothRectangleBorder(
+                                      borderRadius: SmoothBorderRadius(
+                                        cornerRadius: 18,
+                                        cornerSmoothing: 0.6,
+                                      ),
+                                      side: BorderSide(
+                                        color: isFocused
+                                            ? Theme.of(
+                                                context,
+                                              ).colorScheme.primary
+                                            : (Theme.of(context).brightness ==
+                                                      Brightness.dark
+                                                  ? const Color(0xFF3A3A3A)
+                                                  : Colors.grey[300]!),
+                                        width: 1.5,
+                                      ),
                                     ),
-                                    border: InputBorder.none,
-                                    focusedBorder: InputBorder.none,
-                                    enabledBorder: InputBorder.none,
-                                    errorBorder: InputBorder.none,
-                                    focusedErrorBorder: InputBorder.none,
-                                    contentPadding: const EdgeInsets.all(16),
-                                    filled: false,
+                                    shadows: isFocused
+                                        ? [
+                                            BoxShadow(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .primary
+                                                  .withOpacity(0.15),
+                                              blurRadius: 8,
+                                              offset: const Offset(0, 2),
+                                            ),
+                                          ]
+                                        : [],
                                   ),
-                                ),
-                              ),
-                            );
-                          },
-                        ),
+                                  child: ClipSmoothRect(
+                                    radius: SmoothBorderRadius(
+                                      cornerRadius: 18,
+                                      cornerSmoothing: 0.6,
+                                    ),
+                                    child: TextField(
+                                      controller: nameController,
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        color: Theme.of(
+                                          context,
+                                        ).textTheme.bodyLarge?.color,
+                                      ),
+                                      decoration: InputDecoration(
+                                        hintText: 'Enter medication name',
+                                        hintStyle: TextStyle(
+                                          color: Theme.of(context)
+                                              .textTheme
+                                              .bodyMedium
+                                              ?.color
+                                              ?.withOpacity(0.6),
+                                          fontSize: 16,
+                                        ),
+                                        border: InputBorder.none,
+                                        focusedBorder: InputBorder.none,
+                                        enabledBorder: InputBorder.none,
+                                        errorBorder: InputBorder.none,
+                                        focusedErrorBorder: InputBorder.none,
+                                        contentPadding: const EdgeInsets.all(
+                                          20,
+                                        ),
+                                        filled: false,
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 20),
 
                       // Dosage input
-                      Focus(
-                        child: Builder(
-                          builder: (context) {
-                            final isFocused = Focus.of(context).hasFocus;
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Dosage (Optional)',
+                            style: Theme.of(context).textTheme.titleMedium
+                                ?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 16,
+                                ),
+                          ),
+                          const SizedBox(height: 8),
+                          Focus(
+                            child: Builder(
+                              builder: (context) {
+                                final isFocused = Focus.of(context).hasFocus;
 
-                            return Container(
-                              decoration: ShapeDecoration(
-                                color:
-                                    Theme.of(context).brightness ==
-                                        Brightness.dark
-                                    ? const Color(0xFF2A2A2A)
-                                    : const Color(0xFFF0F1F7),
-                                shape: SmoothRectangleBorder(
-                                  borderRadius: SmoothBorderRadius(
-                                    cornerRadius: 16,
-                                    cornerSmoothing: 0.6,
-                                  ),
-                                  side: BorderSide(
-                                    color: isFocused
-                                        ? Theme.of(
-                                            context,
-                                          ).colorScheme.primary.withOpacity(0.8)
-                                        : Theme.of(context).brightness ==
-                                              Brightness.dark
-                                        ? const Color(0xFF3A3A3A)
-                                        : Colors.grey[200]!,
-                                    width: isFocused ? 2 : 1,
-                                  ),
-                                ),
-                                shadows: isFocused
-                                    ? [
-                                        BoxShadow(
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .primary
-                                              .withOpacity(0.1),
-                                          blurRadius: 10,
-                                          offset: const Offset(0, 2),
-                                        ),
-                                      ]
-                                    : [
-                                        BoxShadow(
-                                          color: Colors.black.withOpacity(0.02),
-                                          blurRadius: 6,
-                                          offset: const Offset(0, 1),
-                                        ),
-                                      ],
-                              ),
-                              child: ClipSmoothRect(
-                                radius: SmoothBorderRadius(
-                                  cornerRadius: 16,
-                                  cornerSmoothing: 0.6,
-                                ),
-                                child: TextField(
-                                  controller: dosageController,
-                                  style: TextStyle(
-                                    fontSize: 16,
+                                return Container(
+                                  decoration: ShapeDecoration(
                                     color: Theme.of(
                                       context,
-                                    ).textTheme.bodyLarge?.color,
-                                  ),
-                                  decoration: InputDecoration(
-                                    labelText: 'Dosage (Optional)',
-                                    hintText: 'e.g., 10mg, 2 tablets, 5ml',
-                                    hintStyle: TextStyle(
-                                      color: const Color(
-                                        0xFF5C5FC1,
-                                      ).withOpacity(0.7),
-                                      fontSize: 16,
+                                    ).scaffoldBackgroundColor,
+                                    shape: SmoothRectangleBorder(
+                                      borderRadius: SmoothBorderRadius(
+                                        cornerRadius: 18,
+                                        cornerSmoothing: 0.6,
+                                      ),
+                                      side: BorderSide(
+                                        color: isFocused
+                                            ? Theme.of(
+                                                context,
+                                              ).colorScheme.primary
+                                            : (Theme.of(context).brightness ==
+                                                      Brightness.dark
+                                                  ? const Color(0xFF3A3A3A)
+                                                  : Colors.grey[300]!),
+                                        width: 1.5,
+                                      ),
                                     ),
-                                    border: InputBorder.none,
-                                    focusedBorder: InputBorder.none,
-                                    enabledBorder: InputBorder.none,
-                                    errorBorder: InputBorder.none,
-                                    focusedErrorBorder: InputBorder.none,
-                                    contentPadding: const EdgeInsets.all(16),
-                                    filled: false,
+                                    shadows: isFocused
+                                        ? [
+                                            BoxShadow(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .primary
+                                                  .withOpacity(0.15),
+                                              blurRadius: 8,
+                                              offset: const Offset(0, 2),
+                                            ),
+                                          ]
+                                        : [],
                                   ),
-                                ),
-                              ),
-                            );
-                          },
-                        ),
+                                  child: ClipSmoothRect(
+                                    radius: SmoothBorderRadius(
+                                      cornerRadius: 18,
+                                      cornerSmoothing: 0.6,
+                                    ),
+                                    child: TextField(
+                                      controller: dosageController,
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        color: Theme.of(
+                                          context,
+                                        ).textTheme.bodyLarge?.color,
+                                      ),
+                                      decoration: InputDecoration(
+                                        hintText: 'e.g., 10mg, 2 tablets, 5ml',
+                                        hintStyle: TextStyle(
+                                          color: Theme.of(context)
+                                              .textTheme
+                                              .bodyMedium
+                                              ?.color
+                                              ?.withOpacity(0.6),
+                                          fontSize: 16,
+                                        ),
+                                        border: InputBorder.none,
+                                        focusedBorder: InputBorder.none,
+                                        enabledBorder: InputBorder.none,
+                                        errorBorder: InputBorder.none,
+                                        focusedErrorBorder: InputBorder.none,
+                                        contentPadding: const EdgeInsets.all(
+                                          20,
+                                        ),
+                                        filled: false,
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 20),
 
                       // Time selector
-                      Container(
-                        decoration: ShapeDecoration(
-                          color: Theme.of(context).brightness == Brightness.dark
-                              ? const Color(0xFF2A2A2A)
-                              : const Color(0xFFF0F1F7),
-                          shape: SmoothRectangleBorder(
-                            borderRadius: SmoothBorderRadius(
-                              cornerRadius: 16,
-                              cornerSmoothing: 0.6,
-                            ),
-                            side: BorderSide(
-                              color:
-                                  Theme.of(context).brightness ==
-                                      Brightness.dark
-                                  ? const Color(0xFF3A3A3A)
-                                  : Colors.grey[200]!,
-                              width: 1,
-                            ),
-                          ),
-                        ),
-                        child: Material(
-                          color: Colors.transparent,
-                          child: InkWell(
-                            onTap: () async {
-                              final time = await showDialog<TimeOfDay>(
-                                context: context,
-                                builder: (context) => _TimePickerDialog(
-                                  initialTime: selectedTime,
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Reminder Time',
+                            style: Theme.of(context).textTheme.titleMedium
+                                ?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 16,
                                 ),
-                              );
-                              if (time != null) {
-                                setDialogState(() {
-                                  selectedTime = time;
-                                });
-                              }
-                            },
-                            customBorder: SmoothRectangleBorder(
-                              borderRadius: SmoothBorderRadius(
-                                cornerRadius: 16,
-                                cornerSmoothing: 0.6,
+                          ),
+                          const SizedBox(height: 8),
+                          Container(
+                            decoration: ShapeDecoration(
+                              color: Theme.of(context).scaffoldBackgroundColor,
+                              shape: SmoothRectangleBorder(
+                                borderRadius: SmoothBorderRadius(
+                                  cornerRadius: 18,
+                                  cornerSmoothing: 0.6,
+                                ),
+                                side: BorderSide(
+                                  color:
+                                      Theme.of(context).brightness ==
+                                          Brightness.dark
+                                      ? const Color(0xFF3A3A3A)
+                                      : Colors.grey[300]!,
+                                  width: 1.5,
+                                ),
                               ),
                             ),
-                            child: Container(
-                              padding: const EdgeInsets.all(16),
-                              child: Row(
-                                children: [
-                                  Container(
-                                    height: 40,
-                                    width: 40,
-                                    decoration: ShapeDecoration(
-                                      color:
-                                          Theme.of(context).brightness ==
-                                              Brightness.dark
-                                          ? const Color(0xFF3A3A3A)
-                                          : Colors.white,
-                                      shape: SmoothRectangleBorder(
-                                        borderRadius: SmoothBorderRadius(
-                                          cornerRadius: 10,
-                                          cornerSmoothing: 0.6,
+                            child: Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                onTap: () async {
+                                  final time = await showDialog<TimeOfDay>(
+                                    context: context,
+                                    builder: (context) => _TimePickerDialog(
+                                      initialTime: selectedTime,
+                                    ),
+                                  );
+                                  if (time != null) {
+                                    setDialogState(() {
+                                      selectedTime = time;
+                                    });
+                                  }
+                                },
+                                customBorder: SmoothRectangleBorder(
+                                  borderRadius: SmoothBorderRadius(
+                                    cornerRadius: 18,
+                                    cornerSmoothing: 0.6,
+                                  ),
+                                ),
+                                child: Container(
+                                  padding: const EdgeInsets.all(20),
+                                  child: Row(
+                                    children: [
+                                      Container(
+                                        height: 40,
+                                        width: 40,
+                                        decoration: ShapeDecoration(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .primary
+                                              .withOpacity(0.1),
+                                          shape: SmoothRectangleBorder(
+                                            borderRadius: SmoothBorderRadius(
+                                              cornerRadius: 12,
+                                              cornerSmoothing: 0.6,
+                                            ),
+                                          ),
+                                        ),
+                                        child: Center(
+                                          child: Icon(
+                                            Icons.access_time,
+                                            color: Theme.of(
+                                              context,
+                                            ).colorScheme.primary,
+                                            size: 20,
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                    child: Center(
-                                      child: Icon(
-                                        Icons.access_time,
+                                      const SizedBox(width: 16),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              'Reminder Time',
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .bodyMedium
+                                                  ?.copyWith(
+                                                    color: Theme.of(context)
+                                                        .textTheme
+                                                        .bodyMedium
+                                                        ?.color
+                                                        ?.withOpacity(0.7),
+                                                  ),
+                                            ),
+                                            const SizedBox(height: 2),
+                                            Text(
+                                              selectedTime.format(context),
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .titleMedium
+                                                  ?.copyWith(
+                                                    fontWeight: FontWeight.w600,
+                                                    fontSize: 16,
+                                                  ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Icon(
+                                        Icons.arrow_forward_ios,
+                                        size: 16,
                                         color: Theme.of(
                                           context,
-                                        ).colorScheme.primary,
-                                        size: 20,
+                                        ).iconTheme.color?.withOpacity(0.5),
                                       ),
-                                    ),
+                                    ],
                                   ),
-                                  const SizedBox(width: 16),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          'Reminder Time',
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                            color: Theme.of(
-                                              context,
-                                            ).textTheme.bodyMedium?.color,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 2),
-                                        Text(
-                                          '${selectedTime.hour.toString().padLeft(2, '0')}:${selectedTime.minute.toString().padLeft(2, '0')}',
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            color: Theme.of(
-                                              context,
-                                            ).textTheme.bodyLarge?.color,
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  const SizedBox(width: 16),
-                                  Icon(
-                                    Icons.arrow_forward_ios,
-                                    color: Theme.of(context)
-                                        .textTheme
-                                        .bodyMedium
-                                        ?.color
-                                        ?.withOpacity(0.5),
-                                    size: 14,
-                                  ),
-                                ],
+                                ),
                               ),
                             ),
                           ),
-                        ),
+                        ],
                       ),
                       const SizedBox(height: 20),
 

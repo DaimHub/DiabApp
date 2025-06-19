@@ -112,12 +112,12 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
                         color: theme.textTheme.headlineMedium?.color,
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 12),
 
                     // Date Range Picker
                     _buildDateRangePicker(theme),
 
-                    const SizedBox(height: 30),
+                    const SizedBox(height: 20),
 
                     // Export Format Section
                     Text(
@@ -128,44 +128,17 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
                         color: theme.textTheme.headlineMedium?.color,
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 12),
 
                     // Format Selection
-                    Container(
-                      decoration: ShapeDecoration(
-                        color: theme.scaffoldBackgroundColor,
-                        shape: SmoothRectangleBorder(
-                          borderRadius: SmoothBorderRadius(
-                            cornerRadius: 16,
-                            cornerSmoothing: 0.6,
-                          ),
-                          side: BorderSide(
-                            color: theme.brightness == Brightness.dark
-                                ? const Color(0xFF3A3A3A)
-                                : Colors.grey[200]!,
-                            width: 1,
-                          ),
-                        ),
-                        shadows: [
-                          BoxShadow(
-                            color: theme.brightness == Brightness.dark
-                                ? Colors.black.withValues(alpha: 0.2)
-                                : Colors.black.withValues(alpha: 0.05),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        children: _exportFormats.map((format) {
-                          return _buildFormatOption(
-                            format: format,
-                            isSelected: format == _selectedFormat,
-                            onTap: () =>
-                                setState(() => _selectedFormat = format),
-                          );
-                        }).toList(),
-                      ),
+                    Column(
+                      children: _exportFormats.map((format) {
+                        return _buildFormatOption(
+                          format: format,
+                          isSelected: format == _selectedFormat,
+                          onTap: () => setState(() => _selectedFormat = format),
+                        );
+                      }).toList(),
                     ),
 
                     const SizedBox(height: 40),
@@ -218,105 +191,87 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
 
   Widget _buildDateRangePicker(ThemeData theme) {
     return Container(
-      decoration: ShapeDecoration(
-        color: theme.scaffoldBackgroundColor,
-        shape: SmoothRectangleBorder(
-          borderRadius: SmoothBorderRadius(
-            cornerRadius: 16,
-            cornerSmoothing: 0.6,
-          ),
-          side: BorderSide(
-            color: theme.brightness == Brightness.dark
-                ? const Color(0xFF3A3A3A)
-                : Colors.grey[200]!,
-            width: 1,
-          ),
-        ),
-        shadows: [
-          BoxShadow(
-            color: theme.brightness == Brightness.dark
-                ? Colors.black.withValues(alpha: 0.2)
-                : Colors.black.withValues(alpha: 0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: _selectDateRange,
-          customBorder: SmoothRectangleBorder(
+      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 4),
+      child: Container(
+        decoration: ShapeDecoration(
+          color: theme.scaffoldBackgroundColor,
+          shape: SmoothRectangleBorder(
             borderRadius: SmoothBorderRadius(
-              cornerRadius: 16,
+              cornerRadius: 18,
               cornerSmoothing: 0.6,
             ),
+            side: BorderSide(
+              color: theme.brightness == Brightness.dark
+                  ? const Color(0xFF3A3A3A)
+                  : Colors.grey[300]!,
+              width: 1.5,
+            ),
           ),
-          child: Container(
-            padding: const EdgeInsets.all(20),
-            child: Row(
-              children: [
-                Container(
-                  height: 44,
-                  width: 44,
-                  decoration: ShapeDecoration(
-                    color: theme.brightness == Brightness.dark
-                        ? const Color(0xFF3A3A3A)
-                        : Colors.white,
-                    shape: SmoothRectangleBorder(
-                      borderRadius: SmoothBorderRadius(
-                        cornerRadius: 12,
-                        cornerSmoothing: 0.6,
-                      ),
-                    ),
-                    shadows: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.05),
-                        blurRadius: 6,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Center(
-                    child: FaIcon(
-                      FontAwesomeIcons.calendarDays,
-                      color: theme.colorScheme.primary,
-                      size: 20,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Select Date Range',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: theme.textTheme.titleMedium?.color,
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: _selectDateRange,
+            customBorder: SmoothRectangleBorder(
+              borderRadius: SmoothBorderRadius(
+                cornerRadius: 18,
+                cornerSmoothing: 0.6,
+              ),
+            ),
+            child: Container(
+              padding: const EdgeInsets.all(20),
+              child: Row(
+                children: [
+                  Container(
+                    height: 40,
+                    width: 40,
+                    decoration: ShapeDecoration(
+                      color: theme.colorScheme.primary.withOpacity(0.1),
+                      shape: SmoothRectangleBorder(
+                        borderRadius: SmoothBorderRadius(
+                          cornerRadius: 12,
+                          cornerSmoothing: 0.6,
                         ),
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '${DateFormat('MMM d, yyyy').format(_selectedDateRange.start)} - ${DateFormat('MMM d, yyyy').format(_selectedDateRange.end)}',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: theme.textTheme.bodyMedium?.color,
-                        ),
+                    ),
+                    child: Center(
+                      child: FaIcon(
+                        FontAwesomeIcons.calendarDays,
+                        color: theme.colorScheme.primary,
+                        size: 20,
                       ),
-                    ],
+                    ),
                   ),
-                ),
-                FaIcon(
-                  FontAwesomeIcons.chevronRight,
-                  color: theme.textTheme.bodyMedium?.color?.withValues(
-                    alpha: 0.5,
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Select Date Range',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: theme.textTheme.bodyMedium?.color
+                                ?.withOpacity(0.7),
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          '${DateFormat('MMM d, yyyy').format(_selectedDateRange.start)} - ${DateFormat('MMM d, yyyy').format(_selectedDateRange.end)}',
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                  size: 12,
-                ),
-              ],
+                  Icon(
+                    Icons.arrow_forward_ios,
+                    size: 16,
+                    color: theme.iconTheme.color?.withOpacity(0.5),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -344,98 +299,106 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
     required VoidCallback onTap,
   }) {
     final theme = Theme.of(context);
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            border: Border(
-              bottom: BorderSide(
-                color: theme.brightness == Brightness.dark
-                    ? const Color(0xFF3A3A3A)
-                    : Colors.grey[200]!,
-                width: 1,
-              ),
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          customBorder: SmoothRectangleBorder(
+            borderRadius: SmoothBorderRadius(
+              cornerRadius: 16,
+              cornerSmoothing: 0.6,
             ),
           ),
-          child: Row(
-            children: [
-              Container(
-                height: 44,
-                width: 44,
-                decoration: ShapeDecoration(
-                  color: theme.brightness == Brightness.dark
-                      ? const Color(0xFF3A3A3A)
-                      : Colors.white,
-                  shape: SmoothRectangleBorder(
-                    borderRadius: SmoothBorderRadius(
-                      cornerRadius: 12,
-                      cornerSmoothing: 0.6,
-                    ),
-                  ),
-                  shadows: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.05),
-                      blurRadius: 6,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: ShapeDecoration(
+              color: isSelected
+                  ? theme.colorScheme.primary.withOpacity(0.1)
+                  : Colors.transparent,
+              shape: SmoothRectangleBorder(
+                borderRadius: SmoothBorderRadius(
+                  cornerRadius: 16,
+                  cornerSmoothing: 0.6,
                 ),
-                child: Center(
-                  child: FaIcon(
-                    format == 'CSV'
-                        ? FontAwesomeIcons.table
-                        : FontAwesomeIcons.file,
-                    color: theme.colorScheme.primary,
-                    size: 20,
-                  ),
+                side: BorderSide(
+                  color: isSelected
+                      ? theme.colorScheme.primary
+                      : Colors.transparent,
+                  width: 2,
                 ),
               ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      format,
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: theme.textTheme.titleMedium?.color,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      format == 'CSV'
-                          ? 'Comma-separated values file'
-                          : 'Portable Document Format',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: theme.textTheme.bodyMedium?.color,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              if (isSelected)
+            ),
+            child: Row(
+              children: [
                 Container(
-                  height: 20,
-                  width: 20,
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.primary,
-                    shape: BoxShape.circle,
+                  height: 50,
+                  width: 50,
+                  decoration: ShapeDecoration(
+                    color: isSelected
+                        ? theme.colorScheme.primary
+                        : (theme.brightness == Brightness.dark
+                              ? const Color(0xFF3A3A3A)
+                              : const Color(0xFFF0F1F7)),
+                    shape: SmoothRectangleBorder(
+                      borderRadius: SmoothBorderRadius(
+                        cornerRadius: 12,
+                        cornerSmoothing: 0.6,
+                      ),
+                    ),
                   ),
-                  child: const Center(
+                  child: Center(
                     child: FaIcon(
-                      FontAwesomeIcons.check,
-                      color: Colors.white,
-                      size: 12,
+                      format == 'CSV'
+                          ? FontAwesomeIcons.table
+                          : FontAwesomeIcons.file,
+                      color: isSelected
+                          ? Colors.white
+                          : theme.colorScheme.primary,
+                      size: 24,
                     ),
                   ),
                 ),
-            ],
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        format,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 18,
+                          color: isSelected
+                              ? theme.colorScheme.primary
+                              : theme.textTheme.titleMedium?.color,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        format == 'CSV'
+                            ? 'Comma-separated values file'
+                            : 'Portable Document Format',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: theme.brightness == Brightness.dark
+                              ? Colors.white70
+                              : Colors.grey[600],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Text(
+                  isSelected ? 'Selected' : '',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: isSelected
+                        ? theme.colorScheme.primary
+                        : Colors.transparent,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -816,12 +779,12 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
           margin: const pw.EdgeInsets.all(32),
           build: (pw.Context context) {
             return [
-              // Header with app-style design
+              // Header with clean design
               pw.Container(
-                padding: const pw.EdgeInsets.all(24),
+                padding: const pw.EdgeInsets.all(20),
                 decoration: pw.BoxDecoration(
                   color: PdfColor.fromHex('#617AFA'), // App primary blue
-                  borderRadius: pw.BorderRadius.circular(16),
+                  borderRadius: pw.BorderRadius.circular(12),
                 ),
                 child: pw.Column(
                   crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -829,16 +792,16 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
                     pw.Text(
                       'Glucose Readings Report',
                       style: pw.TextStyle(
-                        fontSize: 28,
+                        fontSize: 24,
                         font: fontBold,
                         color: PdfColors.white,
                       ),
                     ),
-                    pw.SizedBox(height: 8),
+                    pw.SizedBox(height: 4),
                     pw.Text(
                       'Generated on ${DateFormat('MMMM d, yyyy \'at\' h:mm a').format(DateTime.now())}',
                       style: pw.TextStyle(
-                        fontSize: 14,
+                        fontSize: 13,
                         font: fontRegular,
                         color: PdfColors.white,
                       ),
@@ -847,27 +810,14 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
                 ),
               ),
 
-              pw.SizedBox(height: 20),
+              pw.SizedBox(height: 16),
 
-              // Patient Information Section with app-style card
+              // Patient Information Section with clean design
               pw.Container(
-                padding: const pw.EdgeInsets.all(20),
+                padding: const pw.EdgeInsets.all(16),
                 decoration: pw.BoxDecoration(
                   color: PdfColors.white,
-                  borderRadius: pw.BorderRadius.circular(16),
-                  border: pw.Border.all(
-                    color: PdfColor.fromHex('#DFE1E5'), // App border color
-                    width: 1,
-                  ),
-                  boxShadow: [
-                    pw.BoxShadow(
-                      color: PdfColor.fromHex(
-                        '#00000008',
-                      ), // Black with 5% opacity
-                      blurRadius: 8,
-                      offset: const PdfPoint(0, 2),
-                    ),
-                  ],
+                  borderRadius: pw.BorderRadius.circular(12),
                 ),
                 child: pw.Column(
                   crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -926,31 +876,15 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
                 ),
               ),
 
-              pw.SizedBox(height: 20),
+              pw.SizedBox(height: 16),
 
-              // Summary Statistics with app-style card
+              // Summary Statistics with clean design
               if (glucoseEvents.isNotEmpty) ...[
                 pw.Container(
-                  padding: const pw.EdgeInsets.all(20),
+                  padding: const pw.EdgeInsets.all(16),
                   decoration: pw.BoxDecoration(
-                    color: PdfColors
-                        .white, // White background for better readability
-                    borderRadius: pw.BorderRadius.circular(16),
-                    border: pw.Border.all(
-                      color: PdfColor.fromHex(
-                        '#617AFA',
-                      ), // App primary blue border
-                      width: 1,
-                    ),
-                    boxShadow: [
-                      pw.BoxShadow(
-                        color: PdfColor.fromHex(
-                          '#00000008',
-                        ), // Black with 5% opacity
-                        blurRadius: 8,
-                        offset: const PdfPoint(0, 2),
-                      ),
-                    ],
+                    color: PdfColors.white,
+                    borderRadius: pw.BorderRadius.circular(12),
                   ),
                   child: pw.Column(
                     crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -997,29 +931,16 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
                     ],
                   ),
                 ),
-                pw.SizedBox(height: 20),
+                pw.SizedBox(height: 16),
               ],
 
-              // Glucose Trend Chart with app-style card
+              // Glucose Trend Chart with clean design
               if (chartImage != null) ...[
                 pw.Container(
-                  padding: const pw.EdgeInsets.all(20),
+                  padding: const pw.EdgeInsets.all(16),
                   decoration: pw.BoxDecoration(
                     color: PdfColors.white,
-                    borderRadius: pw.BorderRadius.circular(16),
-                    border: pw.Border.all(
-                      color: PdfColor.fromHex('#DFE1E5'), // App border color
-                      width: 1,
-                    ),
-                    boxShadow: [
-                      pw.BoxShadow(
-                        color: PdfColor.fromHex(
-                          '#00000008',
-                        ), // Black with 5% opacity
-                        blurRadius: 8,
-                        offset: const PdfPoint(0, 2),
-                      ),
-                    ],
+                    borderRadius: pw.BorderRadius.circular(12),
                   ),
                   child: pw.Column(
                     crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -1032,33 +953,33 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
                           color: PdfColor.fromHex('#303030'), // App text color
                         ),
                       ),
-                      pw.SizedBox(height: 16),
+                      pw.SizedBox(height: 12),
                       pw.Container(
-                        height: 300,
+                        height: 280,
                         decoration: pw.BoxDecoration(
-                          borderRadius: pw.BorderRadius.circular(12),
+                          borderRadius: pw.BorderRadius.circular(8),
                         ),
                         child: pw.Image(chartImage, fit: pw.BoxFit.contain),
                       ),
                     ],
                   ),
                 ),
-                pw.SizedBox(height: 20),
+                pw.SizedBox(height: 16),
               ],
 
               // Readings Table
               pw.Text(
                 'Glucose Readings',
-                style: pw.TextStyle(fontSize: 16, font: fontBold),
+                style: pw.TextStyle(fontSize: 18, font: fontBold),
               ),
-              pw.SizedBox(height: 12),
+              pw.SizedBox(height: 8),
 
               if (glucoseEvents.isEmpty)
                 pw.Container(
-                  padding: const pw.EdgeInsets.all(20),
+                  padding: const pw.EdgeInsets.all(16),
                   decoration: pw.BoxDecoration(
-                    color: PdfColors.grey100,
-                    borderRadius: pw.BorderRadius.circular(8),
+                    color: PdfColors.grey50,
+                    borderRadius: pw.BorderRadius.circular(12),
                   ),
                   child: pw.Center(
                     child: pw.Text(
@@ -1073,7 +994,7 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
                 )
               else
                 pw.Table(
-                  border: pw.TableBorder.all(color: PdfColors.grey300),
+                  border: pw.TableBorder.all(color: PdfColors.grey200),
                   columnWidths: {
                     0: const pw.FlexColumnWidth(2),
                     1: const pw.FlexColumnWidth(1.5),
@@ -1084,7 +1005,7 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
                     // Header row
                     pw.TableRow(
                       decoration: const pw.BoxDecoration(
-                        color: PdfColors.grey200,
+                        color: PdfColors.grey100,
                       ),
                       children: [
                         _buildTableCell(
@@ -1350,11 +1271,11 @@ class _ExportDataScreenState extends State<ExportDataScreen> {
     bool isHeader = false,
   }) {
     return pw.Container(
-      padding: const pw.EdgeInsets.all(8),
+      padding: const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       child: pw.Text(
         text,
         style: pw.TextStyle(
-          fontSize: isHeader ? 10 : 9,
+          fontSize: isHeader ? 11 : 10,
           font: isHeader ? fontBold : fontRegular,
         ),
       ),

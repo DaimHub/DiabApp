@@ -5,7 +5,6 @@ import 'package:figma_squircle/figma_squircle.dart';
 import 'overview_screen.dart';
 import 'log_screen.dart';
 import 'log_history_screen.dart';
-import 'learn_screen.dart';
 import 'settings_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -22,7 +21,7 @@ class _DashboardScreenState extends State<DashboardScreen>
   GlobalKey _logHistoryKey = GlobalKey();
   GlobalKey _overviewKey = GlobalKey();
 
-  final List<String> _titles = ['My Health', 'Log', 'Library'];
+  final List<String> _titles = ['My Health', 'Log'];
 
   @override
   void initState() {
@@ -77,7 +76,6 @@ class _DashboardScreenState extends State<DashboardScreen>
           });
         },
       ),
-      const LearnScreenContent(),
     ];
 
     return Scaffold(
@@ -287,11 +285,6 @@ class _DashboardScreenState extends State<DashboardScreen>
             icon: Icon(FontAwesomeIcons.calendar, size: 22),
             activeIcon: FaIcon(FontAwesomeIcons.calendar, size: 22),
             label: 'Log',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(FontAwesomeIcons.book, size: 22),
-            activeIcon: FaIcon(FontAwesomeIcons.book, size: 22),
-            label: 'Learn',
           ),
         ],
       ),

@@ -438,105 +438,91 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final disabled = isDisabled ?? false;
 
     return Container(
-      decoration: ShapeDecoration(
-        color: theme.scaffoldBackgroundColor,
-        shape: SmoothRectangleBorder(
-          borderRadius: SmoothBorderRadius(
-            cornerRadius: 16,
-            cornerSmoothing: 0.6,
-          ),
-          side: BorderSide(
-            color: theme.brightness == Brightness.dark
-                ? const Color(0xFF3A3A3A)
-                : Colors.grey[200]!,
-            width: 1,
-          ),
-        ),
-        shadows: [
-          BoxShadow(
-            color: theme.brightness == Brightness.dark
-                ? Colors.black.withOpacity(0.2)
-                : Colors.black.withOpacity(0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        child: Row(
-          children: [
-            Container(
-              height: 44,
-              width: 44,
-              decoration: ShapeDecoration(
-                color: theme.brightness == Brightness.dark
-                    ? const Color(0xFF3A3A3A)
-                    : Colors.white,
-                shape: SmoothRectangleBorder(
-                  borderRadius: SmoothBorderRadius(
-                    cornerRadius: 12,
-                    cornerSmoothing: 0.6,
-                  ),
-                ),
-                shadows: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 6,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Center(
-                child: Icon(
-                  icon,
-                  color: disabled
-                      ? theme.iconTheme.color?.withOpacity(0.5)
-                      : theme.colorScheme.primary,
-                  size: 22,
-                ),
-              ),
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {}, // Empty onTap to enable ripple without action
+          customBorder: SmoothRectangleBorder(
+            borderRadius: SmoothBorderRadius(
+              cornerRadius: 16,
+              cornerSmoothing: 0.6,
             ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: disabled
-                          ? theme.textTheme.titleMedium?.color?.withOpacity(0.6)
-                          : theme.textTheme.titleMedium?.color,
+          ),
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                Container(
+                  height: 50,
+                  width: 50,
+                  decoration: ShapeDecoration(
+                    color: theme.brightness == Brightness.dark
+                        ? const Color(0xFF3A3A3A)
+                        : const Color(0xFFF0F1F7),
+                    shape: SmoothRectangleBorder(
+                      borderRadius: SmoothBorderRadius(
+                        cornerRadius: 12,
+                        cornerSmoothing: 0.6,
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    description,
-                    style: TextStyle(
-                      fontSize: 14,
+                  child: Center(
+                    child: Icon(
+                      icon,
                       color: disabled
-                          ? theme.textTheme.bodyMedium?.color?.withOpacity(0.5)
-                          : theme.textTheme.bodyMedium?.color,
+                          ? theme.iconTheme.color?.withOpacity(0.5)
+                          : theme.colorScheme.primary,
+                      size: 24,
                     ),
                   ),
-                ],
-              ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 18,
+                          color: disabled
+                              ? theme.textTheme.titleMedium?.color?.withOpacity(
+                                  0.6,
+                                )
+                              : theme.textTheme.titleMedium?.color,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        description,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: disabled
+                              ? theme.textTheme.bodyMedium?.color?.withOpacity(
+                                  0.5,
+                                )
+                              : (theme.brightness == Brightness.dark
+                                    ? Colors.white70
+                                    : Colors.grey[600]),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Switch(
+                  value: value,
+                  onChanged: disabled ? null : onChanged,
+                  activeColor: Colors.white,
+                  activeTrackColor: theme.colorScheme.primary,
+                  inactiveThumbColor: Colors.white,
+                  inactiveTrackColor: disabled
+                      ? Colors.grey[400]
+                      : Colors.grey[300],
+                ),
+              ],
             ),
-            const SizedBox(width: 16),
-            Switch(
-              value: value,
-              onChanged: disabled ? null : onChanged,
-              activeColor: Colors.white,
-              activeTrackColor: theme.colorScheme.primary,
-              inactiveThumbColor: Colors.white,
-              inactiveTrackColor: disabled
-                  ? Colors.grey[400]
-                  : Colors.grey[300],
-            ),
-          ],
+          ),
         ),
       ),
     );
@@ -547,30 +533,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final disabled = !settingsProvider.notificationsEnabled;
 
     return Container(
-      decoration: ShapeDecoration(
-        color: theme.scaffoldBackgroundColor,
-        shape: SmoothRectangleBorder(
-          borderRadius: SmoothBorderRadius(
-            cornerRadius: 16,
-            cornerSmoothing: 0.6,
-          ),
-          side: BorderSide(
-            color: theme.brightness == Brightness.dark
-                ? const Color(0xFF3A3A3A)
-                : Colors.grey[200]!,
-            width: 1,
-          ),
-        ),
-        shadows: [
-          BoxShadow(
-            color: theme.brightness == Brightness.dark
-                ? Colors.black.withOpacity(0.2)
-                : Colors.black.withOpacity(0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
+      margin: const EdgeInsets.symmetric(vertical: 8),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
@@ -593,29 +556,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
           child: Container(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(16),
             child: Row(
               children: [
                 Container(
-                  height: 44,
-                  width: 44,
+                  height: 50,
+                  width: 50,
                   decoration: ShapeDecoration(
                     color: theme.brightness == Brightness.dark
                         ? const Color(0xFF3A3A3A)
-                        : Colors.white,
+                        : const Color(0xFFF0F1F7),
                     shape: SmoothRectangleBorder(
                       borderRadius: SmoothBorderRadius(
                         cornerRadius: 12,
                         cornerSmoothing: 0.6,
                       ),
                     ),
-                    shadows: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 6,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
                   ),
                   child: Center(
                     child: FaIcon(
@@ -623,7 +579,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       color: disabled
                           ? theme.iconTheme.color?.withOpacity(0.5)
                           : theme.colorScheme.primary,
-                      size: 20,
+                      size: 24,
                     ),
                   ),
                 ),
@@ -634,9 +590,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     children: [
                       Text(
                         'Medication Reminders',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 18,
                           color: disabled
                               ? theme.textTheme.titleMedium?.color?.withOpacity(
                                   0.6,
@@ -644,69 +600,35 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               : theme.textTheme.titleMedium?.color,
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 2),
                       Text(
                         'Manage your medication schedule and reminders',
-                        style: TextStyle(
-                          fontSize: 14,
+                        style: theme.textTheme.bodyMedium?.copyWith(
                           color: disabled
                               ? theme.textTheme.bodyMedium?.color?.withOpacity(
                                   0.5,
                                 )
-                              : theme.textTheme.bodyMedium?.color,
+                              : (theme.brightness == Brightness.dark
+                                    ? Colors.white70
+                                    : Colors.grey[600]),
                         ),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(width: 16),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 4,
-                      ),
-                      decoration: ShapeDecoration(
-                        color: disabled
-                            ? Colors.grey.withOpacity(0.1)
-                            : settingsProvider.medicationRemindersEnabled
-                            ? theme.colorScheme.primary.withOpacity(0.1)
-                            : Colors.grey.withOpacity(0.1),
-                        shape: SmoothRectangleBorder(
-                          borderRadius: SmoothBorderRadius(
-                            cornerRadius: 8,
-                            cornerSmoothing: 0.6,
-                          ),
-                        ),
-                      ),
-                      child: Text(
-                        settingsProvider.medicationRemindersEnabled
-                            ? 'Enabled'
-                            : 'Disabled',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: disabled
-                              ? theme.textTheme.bodyMedium?.color?.withOpacity(
-                                  0.5,
-                                )
-                              : settingsProvider.medicationRemindersEnabled
-                              ? theme.colorScheme.primary
-                              : Colors.grey[600],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Icon(
-                      Icons.arrow_forward_ios,
-                      color: disabled
-                          ? theme.textTheme.bodyMedium?.color?.withOpacity(0.3)
-                          : theme.textTheme.bodyMedium?.color?.withOpacity(0.5),
-                      size: 16,
-                    ),
-                  ],
+                Text(
+                  settingsProvider.medicationRemindersEnabled
+                      ? 'Enabled'
+                      : 'Disabled',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: disabled
+                        ? theme.textTheme.bodyMedium?.color?.withOpacity(0.5)
+                        : settingsProvider.medicationRemindersEnabled
+                        ? theme.colorScheme.primary
+                        : (theme.brightness == Brightness.dark
+                              ? Colors.white60
+                              : Colors.grey[500]),
+                  ),
                 ),
               ],
             ),
@@ -725,34 +647,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }) {
     final theme = Theme.of(context);
     return Container(
-      decoration: ShapeDecoration(
-        color: isDestructive
-            ? Colors.red.withOpacity(0.05)
-            : theme.scaffoldBackgroundColor,
-        shape: SmoothRectangleBorder(
-          borderRadius: SmoothBorderRadius(
-            cornerRadius: 16,
-            cornerSmoothing: 0.6,
-          ),
-          side: BorderSide(
-            color: isDestructive
-                ? Colors.red.withOpacity(0.3)
-                : theme.brightness == Brightness.dark
-                ? const Color(0xFF3A3A3A)
-                : Colors.grey[200]!,
-            width: 1,
-          ),
-        ),
-        shadows: [
-          BoxShadow(
-            color: theme.brightness == Brightness.dark
-                ? Colors.black.withOpacity(0.2)
-                : Colors.black.withOpacity(0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
+      margin: const EdgeInsets.symmetric(vertical: 8),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
@@ -764,31 +659,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
           child: Container(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(16),
             child: Row(
               children: [
                 Container(
-                  height: 44,
-                  width: 44,
+                  height: 50,
+                  width: 50,
                   decoration: ShapeDecoration(
                     color: isDestructive
                         ? Colors.red.withOpacity(0.1)
-                        : theme.brightness == Brightness.dark
-                        ? const Color(0xFF3A3A3A)
-                        : Colors.white,
+                        : (theme.brightness == Brightness.dark
+                              ? const Color(0xFF3A3A3A)
+                              : const Color(0xFFF0F1F7)),
                     shape: SmoothRectangleBorder(
                       borderRadius: SmoothBorderRadius(
                         cornerRadius: 12,
                         cornerSmoothing: 0.6,
                       ),
                     ),
-                    shadows: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 6,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
                   ),
                   child: Center(
                     child: Icon(
@@ -796,7 +684,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       color: isDestructive
                           ? Colors.red[600]
                           : theme.colorScheme.primary,
-                      size: 22,
+                      size: 24,
                     ),
                   ),
                 ),
@@ -807,20 +695,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     children: [
                       Text(
                         title,
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 18,
                           color: isDestructive
                               ? Colors.red[600]
                               : theme.textTheme.titleMedium?.color,
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 2),
                       Text(
                         description,
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: theme.textTheme.bodyMedium?.color,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: theme.brightness == Brightness.dark
+                              ? Colors.white70
+                              : Colors.grey[600],
                         ),
                       ),
                     ],
